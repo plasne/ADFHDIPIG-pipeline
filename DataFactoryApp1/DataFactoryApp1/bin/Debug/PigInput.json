@@ -1,0 +1,15 @@
+{
+  "$schema": "http://datafactories.schema.management.azure.com/schemas/2015-09-01/Microsoft.DataFactory.Table.json",
+  "name": "PigInput",
+  "properties": {
+    "type": "AzureBlob",
+    "linkedServiceName": "AzureStorage",
+    "typeProperties": {
+      "folderPath": "pelasne-pig-2017-03-09t22-26-52-136z/user/plasne/input"
+    },
+    "availability": {
+      "frequency": "Minute",
+      "interval": 30
+    }
+  }
+}

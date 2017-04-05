@@ -1,0 +1,16 @@
+﻿{
+    "$schema": "http://datafactories.schema.management.azure.com/schemas/2015-09-01/Microsoft.DataFactory.LinkedService.json",
+    "name": "FTP",
+    "properties": {
+      "type": "FtpServer",
+      "typeProperties": {
+        "authenticationType": "Basic",
+        "host": "pelasne-ftp.eastus.cloudapp.azure.com",
+        "port": 21,
+        "username": "plasne",
+        "password": "????",
+        "enableSsl": false,
+        "enableServerCertificateValidation": false
+      }
+    }
+}

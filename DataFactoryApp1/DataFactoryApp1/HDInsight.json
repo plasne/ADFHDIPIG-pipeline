@@ -1,0 +1,13 @@
+﻿{
+    "$schema": "http://datafactories.schema.management.azure.com/schemas/2015-09-01/Microsoft.DataFactory.LinkedService.json",
+    "name": "HDInsight",
+  "properties": {
+    "type": "HDInsight",
+    "typeProperties": {
+      "clusterUri": "https://pelasne-pig.azurehdinsight.net",
+      "userName": "admin",
+      "password": "????",
+      "linkedServiceName": "AzureStorage"
+    }
+  }
+}
