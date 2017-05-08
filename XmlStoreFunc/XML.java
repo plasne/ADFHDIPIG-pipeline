@@ -203,7 +203,28 @@ System.out.println("element: " + field.getName());
   }
 
   @Override
-  public OutputFormat getOutputFormat() {
+  public OutputFormat getOutputFormat() throws IOException {
+    try {
+
+      // read the contents of the config file
+      UDFContext udfc = UDFContext.getUDFContext();
+      Configuration conf = udfc.getJobConf();
+      Path path = new Path(config);
+      FileSystem fs = FileSystem.get(path.toUri(), conf);
+      FSDataInputStream inputStream = fs.open(path);
+      java.util.Scanner scanner = new java.util.Scanner(inputStream).useDelimiter("\\A");
+      String raw = scanner.hasNext() ? scanner.next() : "";
+      fs.close();
+
+      // parse the JSON (need the root before creating the writer)
+      JSONParser parser = new JSONParser();
+      JSONObject json = (JSONObject) parser.parse(raw);
+      root = json.get("root").toString();
+      entry = json.get("entry").toString();
+
+    } catch (Exception) {
+      throw new ExecException(ex);
+    }
     return new XMLOutputFormat<WritableComparable, Text>(root);
   }
 
@@ -231,30 +252,6 @@ System.out.println("element: " + field.getName());
       if (s == null) throw new ExecException("Could not find schema in UDF context.");
       ResourceSchema schema = new ResourceSchema(Utils.getSchemaFromString(s));
       fields = schema.getFields();
-
-      // read the config
-
-Configuration conf = udfc.getJobConf();
-Path path = new Path(config);
-FileSystem fs = FileSystem.get(path.toUri(), conf);
-FSDataInputStream inputStream = fs.open(path);
-
-java.util.Scanner scanner = new java.util.Scanner(inputStream).useDelimiter("\\A");
-String raw = scanner.hasNext() ? scanner.next() : "";
-
-fs.close();
-
-System.out.println("raw: " + raw);
-
-//      byte[] encoded = Files.readAllBytes(Paths.get(config));
-//      String raw = new String(encoded, StandardCharsets.UTF_8);
-      JSONParser parser = new JSONParser();
-      JSONObject json = (JSONObject) parser.parse(raw);
-      this.root = json.get("root").toString();
-      this.entry = json.get("entry").toString();
-
-System.out.println("root: '" + this.root + "'");
-System.out.println("entry: '" + this.entry + "'");
 
     } catch (Exception ex) {
       throw new ExecException(ex);
