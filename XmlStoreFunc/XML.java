@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
@@ -98,51 +95,12 @@ public class XML extends StoreFunc {
   private XMLOutputFactory xof;
   private XMLStreamWriter xml;
 
+  private java.lang.String config;
   private java.lang.String root;
   private java.lang.String entry;
 
-  public XML(java.lang.String config) throws IOException {
-
-    // read the config
-//    try {
-
-//      byte[] encoded = Files.readAllBytes(Paths.get(config));
-//      String raw = new String(encoded, StandardCharsets.UTF_8);
-
-java.lang.String raw = "";
-try (FileInputStream fis = new FileInputStream(config);
-    InputStreamReader stream = new InputStreamReader(fis);
-    BufferedReader buffer = new BufferedReader(stream)) {
-  System.out.println("getting started");
-  java.lang.String line;
-  while ((line = buffer.readLine()) != null) {
-    raw += line;
-    System.out.println("line: " + line);
-    System.out.println("raw: " + raw);
-  }
-  System.out.println("before parse");
-  JSONParser parser = new JSONParser();
-  JSONObject json = (JSONObject) parser.parse(raw);
-  this.root = json.get("root").toString();
-  this.entry = json.get("entry").toString();
-} catch (Exception ex) {
-  throw new ExecException("error in config file: " + ex);
-}
-
-
-System.out.println("root: '" + this.root + "'");
-System.out.println("entry: '" + this.entry + "'");
-
-//this.root = "wrapper";
-//this.entry = "item";
-//
-//    } catch (Exception ex) {
-//System.out.println("ex!!!");
-//      throw new ExecException("error in config file: " + ex);
-//    }
-
-System.out.println("init done");
-
+  public XML(java.lang.String config) {
+    this.config = config;
   }
 
   public XML(java.lang.String root, java.lang.String entry) {
@@ -272,6 +230,17 @@ System.out.println("element: " + field.getName());
       ResourceSchema schema = new ResourceSchema(Utils.getSchemaFromString(s));
       fields = schema.getFields();
 
+      // read the config
+      byte[] encoded = Files.readAllBytes(Paths.get(config));
+      String raw = new String(encoded, StandardCharsets.UTF_8);
+      JSONParser parser = new JSONParser();
+      JSONObject json = (JSONObject) parser.parse(raw);
+      this.root = json.get("root").toString();
+      this.entry = json.get("entry").toString();
+
+System.out.println("root: '" + this.root + "'");
+System.out.println("entry: '" + this.entry + "'");
+
     } catch (Exception ex) {
       throw new ExecException(ex);
     }
@@ -279,8 +248,7 @@ System.out.println("element: " + field.getName());
 
   @Override
   public void setStoreLocation(String location, Job job) throws IOException {
-//        job.getConfiguration().set("mapred.textoutputformat.separator", "");
-        FileOutputFormat.setOutputPath(job, new Path(location));
+    FileOutputFormat.setOutputPath(job, new Path(location));
   }
 
 }
