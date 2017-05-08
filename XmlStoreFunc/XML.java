@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.nio.file.Paths;
@@ -97,12 +98,10 @@ public class XML extends StoreFunc {
   private XMLOutputFactory xof;
   private XMLStreamWriter xml;
 
-  private java.lang.String config;
   private java.lang.String root;
   private java.lang.String entry;
 
   public XML(java.lang.String config) throws IOException {
-    this.config = config;
 
     // read the config
 //    try {
@@ -111,7 +110,9 @@ public class XML extends StoreFunc {
 //      String raw = new String(encoded, StandardCharsets.UTF_8);
 
 java.lang.String raw = "";
-try (InputStreamReader in_stream = new InputStreamReader(System.in); BufferedReader buffer = new BufferedReader(in_stream)) {
+try (FileInputStream fis = new FileInputStream(config);
+    InputStreamReader stream = new InputStreamReader(fis);
+    BufferedReader buffer = new BufferedReader(stream)) {
   System.out.println("getting started");
   java.lang.String line;
   while ((line = buffer.readLine()) != null) {
