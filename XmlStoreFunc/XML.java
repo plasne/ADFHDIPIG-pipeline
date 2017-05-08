@@ -7,9 +7,15 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.DataOutputStream;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.apache.pig.PigException;
 import org.apache.pig.PigWarning;
 import org.apache.pig.StoreFunc;
@@ -93,16 +99,22 @@ public class XML extends StoreFunc {
   private java.lang.String root;
   private java.lang.String entry;
 
-  public XML(java.lang.String config) {
+  public XML(java.lang.String config) throws IOException {
     this.config = config;
 
     // read the config
-    byte[] encoded = Files.readAllBytes(Paths.get(config));
-    String raw = new String(encoded, StandardCharsets.UTF_8);
-    JSONParser parser = new JSONParser();
-    JSONObject json = (JSONObject) parser.parse(raw);
-    this.root = json.get("root");
-    this.entry = json.get("entry");
+    try {
+
+      byte[] encoded = Files.readAllBytes(Paths.get(config));
+      String raw = new String(encoded, StandardCharsets.UTF_8);
+      JSONParser parser = new JSONParser();
+      JSONObject json = (JSONObject) parser.parse(raw);
+      this.root = json.get("root").toString();
+      this.entry = json.get("entry").toString();
+
+    } catch (Exception ex) {
+      throw new ExecException(ex);
+    }
 
   }
 
