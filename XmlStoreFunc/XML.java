@@ -207,11 +207,10 @@ System.out.println("element: " + field.getName());
   @Override
   public OutputFormat getOutputFormat() throws IOException {
     try {
-
-      if (iii > 0) {
-
+      UDFContext udfc = UDFContext.getUDFContext();
+      if (!udfc.isFrontend()) { // only read on backend
+     
         // read the contents of the config file
-        UDFContext udfc = UDFContext.getUDFContext();
         Configuration conf = udfc.getJobConf();
         Path path = new Path(config);
         FileSystem fs = FileSystem.get(path.toUri(), conf);
@@ -227,7 +226,6 @@ System.out.println("element: " + field.getName());
         entry = json.get("entry").toString();
 
       }
-      iii++;
 
     } catch (Exception ex) {
       throw new ExecException(ex);
