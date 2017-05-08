@@ -229,7 +229,7 @@ System.out.println("element: " + field.getName());
       }
       iii++;
 
-    } catch (Exception) {
+    } catch (Exception ex) {
       throw new ExecException(ex);
     }
     return new XMLOutputFormat<WritableComparable, Text>(root);
