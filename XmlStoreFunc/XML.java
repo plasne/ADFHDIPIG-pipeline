@@ -1,5 +1,6 @@
 package output;
 
+import java.util.Scanner;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Properties;
@@ -30,6 +31,7 @@ import org.apache.pig.impl.util.Utils;
 import org.apache.pig.impl.util.UDFContext;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -231,8 +233,21 @@ System.out.println("element: " + field.getName());
       fields = schema.getFields();
 
       // read the config
-      byte[] encoded = Files.readAllBytes(Paths.get(config));
-      String raw = new String(encoded, StandardCharsets.UTF_8);
+
+Configuration conf = udfc.getJobConf();
+Path path = new Path(config);
+FileSystem fs = FileSystem.get(path.toUri(), conf);
+FSDataInputStream inputStream = fs.open(path);
+
+java.util.Scanner scanner = new java.util.Scanner(inputStream).useDelimiter("\\A");
+String raw = scanner.hasNext() ? scanner.next() : "";
+
+fs.close();
+
+System.out.println("raw: " + raw);
+
+//      byte[] encoded = Files.readAllBytes(Paths.get(config));
+//      String raw = new String(encoded, StandardCharsets.UTF_8);
       JSONParser parser = new JSONParser();
       JSONObject json = (JSONObject) parser.parse(raw);
       this.root = json.get("root").toString();
