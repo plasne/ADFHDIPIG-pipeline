@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
@@ -103,18 +105,38 @@ public class XML extends StoreFunc {
     this.config = config;
 
     // read the config
-    try {
+//    try {
 
-      byte[] encoded = Files.readAllBytes(Paths.get(config));
-      String raw = new String(encoded, StandardCharsets.UTF_8);
-      JSONParser parser = new JSONParser();
-      JSONObject json = (JSONObject) parser.parse(raw);
-      this.root = json.get("root").toString();
-      this.entry = json.get("entry").toString();
+//      byte[] encoded = Files.readAllBytes(Paths.get(config));
+//      String raw = new String(encoded, StandardCharsets.UTF_8);
 
-    } catch (Exception ex) {
-      throw new ExecException(ex);
-    }
+java.lang.String raw = "";
+try (InputStreamReader in_stream = new InputStreamReader(System.in); BufferedReader buffer = new BufferedReader(in_stream)) {
+  java.lang.String line;
+  while ((line = buffer.readLine()) != null) {
+    raw += line;
+  }
+  JSONParser parser = new JSONParser();
+  JSONObject json = (JSONObject) parser.parse(raw);
+  this.root = json.get("root").toString();
+  this.entry = json.get("entry").toString();
+} catch (Exception ex) {
+  throw new ExecException("error in config file: " + ex);
+}
+
+
+System.out.println("root: '" + this.root + "'");
+System.out.println("entry: '" + this.entry + "'");
+
+//this.root = "wrapper";
+//this.entry = "item";
+//
+//    } catch (Exception ex) {
+//System.out.println("ex!!!");
+//      throw new ExecException("error in config file: " + ex);
+//    }
+
+System.out.println("init done");
 
   }
 
@@ -143,6 +165,8 @@ public class XML extends StoreFunc {
       // write each element
       for (int i = 0; i < fields.length; i++) {
         ResourceFieldSchema field = fields[i];
+
+System.out.println("element: " + field.getName());
 
         //if (field.getName() == scale) {
           //xml.writeStartElement("Scale");

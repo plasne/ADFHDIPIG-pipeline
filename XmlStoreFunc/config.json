@@ -1,6 +1,6 @@
 {
-    "root": "output",
-    "line": "line",
+    "root": "wrapper",
+    "entry": "item",
     "processors": [
         {
             "column": "",
