@@ -112,10 +112,14 @@ public class XML extends StoreFunc {
 
 java.lang.String raw = "";
 try (InputStreamReader in_stream = new InputStreamReader(System.in); BufferedReader buffer = new BufferedReader(in_stream)) {
+  System.out.println("getting started");
   java.lang.String line;
   while ((line = buffer.readLine()) != null) {
     raw += line;
+    System.out.println("line: " + line);
+    System.out.println("raw: " + raw);
   }
+  System.out.println("before parse");
   JSONParser parser = new JSONParser();
   JSONObject json = (JSONObject) parser.parse(raw);
   this.root = json.get("root").toString();
