@@ -202,25 +202,32 @@ System.out.println("element: " + field.getName());
     }
   }
 
+  private int iii = 0;
+
   @Override
   public OutputFormat getOutputFormat() throws IOException {
     try {
 
-      // read the contents of the config file
-      UDFContext udfc = UDFContext.getUDFContext();
-      Configuration conf = udfc.getJobConf();
-      Path path = new Path(config);
-      FileSystem fs = FileSystem.get(path.toUri(), conf);
-      FSDataInputStream inputStream = fs.open(path);
-      java.util.Scanner scanner = new java.util.Scanner(inputStream).useDelimiter("\\A");
-      String raw = scanner.hasNext() ? scanner.next() : "";
-      fs.close();
+      if (iii > 0) {
 
-      // parse the JSON (need the root before creating the writer)
-      JSONParser parser = new JSONParser();
-      JSONObject json = (JSONObject) parser.parse(raw);
-      root = json.get("root").toString();
-      entry = json.get("entry").toString();
+        // read the contents of the config file
+        UDFContext udfc = UDFContext.getUDFContext();
+        Configuration conf = udfc.getJobConf();
+        Path path = new Path(config);
+        FileSystem fs = FileSystem.get(path.toUri(), conf);
+        FSDataInputStream inputStream = fs.open(path);
+        java.util.Scanner scanner = new java.util.Scanner(inputStream).useDelimiter("\\A");
+        String raw = scanner.hasNext() ? scanner.next() : "";
+        fs.close();
+
+        // parse the JSON (need the root before creating the writer)
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(raw);
+        root = json.get("root").toString();
+        entry = json.get("entry").toString();
+
+      }
+      iii++;
 
     } catch (Exception) {
       throw new ExecException(ex);
