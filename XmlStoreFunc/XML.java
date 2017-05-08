@@ -87,6 +87,16 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
 }
 
+class Processor {
+  public java.lang.String column;
+  public java.lang.String type;
+
+  public Processor(java.lang.String column, java.lang.String type) {
+    this.column = column;
+    this.type = type;
+  }
+}
+
 public class XML extends StoreFunc {
 
   private RecordWriter writer = null;
@@ -100,6 +110,7 @@ public class XML extends StoreFunc {
   private java.lang.String config;
   private java.lang.String root;
   private java.lang.String entry;
+  private ArrayList<Processor> processors = new ArrayList<Processor>();
 
   public XML(java.lang.String config) {
     this.config = config;
@@ -131,17 +142,14 @@ public class XML extends StoreFunc {
       for (int i = 0; i < fields.length; i++) {
         ResourceFieldSchema field = fields[i];
 
-System.out.println("element: " + field.getName());
-
-        //if (field.getName() == scale) {
+        java.lang.String fieldName = field.getName();
           //xml.writeStartElement("Scale");
 
           //xml.writeEndElement();
-        //}
 
         Object value = t.get(i);
         if (value != null) {
-          xml.writeStartElement(field.getName());
+          xml.writeStartElement(fieldName);
           xml.writeCharacters(fieldToString(field, value));
           xml.writeEndElement();
         }
@@ -202,8 +210,6 @@ System.out.println("element: " + field.getName());
     }
   }
 
-  private int iii = 0;
-
   @Override
   public OutputFormat getOutputFormat() throws IOException {
     try {
@@ -224,6 +230,11 @@ System.out.println("element: " + field.getName());
         JSONObject json = (JSONObject) parser.parse(raw);
         root = json.get("root").toString();
         entry = json.get("entry").toString();
+        JSONArray procarray = (JSONArray) json.get("processors");
+        for (int i = 0; i < procarray.length(); i++) {
+          JSONObject proc = (JSONObject) procarray.get(i);
+          processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
+        }
 
       }
 
