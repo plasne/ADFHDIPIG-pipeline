@@ -89,8 +89,22 @@ public class XML extends StoreFunc {
   private XMLOutputFactory xof;
   private XMLStreamWriter xml;
 
+  private java.lang.String config;
   private java.lang.String root;
   private java.lang.String entry;
+
+  public XML(java.lang.String config) {
+    this.config = config;
+
+    // read the config
+    byte[] encoded = Files.readAllBytes(Paths.get(config));
+    String raw = new String(encoded, StandardCharsets.UTF_8);
+    JSONParser parser = new JSONParser();
+    JSONObject json = (JSONObject) parser.parse(raw);
+    this.root = json.get("root");
+    this.entry = json.get("entry");
+
+  }
 
   public XML(java.lang.String root, java.lang.String entry) {
     this.root = root;
@@ -117,6 +131,13 @@ public class XML extends StoreFunc {
       // write each element
       for (int i = 0; i < fields.length; i++) {
         ResourceFieldSchema field = fields[i];
+
+        //if (field.getName() == scale) {
+          //xml.writeStartElement("Scale");
+
+          //xml.writeEndElement();
+        //}
+
         Object value = t.get(i);
         if (value != null) {
           xml.writeStartElement(field.getName());

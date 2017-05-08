@@ -1,0 +1,10 @@
+{
+    "root": "output",
+    "line": "line",
+    "processors": [
+        {
+            "column": "",
+            "type": "scale"
+        }
+    ]
+}
