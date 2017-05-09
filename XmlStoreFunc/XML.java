@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
@@ -46,6 +44,7 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.pig.backend.hadoop.executionengine.physicalLayer.PigLogger;
 
 class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
@@ -272,17 +271,18 @@ public class XML extends StoreFunc {
         root = json.get("root").toString();
         entry = json.get("entry").toString();
 
-        Logger logger = Logger.getLogger(XML.class.getName());
 
-        logger.info("root: " + root);
-        logger.info("entry: " + entry);
+        PigLogger logger = this.getLogger();
+
+        logger.warn("root: " + root);
+        logger.warn("entry: " + entry);
 
         JSONArray procarray = (JSONArray) json.get("processors");
         for (int i = 0; i < procarray.size(); i++) {
           JSONObject proc = (JSONObject) procarray.get(i);
 
-          logger.info("column: " + proc.get("column").toString());
-          logger.info("type: " + proc.get("type").toString());
+          logger.warn("column: " + proc.get("column").toString());
+          logger.warn("type: " + proc.get("type").toString());
 
           processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
         }
