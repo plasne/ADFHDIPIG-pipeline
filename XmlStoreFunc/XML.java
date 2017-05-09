@@ -170,7 +170,7 @@ public class XML extends StoreFunc {
                       xml.writeStartElement("Scale_Value");
                       break;
                   }
-                  xml.writeCharacters(((Double)columns[k]).toString());
+                  xml.writeCharacters(Double.parseDouble(columns[k]).toString());
                   xml.writeEndElement();
                 }
               }
