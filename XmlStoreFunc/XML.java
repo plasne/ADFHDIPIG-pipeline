@@ -277,8 +277,8 @@ public class XML extends StoreFunc {
         for (int i = 0; i < procarray.size(); i++) {
           JSONObject proc = (JSONObject) procarray.get(i);
 
-          System.err.println("column: " + column);
-          System.err.println("type: " + type);
+          System.err.println("column: " + proc.get("column").toString());
+          System.err.println("type: " + proc.get("type").toString());
 
           processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
         }
