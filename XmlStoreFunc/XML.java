@@ -148,9 +148,10 @@ public class XML extends StoreFunc {
         // find the processor
         Processor processor = null;
         for (int j = 0; j < processors.size(); j++) {
-          if (processors[j].column == fieldName) processor = processors[j];
+          Processor potential = processors.get(j);
+          if (potential.column == fieldName) processor = potential;
         }
-        if (processor) {
+        if (processor != null) {
           switch (processor.type) {
 
             // scale processor (qty,value;qty,value;qty,value)
