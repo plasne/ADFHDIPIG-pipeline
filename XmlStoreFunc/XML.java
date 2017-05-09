@@ -74,7 +74,12 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     }
 
     public synchronized void write(T1 key, T2 value) throws IOException {
-       out.writeBytes(value.toString());
+      out.writeBytes(value.toString());
+    }
+
+    public void writeIndent(int level, T2 value) throws IOException {
+      String spaces = new String(new char[level * 2]).replace('\0', ' ');
+      out.writeBytes(spaces + value.toString() + "\n");
     }
 
     public synchronized void close(TaskAttemptContext job) throws IOException {
@@ -163,7 +168,7 @@ public class XML extends StoreFunc {
       // write to the RecordWriter
       xml.flush();
       xml.close();
-      writer.write(null, str.getBuffer().toString());
+      writer.writeIndent(1, str.getBuffer().toString());
       str.close();
 
     } catch (Exception e) {
