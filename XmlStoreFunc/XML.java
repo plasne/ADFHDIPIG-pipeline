@@ -77,11 +77,6 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
       out.writeBytes(value.toString());
     }
 
-    public void writeIndent(int level, T2 value) throws IOException {
-      String spaces = new String(new char[level * 2]).replace('\0', ' ');
-      out.writeBytes(spaces + value.toString() + "\n");
-    }
-
     public synchronized void close(TaskAttemptContext job) throws IOException {
       try {
         out.writeBytes("</" + root + ">");
@@ -148,18 +143,51 @@ public class XML extends StoreFunc {
       // write each element
       for (int i = 0; i < fields.length; i++) {
         ResourceFieldSchema field = fields[i];
-
         java.lang.String fieldName = field.getName();
-          //xml.writeStartElement("Scale");
 
-          //xml.writeEndElement();
-
-        Object value = t.get(i);
-        if (value != null) {
-          xml.writeStartElement(fieldName);
-          xml.writeCharacters(fieldToString(field, value));
-          xml.writeEndElement();
+        // find the processor
+        Processor processor = null;
+        for (int j = 0; j < processors.size(); j++) {
+          if (processors[j].column == fieldName) processor = processors[j];
         }
+        if (processor) {
+          switch (processor.type) {
+
+            // scale processor (qty,value;qty,value;qty,value)
+            case "scale":
+              java.lang.String raw = (java.lang.String) t.get(i);
+              java.lang.String body = raw.substring(1, raw.length - 1);
+              java.lang.String[] segments = body.split(";");
+              for (java.lang.String segment : segments) {
+                java.lang.String[] columns = segment.split(",");
+                for (int k = 0; k < columns.length; k++) {
+                  switch(k) {
+                    case 0:
+                      xml.writeStartElement("Scale_Quantity");
+                      break;
+                    case 1:
+                      xml.writeStartElement("Scale_Value");
+                      break;
+                  }
+                  xml.writeCharacters(((Double)columns[k]).toString());
+                  xml.writeEndElement();
+                }
+              }
+              break;
+
+          }
+        } else {
+
+          // write without a processor
+          Object value = t.get(i);
+          if (value != null) {
+            xml.writeStartElement(fieldName);
+            xml.writeCharacters(fieldToString(field, value));
+            xml.writeEndElement();
+          }
+
+        }
+
       }
 
       // close out the entry
@@ -168,7 +196,7 @@ public class XML extends StoreFunc {
       // write to the RecordWriter
       xml.flush();
       xml.close();
-      writer.writeIndent(1, str.getBuffer().toString());
+      writer.write(null, str.getBuffer().toString());
       str.close();
 
     } catch (Exception e) {
