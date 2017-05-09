@@ -269,16 +269,14 @@ public class XML extends StoreFunc {
         JSONObject json = (JSONObject) parser.parse(raw);
         root = json.get("root").toString();
         entry = json.get("entry").toString();
-
-        System.err.println("root: " + root);
-        System.err.println("entry: " + entry);
-
         JSONArray procarray = (JSONArray) json.get("processors");
+
+        throw new ExecException("size: " + procarray.size());
+
         for (int i = 0; i < procarray.size(); i++) {
           JSONObject proc = (JSONObject) procarray.get(i);
 
-          System.err.println("column: " + proc.get("column").toString());
-          System.err.println("type: " + proc.get("type").toString());
+          throw new ExecException("column: ''" + proc.get("column").toString() + "'' , type: '" + proc.get("type").toString() + "'")
 
           processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
         }
