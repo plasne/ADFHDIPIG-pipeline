@@ -156,6 +156,7 @@ public class XML extends StoreFunc {
 
             // scale processor (qty,value;qty,value;qty,value)
             case "scale":
+              xml.writeStartElement("Scale");
               java.lang.String raw = (java.lang.String) t.get(i);
               java.lang.String body = raw.substring(1, raw.length() - 1);
               java.lang.String[] segments = body.split(";");
@@ -175,6 +176,7 @@ public class XML extends StoreFunc {
                   xml.writeEndElement();
                 }
               }
+              xml.writeEndElement();
               break;
 
           }
@@ -267,9 +269,13 @@ public class XML extends StoreFunc {
         JSONObject json = (JSONObject) parser.parse(raw);
         root = json.get("root").toString();
         entry = json.get("entry").toString();
+        System.out.println("root: " + root);
+        System.out.println("entry: " + entry);
         JSONArray procarray = (JSONArray) json.get("processors");
         for (int i = 0; i < procarray.size(); i++) {
           JSONObject proc = (JSONObject) procarray.get(i);
+          System.out.println("column: " + proc.get("column").toString());
+          System.out.println("type: " + proc.get("type").toString());
           processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
         }
 
