@@ -273,13 +273,13 @@ public class XML extends StoreFunc {
 
         throw new ExecException("size: " + procarray.size());
 
-        for (int i = 0; i < procarray.size(); i++) {
-          JSONObject proc = (JSONObject) procarray.get(i);
+        //for (int i = 0; i < procarray.size(); i++) {
+          //JSONObject proc = (JSONObject) procarray.get(i);
 
-          throw new ExecException("column: ''" + proc.get("column").toString() + "'' , type: '" + proc.get("type").toString() + "'");
+          //throw new ExecException("column: ''" + proc.get("column").toString() + "'' , type: '" + proc.get("type").toString() + "'");
 
-          processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
-        }
+          //processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
+        //}
 
       }
 
