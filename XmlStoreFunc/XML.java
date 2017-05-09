@@ -272,15 +272,17 @@ public class XML extends StoreFunc {
         root = json.get("root").toString();
         entry = json.get("entry").toString();
 
-        Logger.getLogger(XML.class.getName()).log(Level.INFO, null, "root: " + root);
-        Logger.getLogger(XML.class.getName()).log(Level.INFO, null, "entry: " + entry);
+        Logger logger = Logger.getLogger(XML.class.getName());
+
+        logger.info("root: " + root);
+        logger.info("entry: " + entry);
 
         JSONArray procarray = (JSONArray) json.get("processors");
         for (int i = 0; i < procarray.size(); i++) {
           JSONObject proc = (JSONObject) procarray.get(i);
 
-          Logger.getLogger(XML.class.getName()).log(Level.INFO, null, "column: " + proc.get("column").toString());
-          Logger.getLogger(XML.class.getName()).log(Level.INFO, null, "type: " + proc.get("type").toString());
+          logger.info("column: " + proc.get("column").toString());
+          logger.info("type: " + proc.get("type").toString());
 
           processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
         }
