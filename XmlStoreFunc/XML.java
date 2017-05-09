@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
@@ -269,13 +271,17 @@ public class XML extends StoreFunc {
         JSONObject json = (JSONObject) parser.parse(raw);
         root = json.get("root").toString();
         entry = json.get("entry").toString();
-        System.console().writer().println("root: " + root);
-        System.console().writer().println("entry: " + entry);
+
+        Logger.getLogger(XML.class.getName()).log(Level.INFO, null, "root: " + root);
+        Logger.getLogger(XML.class.getName()).log(Level.INFO, null, "entry: " + entry);
+
         JSONArray procarray = (JSONArray) json.get("processors");
         for (int i = 0; i < procarray.size(); i++) {
           JSONObject proc = (JSONObject) procarray.get(i);
-          System.console().writer().println("column: " + proc.get("column").toString());
-          System.console().writer().println("type: " + proc.get("type").toString());
+
+          Logger.getLogger(XML.class.getName()).log(Level.INFO, null, "column: " + proc.get("column").toString());
+          Logger.getLogger(XML.class.getName()).log(Level.INFO, null, "type: " + proc.get("type").toString());
+
           processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
         }
 
