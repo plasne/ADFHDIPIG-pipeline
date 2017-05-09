@@ -44,7 +44,6 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.pig.backend.hadoop.executionengine.physicalLayer.PigLogger;
 
 class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
@@ -272,17 +271,15 @@ public class XML extends StoreFunc {
         entry = json.get("entry").toString();
 
 
-        PigLogger logger = this.getLogger();
-
-        logger.warn("root: " + root);
-        logger.warn("entry: " + entry);
+        warn("root: " + root);
+        warn("entry: " + entry);
 
         JSONArray procarray = (JSONArray) json.get("processors");
         for (int i = 0; i < procarray.size(); i++) {
           JSONObject proc = (JSONObject) procarray.get(i);
 
-          logger.warn("column: " + proc.get("column").toString());
-          logger.warn("type: " + proc.get("type").toString());
+          warn("column: " + proc.get("column").toString());
+          warn("type: " + proc.get("type").toString());
 
           processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
         }
