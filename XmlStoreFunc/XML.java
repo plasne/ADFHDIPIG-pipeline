@@ -157,7 +157,7 @@ public class XML extends StoreFunc {
             // scale processor (qty,value;qty,value;qty,value)
             case "scale":
               java.lang.String raw = (java.lang.String) t.get(i);
-              java.lang.String body = raw.substring(1, raw.length - 1);
+              java.lang.String body = raw.substring(1, raw.length() - 1);
               java.lang.String[] segments = body.split(";");
               for (java.lang.String segment : segments) {
                 java.lang.String[] columns = segment.split(",");
@@ -170,7 +170,8 @@ public class XML extends StoreFunc {
                       xml.writeStartElement("Scale_Value");
                       break;
                   }
-                  xml.writeCharacters(Double.parseDouble(columns[k]).toString());
+                  Double dv = Double.parseDouble(columns[k]);
+                  xml.writeCharacters(dv.toString());
                   xml.writeEndElement();
                 }
               }
