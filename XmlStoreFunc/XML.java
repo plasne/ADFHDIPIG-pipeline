@@ -270,16 +270,15 @@ public class XML extends StoreFunc {
         root = json.get("root").toString();
         entry = json.get("entry").toString();
 
-
-        warn("root: " + root, PigWarning.UDF_WARNING_1);
-        warn("entry: " + entry, PigWarning.UDF_WARNING_1);
+        System.err.println("root: " + root);
+        System.err.println("entry: " + entry);
 
         JSONArray procarray = (JSONArray) json.get("processors");
         for (int i = 0; i < procarray.size(); i++) {
           JSONObject proc = (JSONObject) procarray.get(i);
 
-          warn("column: " + proc.get("column").toString(), PigWarning.UDF_WARNING_1);
-          warn("type: " + proc.get("type").toString(), PigWarning.UDF_WARNING_1);
+          System.err.println("column: " + column);
+          System.err.println("type: " + type);
 
           processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
         }
