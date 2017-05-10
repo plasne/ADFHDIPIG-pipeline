@@ -307,6 +307,7 @@ public class XML extends StoreFunc {
             processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
           }
         }
+        System.out.println("started....");
         JSONArray pre_section = (JSONArray) json.get("pre");
         if (pre_section != null) {
           for (int i = 0; i < pre_section.size(); i++) {
