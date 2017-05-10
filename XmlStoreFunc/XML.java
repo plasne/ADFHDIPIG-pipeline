@@ -312,7 +312,7 @@ public class XML extends StoreFunc {
           pre = new ArrayList<java.lang.String>();
           for (int i = 0; i < pre_section.size(); i++) {
             java.lang.String line = (java.lang.String) pre_section.get(i);
-            pre.push(line);
+            pre.add(line);
           }
         }
         JSONArray post_section = (JSONArray) json.get("post");
@@ -320,7 +320,7 @@ public class XML extends StoreFunc {
           post = new ArrayList<java.lang.String>();
           for (int i = 0; i < post_section.size(); i++) {
             java.lang.String line = (java.lang.String) post_section.get(i);
-            post.push(line);
+            post.add(line);
           }
         }
 
