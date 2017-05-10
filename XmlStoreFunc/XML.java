@@ -76,10 +76,12 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     public XMLRecordWriter(DataOutputStream out, java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post) throws IOException {
       this.out = out;
       this.root = root;
+      System.out.println("before PRE");
       for (int i = 0; i < pre.size(); i++) {
         java.lang.String line = (java.lang.String) pre.get(i);
         out.writeBytes(line);
       }
+      System.out.println("after PRE");
       out.writeBytes("<" + root + ">");
     }
 
@@ -90,10 +92,12 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     public synchronized void close(TaskAttemptContext job) throws IOException {
       try {
         out.writeBytes("</" + root + ">");
+        System.out.println("before POST");
         for (int i = 0; i < post.size(); i++) {
           java.lang.String line = (java.lang.String) post.get(i);
           out.writeBytes(line);
         }
+        System.out.println("after POST");
       } finally {
         out.close();
       }
@@ -307,6 +311,7 @@ public class XML extends StoreFunc {
         if (pre_section != null) {
           for (int i = 0; i < pre_section.size(); i++) {
             java.lang.String line = (java.lang.String) pre_section.get(i);
+            System.out.println("line [pre]: " + line);
             pre.add(line);
           }
         }
@@ -314,6 +319,7 @@ public class XML extends StoreFunc {
         if (post_section != null) {
           for (int i = 0; i < post_section.size(); i++) {
             java.lang.String line = (java.lang.String) post_section.get(i);
+            System.out.println("line [post]: " + line);
             post.add(line);
           }
         }
