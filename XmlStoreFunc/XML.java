@@ -108,11 +108,19 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 class Processor {
   public java.lang.String column;
   public java.lang.String type;
+  public java.lang.String node;
+  public ArrayList<java.lang.String> children;
 
-  public Processor(java.lang.String column, java.lang.String type) {
+  public Processor(java.lang.String column, java.lang.String type, java.lang.String node, JSONArray children) {
     this.column = column;
     this.type = type;
+    this.node = node;
+    for (int i = 0; i < children.size(); i++) {
+      java.lang.String child = (java.lang.String) children.get(i);
+      this.children.add(child);
+    }
   }
+
 }
 
 public class XML extends StoreFunc {
@@ -172,27 +180,22 @@ public class XML extends StoreFunc {
 
             // scale processor (qty,value;qty,value;qty,value)
             case "scale":
-              xml.writeStartElement("Scale");
               java.lang.String raw = (java.lang.String) t.get(i);
               java.lang.String body = raw.substring(1, raw.length() - 1);
               java.lang.String[] segments = body.split(";");
               for (java.lang.String segment : segments) {
+                xml.writeStartElement(processor.node);
                 java.lang.String[] columns = segment.split(",");
-                for (int k = 0; k < columns.length; k++) {
-                  switch(k) {
-                    case 0:
-                      xml.writeStartElement("Scale_Quantity");
-                      break;
-                    case 1:
-                      xml.writeStartElement("Scale_Value");
-                      break;
-                  }
-                  Double dv = Double.parseDouble(columns[k]);
-                  xml.writeCharacters(dv.toString());
+                for (int k = 0; k < processor.children.size(); k++) {
+                  java.lang.String child = (java.lang.String) processor.children.get(k);
+                  xml.writeStartElement(child);
+                  //Double dv = Double.parseDouble(columns[k]);
+                  java.lang.String v = (java.lang.String) columns[k];
+                  xml.writeCharacters(v);
                   xml.writeEndElement();
                 }
+                xml.writeEndElement();
               }
-              xml.writeEndElement();
               break;
 
           }
