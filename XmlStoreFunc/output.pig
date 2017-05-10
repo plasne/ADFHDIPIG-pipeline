@@ -10,6 +10,5 @@ transform = FOREACH in GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUSTOMER_DEST_
   CUSTOMER_ID, CUSTOMER_SEGMENT_DESC, CUSTOMER_SEGMENT_ID,
   ToString(ToDate(extime, 'yyyyMMdd HH:mm:ss'), 'yyyy-MM-dd HH:mm:ss') as Extraction_Time:chararray,
   SALES_REP,
-  '(1,2;3,4)' as scale:chararray;
+  CONCAT('(', QTY1, ',', VAL1, ';', QTY2, ',', VAL2, ')') as scale:chararray;
 STORE transform INTO '/user/plasne/output.xml' USING output.XML('/user/plasne/config.json');
-DUMP transform;
