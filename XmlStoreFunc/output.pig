@@ -1,6 +1,8 @@
 REGISTER output.jar;
 REGISTER json-simple-1.1.jar;
-in = LOAD '/user/plasne/CUSTOMER.201705041622.csv' USING PigStorage(',')
+REGISTER /usr/hdp/2.5.4.0-121/pig/piggybank.jar;
+DEFINE CSVLoader org.apache.pig.piggybank.storage.CSVLoader();
+in = LOAD '/user/plasne/CUSTOMER.201705041622.csv' USING CSVLoader(',')
   AS (CUSTOMER_SEGMENT_ID:int, CUSTOMER_SEGMENT_DESC:chararray, CUSTOMER_ID:int, CUSTOMER_DESC:chararray,
   CUSTOMER_DEST_LOC:chararray, CUSTOMER_DEST_LOC_DESC:chararray, SALES_REP:chararray, extime:chararray,
   QTY1:float, VAL1:float, QTY2:float, VAL2:float);
