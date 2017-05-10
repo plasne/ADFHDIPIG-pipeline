@@ -146,10 +146,14 @@ public class XML extends StoreFunc {
         java.lang.String fieldName = field.getName();
 
         // find the processor
+        System.out.println("starting....");
         Processor processor = null;
         for (int j = 0; j < processors.size(); j++) {
           Processor potential = processors.get(j);
+          System.out.println("potential: " + potential.column);
+          System.out.println("fieldName: " + fieldName);
           if (potential.column == fieldName) processor = potential;
+          System.out.println("equal? " + (potential.column == fieldName).toString());
         }
         if (processor != null) {
           switch (processor.type) {
@@ -280,20 +284,9 @@ public class XML extends StoreFunc {
         JSONObject json = (JSONObject) parser.parse(raw);
         root = json.get("root").toString();
         entry = json.get("entry").toString();
-
-        System.out.println("root: " + root);
-        System.out.println("entry: " + entry);
-
         JSONArray procarray = (JSONArray) json.get("processors");
-
-        System.out.println("size: " + procarray.size());
-
         for (int i = 0; i < procarray.size(); i++) {
           JSONObject proc = (JSONObject) procarray.get(i);
-
-          System.out.println("column: " + proc.get("column").toString());
-          System.out.println("type: " + proc.get("type").toString());
-
           processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
         }
 
