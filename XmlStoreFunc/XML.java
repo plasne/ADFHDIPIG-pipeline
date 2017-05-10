@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.DataOutputStream;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
 import javax.xml.stream.XMLOutputFactory;
@@ -256,16 +257,18 @@ public class XML extends StoreFunc {
       if (config != null && !udfc.isFrontend()) { // only read on backend
 
         String raw;
-        Path path = new Path(config);
+        
         if (config.startsWith("./")) {
 
           // read from the local file system
+          java.nio.file.Path path = Paths.get(config);
           raw = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 
         } else {
 
           // read from hadoop
           Configuration conf = udfc.getJobConf();
+          org.apache.hadoop.fs.Path path = new Path(config);
           FileSystem fs = FileSystem.get(path.toUri(), conf);
           FSDataInputStream inputStream = fs.open(path);
           java.util.Scanner scanner = new java.util.Scanner(inputStream).useDelimiter("\\A");
