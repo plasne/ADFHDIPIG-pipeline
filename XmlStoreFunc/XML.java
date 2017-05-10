@@ -153,7 +153,7 @@ public class XML extends StoreFunc {
           System.out.println("potential: " + potential.column);
           System.out.println("fieldName: " + fieldName);
           if (potential.column == fieldName) processor = potential;
-          System.out.println("equal? " + (potential.column == fieldName).toString());
+          System.out.println("equal? " + (potential.column == fieldName));
         }
         if (processor != null) {
           switch (processor.type) {
