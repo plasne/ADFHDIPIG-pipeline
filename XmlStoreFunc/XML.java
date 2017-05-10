@@ -76,11 +76,9 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     public XMLRecordWriter(DataOutputStream out, java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post) throws IOException {
       this.out = out;
       this.root = root;
-      if (pre != null) {
-        for (int i = 0; i < pre.size(); i++) {
-          java.lang.String line = (java.lang.String) pre.get(i);
-          out.writeBytes(line);
-        }
+      for (int i = 0; i < pre.size(); i++) {
+        java.lang.String line = (java.lang.String) pre.get(i);
+        out.writeBytes(line);
       }
       out.writeBytes("<" + root + ">");
     }
@@ -92,11 +90,9 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     public synchronized void close(TaskAttemptContext job) throws IOException {
       try {
         out.writeBytes("</" + root + ">");
-        if (post != null) {
-          for (int i = 0; i < post.size(); i++) {
-            java.lang.String line = (java.lang.String) post.get(i);
-            out.writeBytes(line);
-          }
+        for (int i = 0; i < post.size(); i++) {
+          java.lang.String line = (java.lang.String) post.get(i);
+          out.writeBytes(line);
         }
       } finally {
         out.close();
@@ -269,8 +265,8 @@ public class XML extends StoreFunc {
 
   @Override
   public OutputFormat getOutputFormat() throws IOException {
-    ArrayList<java.lang.String> pre;
-    ArrayList<java.lang.String> post;
+    ArrayList<java.lang.String> pre = new ArrayList<java.lang.String>();
+    ArrayList<java.lang.String> post = new ArrayList<java.lang.String>();
     try {
       UDFContext udfc = UDFContext.getUDFContext();
       if (config != null && !udfc.isFrontend()) { // only read on backend
@@ -309,7 +305,6 @@ public class XML extends StoreFunc {
         }
         JSONArray pre_section = (JSONArray) json.get("pre");
         if (pre_section != null) {
-          pre = new ArrayList<java.lang.String>();
           for (int i = 0; i < pre_section.size(); i++) {
             java.lang.String line = (java.lang.String) pre_section.get(i);
             pre.add(line);
@@ -317,7 +312,6 @@ public class XML extends StoreFunc {
         }
         JSONArray post_section = (JSONArray) json.get("post");
         if (post_section != null) {
-          post = new ArrayList<java.lang.String>();
           for (int i = 0; i < post_section.size(); i++) {
             java.lang.String line = (java.lang.String) post_section.get(i);
             post.add(line);
