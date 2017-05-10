@@ -48,8 +48,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
   private java.lang.String root;
-  private java.lang.String[] pre;
-  private java.lang.String[] post;
+  private ArrayList<java.lang.String> pre;
+  private ArrayList<java.lang.String> post;
 
   public XMLOutputFormat(java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post) {
     this.root = root;
@@ -77,8 +77,9 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
       this.out = out;
       this.root = root;
       if (pre != null) {
-        for (int i = 0; i < pre.length; i++) {
-          out.writeBytes(pre[i]);
+        for (int i = 0; i < pre.size(); i++) {
+          java.lang.String line = (java.lang.String) pre.get(i);
+          out.writeBytes(line);
         }
       }
       out.writeBytes("<" + root + ">");
@@ -92,8 +93,9 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
       try {
         out.writeBytes("</" + root + ">");
         if (post != null) {
-          for (int i = 0; i < post.length; i++) {
-            out.writeBytes(post[i]);
+          for (int i = 0; i < post.size(); i++) {
+            java.lang.String line = (java.lang.String) post.get(i);
+            out.writeBytes(line);
           }
         }
       } finally {
