@@ -109,7 +109,7 @@ class Processor {
   public java.lang.String column;
   public java.lang.String type;
   public java.lang.String node;
-  public ArrayList<java.lang.String> children;
+  public ArrayList<java.lang.String> children = new ArrayList<java.lang.String>();
 
   public Processor(java.lang.String column, java.lang.String type, java.lang.String node, JSONArray children) {
     this.column = column;
@@ -305,7 +305,11 @@ public class XML extends StoreFunc {
         if (procarray != null) {
           for (int i = 0; i < procarray.size(); i++) {
             JSONObject proc = (JSONObject) procarray.get(i);
-            processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString(), proc.get("node").toString(), (JSONArray) proc.get("children")));
+            java.lang.String column = proc.get("column").toString();
+            java.lang.String type = proc.get("type").toString();
+            java.lang.String node = proc.get("node").toString();
+            JSONArray children = (JSONArray) proc.get("children");
+            processors.add(new Processor(column, type, node, children));
           }
         }
         JSONArray pre_section = (JSONArray) json.get("pre");
