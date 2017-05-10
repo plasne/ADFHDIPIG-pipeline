@@ -305,7 +305,7 @@ public class XML extends StoreFunc {
         if (procarray != null) {
           for (int i = 0; i < procarray.size(); i++) {
             JSONObject proc = (JSONObject) procarray.get(i);
-            processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString(), proc.get("node").toString(), proc.get("children")));
+            processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString(), proc.get("node").toString(), (JSONArray) proc.get("children")));
           }
         }
         JSONArray pre_section = (JSONArray) json.get("pre");
