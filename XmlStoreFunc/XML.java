@@ -48,9 +48,13 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
   private java.lang.String root;
+  private java.lang.String[] pre;
+  private java.lang.String[] post;
 
-  public XMLOutputFormat(java.lang.String root) {
+  public XMLOutputFormat(java.lang.String root, java.lang.String[] pre, java.lang.String[] post) {
     this.root = root;
+    this.pre = pre;
+    this.post = post;
   }
 
   @Override
@@ -59,17 +63,24 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     Path file = getDefaultWorkFile(job, ".xml");
     FileSystem fs = file.getFileSystem(conf);
     FSDataOutputStream out = fs.create(file, false);
-    return new XMLRecordWriter<T1, T2>(out, root);
+    return new XMLRecordWriter<T1, T2>(out, root, pre, post);
   }
 
   protected static class XMLRecordWriter<T1, T2> extends RecordWriter<T1, T2> {
 
     private DataOutputStream out;
     private java.lang.String root;
+    private java.lang.String[] pre;
+    private java.lang.String[] post;
 
-    public XMLRecordWriter(DataOutputStream out, java.lang.String root) throws IOException {
+    public XMLRecordWriter(DataOutputStream out, java.lang.String root, java.lang.String[] pre, java.lang.String[] post) throws IOException {
       this.out = out;
       this.root = root;
+      if (pre != null) {
+        for (int i = 0; i < pre.length; i++) {
+          out.writeBytes(pre[i]);
+        }
+      }
       out.writeBytes("<" + root + ">");
     }
 
@@ -80,6 +91,11 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     public synchronized void close(TaskAttemptContext job) throws IOException {
       try {
         out.writeBytes("</" + root + ">");
+        if (post != null) {
+          for (int i = 0; i < post.length; i++) {
+            out.writeBytes(post[i]);
+          }
+        }
       } finally {
         out.close();
       }
@@ -251,12 +267,14 @@ public class XML extends StoreFunc {
 
   @Override
   public OutputFormat getOutputFormat() throws IOException {
+    java.lang.String[] pre;
+    java.lang.String[] post;
     try {
       UDFContext udfc = UDFContext.getUDFContext();
       if (config != null && !udfc.isFrontend()) { // only read on backend
-
         String raw;
         
+        // support local and hadoop
         if (config.startsWith("./")) {
 
           // read from the local file system
@@ -281,9 +299,25 @@ public class XML extends StoreFunc {
         root = json.get("root").toString();
         entry = json.get("entry").toString();
         JSONArray procarray = (JSONArray) json.get("processors");
-        for (int i = 0; i < procarray.size(); i++) {
-          JSONObject proc = (JSONObject) procarray.get(i);
-          processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
+        if (procarray != null) {
+          for (int i = 0; i < procarray.size(); i++) {
+            JSONObject proc = (JSONObject) procarray.get(i);
+            processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
+          }
+        }
+        JSONArray pre_section = (JSONArray) json.get("pre");
+        if (pre_section != null) {
+          for (int i = 0; i < pre_section.size(); i++) {
+            java.lang.String line = (java.lang.String) pre_section.get(i);
+            pre.push(line);
+          }
+        }
+        JSONArray post_section = (JSONArray) json.get("post");
+        if (post_section != null) {
+          for (int i = 0; i < post_section.size(); i++) {
+            java.lang.String line = (java.lang.String) post_section.get(i);
+            post.push(line);
+          }
         }
 
       }
@@ -291,7 +325,7 @@ public class XML extends StoreFunc {
     } catch (Exception ex) {
       throw new ExecException(ex);
     }
-    return new XMLOutputFormat<WritableComparable, Text>(root);
+    return new XMLOutputFormat<WritableComparable, Text>(root, pre, post);
   }
 
   @Override
