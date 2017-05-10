@@ -253,16 +253,26 @@ public class XML extends StoreFunc {
   public OutputFormat getOutputFormat() throws IOException {
     try {
       UDFContext udfc = UDFContext.getUDFContext();
-      if (!udfc.isFrontend()) { // only read on backend
-     
-        // read the contents of the config file
-        Configuration conf = udfc.getJobConf();
+      if (config != null && !udfc.isFrontend()) { // only read on backend
+
+        String raw;
         Path path = new Path(config);
-        FileSystem fs = FileSystem.get(path.toUri(), conf);
-        FSDataInputStream inputStream = fs.open(path);
-        java.util.Scanner scanner = new java.util.Scanner(inputStream).useDelimiter("\\A");
-        String raw = scanner.hasNext() ? scanner.next() : "";
-        fs.close();
+        if (config.startsWith("./")) {
+
+          // read from the local file system
+          raw = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+
+        } else {
+
+          // read from hadoop
+          Configuration conf = udfc.getJobConf();
+          FileSystem fs = FileSystem.get(path.toUri(), conf);
+          FSDataInputStream inputStream = fs.open(path);
+          java.util.Scanner scanner = new java.util.Scanner(inputStream).useDelimiter("\\A");
+          raw = scanner.hasNext() ? scanner.next() : "";
+          fs.close();
+
+        }
 
         // parse the JSON (need the root before creating the writer)
         JSONParser parser = new JSONParser();
