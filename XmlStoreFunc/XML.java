@@ -146,14 +146,10 @@ public class XML extends StoreFunc {
         java.lang.String fieldName = field.getName();
 
         // find the processor
-        System.out.println("starting....");
         Processor processor = null;
         for (int j = 0; j < processors.size(); j++) {
           Processor potential = processors.get(j);
-          System.out.println("potential: " + potential.column);
-          System.out.println("fieldName: " + fieldName);
-          if (potential.column == fieldName) processor = potential;
-          System.out.println("equal? " + (potential.column == fieldName));
+          if (potential.column.equals(fieldName)) processor = potential;
         }
         if (processor != null) {
           switch (processor.type) {
