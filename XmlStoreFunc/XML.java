@@ -76,6 +76,8 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     public XMLRecordWriter(DataOutputStream out, java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post) throws IOException {
       this.out = out;
       this.root = root;
+      this.pre = pre;
+      this.post = post;
       System.out.println("before PRE");
       for (int i = 0; i < pre.size(); i++) {
         java.lang.String line = (java.lang.String) pre.get(i);
