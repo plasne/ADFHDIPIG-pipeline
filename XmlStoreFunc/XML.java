@@ -51,7 +51,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
   private java.lang.String[] pre;
   private java.lang.String[] post;
 
-  public XMLOutputFormat(java.lang.String root, java.lang.String[] pre, java.lang.String[] post) {
+  public XMLOutputFormat(java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post) {
     this.root = root;
     this.pre = pre;
     this.post = post;
@@ -70,10 +70,10 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
     private DataOutputStream out;
     private java.lang.String root;
-    private java.lang.String[] pre;
-    private java.lang.String[] post;
+    private ArrayList<java.lang.String> pre;
+    private ArrayList<java.lang.String> post;
 
-    public XMLRecordWriter(DataOutputStream out, java.lang.String root, java.lang.String[] pre, java.lang.String[] post) throws IOException {
+    public XMLRecordWriter(DataOutputStream out, java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post) throws IOException {
       this.out = out;
       this.root = root;
       if (pre != null) {
@@ -267,8 +267,8 @@ public class XML extends StoreFunc {
 
   @Override
   public OutputFormat getOutputFormat() throws IOException {
-    java.lang.String[] pre;
-    java.lang.String[] post;
+    ArrayList<java.lang.String> pre;
+    ArrayList<java.lang.String> post;
     try {
       UDFContext udfc = UDFContext.getUDFContext();
       if (config != null && !udfc.isFrontend()) { // only read on backend
@@ -307,6 +307,7 @@ public class XML extends StoreFunc {
         }
         JSONArray pre_section = (JSONArray) json.get("pre");
         if (pre_section != null) {
+          pre = new ArrayList<java.lang.String>();
           for (int i = 0; i < pre_section.size(); i++) {
             java.lang.String line = (java.lang.String) pre_section.get(i);
             pre.push(line);
@@ -314,6 +315,7 @@ public class XML extends StoreFunc {
         }
         JSONArray post_section = (JSONArray) json.get("post");
         if (post_section != null) {
+          post = new ArrayList<java.lang.String>();
           for (int i = 0; i < post_section.size(); i++) {
             java.lang.String line = (java.lang.String) post_section.get(i);
             post.push(line);
