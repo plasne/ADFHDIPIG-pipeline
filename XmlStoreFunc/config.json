@@ -1,10 +1,12 @@
 {
-    "root": "wrapper",
-    "entry": "item",
+    "root": "CUSTOMER_Set",
+    "entry": "CUSTOMER_Record",
     "processors": [
         {
             "column": "scale",
-            "type": "scale"
+            "type": "scale",
+            "node": "Scale",
+            "children": [ "Scale_Quantity", "Scale_Value" ]
         }
     ],
     "pre": [

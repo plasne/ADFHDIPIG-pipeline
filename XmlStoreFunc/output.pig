@@ -1,10 +1,13 @@
 REGISTER output.jar;
 REGISTER json-simple-1.1.jar;
-in = LOAD '/user/plasne/lee.csv' USING PigStorage(',') AS (customer:chararray, product:chararray, discount:float, startdate:chararray, enddate:chararray);
-transform = FOREACH in GENERATE 'PP01' as ppa:chararray, 'PP02' as ppb:chararray, CONCAT(CONCAT(customer, '/'), product) as cp:chararray,
-  ToString(ToDate(startdate, 'MMddyyyy'), 'yyyy-MM-dd HH:mm:ss') as start:chararray,
-  ToString(ToDate(enddate, 'MMddyyyy'), 'yyyy-MM-dd HH:mm:ss') as end:chararray,
-  ToString(CurrentTime(), 'yyyy-MM-dd HH:mm:ss') as current:chararray,
-  '(4,4.54;6,7894.00;3,479.79)' as scale:chararray;
+in = LOAD '/user/plasne/CUSTOMER.201705041622.csv' USING PigStorage(',')
+  AS (CUSTOMER_SEGMENT_ID:int CUSTOMER_SEGMENT_DESC:chararray, CUSTOMER_ID:int, CUSTOMER_DESC:chararray,
+  CUSTOMER_DEST_LOC:chararray, CUSTOMER_DEST_LOC_DESC:chararray, SALES_REP:chararray, extime:chararray,
+  QTY1:float, VAL1:float, QTY2:float, VAL2:float);
+transform = FOREACH in GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUSTOMER_DEST_LOC_DESC,
+  CUSTOMER_ID, CUSTOMER_SEGMENT_DESC, CUSTOMER_SEGMENT_ID,
+  ToString(ToDate(extime, 'yyyyMMdd HH:mm:ss'), 'yyyy-MM-dd HH:mm:ss') as Extraction_Time:chararray,
+  SALES_REP,
+  CONCAT("(", CONCAT(QTY1, CONCAT(",", CONCAT(VAL1, CONCAT(";", CONCAT(QTY2, CONCAT(",", CONCAT(VAL2, ")")))))))) as scale:chararray;
 STORE transform INTO '/user/plasne/output.xml' USING output.XML('/user/plasne/config.json');
 DUMP transform;
