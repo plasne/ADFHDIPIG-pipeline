@@ -78,12 +78,10 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
       this.root = root;
       this.pre = pre;
       this.post = post;
-      System.out.println("before PRE");
       for (int i = 0; i < pre.size(); i++) {
         java.lang.String line = (java.lang.String) pre.get(i);
         out.writeBytes(line);
       }
-      System.out.println("after PRE");
       out.writeBytes("<" + root + ">");
     }
 
@@ -94,12 +92,10 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     public synchronized void close(TaskAttemptContext job) throws IOException {
       try {
         out.writeBytes("</" + root + ">");
-        System.out.println("before POST");
         for (int i = 0; i < post.size(); i++) {
           java.lang.String line = (java.lang.String) post.get(i);
           out.writeBytes(line);
         }
-        System.out.println("after POST");
       } finally {
         out.close();
       }
@@ -309,12 +305,10 @@ public class XML extends StoreFunc {
             processors.add(new Processor(proc.get("column").toString(), proc.get("type").toString()));
           }
         }
-        System.out.println("started....");
         JSONArray pre_section = (JSONArray) json.get("pre");
         if (pre_section != null) {
           for (int i = 0; i < pre_section.size(); i++) {
             java.lang.String line = (java.lang.String) pre_section.get(i);
-            System.out.println("line [pre]: " + line);
             pre.add(line);
           }
         }
@@ -322,7 +316,6 @@ public class XML extends StoreFunc {
         if (post_section != null) {
           for (int i = 0; i < post_section.size(); i++) {
             java.lang.String line = (java.lang.String) post_section.get(i);
-            System.out.println("line [post]: " + line);
             post.add(line);
           }
         }
