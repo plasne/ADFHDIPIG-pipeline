@@ -50,6 +50,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
   private java.lang.String root;
   private ArrayList<java.lang.String> pre;
   private ArrayList<java.lang.String> post;
+  private ArrayList<java.lang.String> onclose;
 
   public XMLOutputFormat(java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post, ArrayList<java.lang.String> onclose) {
     this.root = root;
