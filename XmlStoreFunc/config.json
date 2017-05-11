@@ -17,6 +17,6 @@
         "</soap:Envelope>"
     ],
     "onclose": [
-        "cuwwrl -X POST -d @{file} http://pelasne-web.eastus2.cloudapp.azure.com"
+        "curl -X POST -d @{file} http://pelasne-web.eastus2.cloudapp.azur3e.com"
     ]
 }
