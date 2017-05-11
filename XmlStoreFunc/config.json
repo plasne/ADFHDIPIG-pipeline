@@ -1,6 +1,5 @@
 {
-    "root": "CUSTOMER_Set",
-    "entry": "CUSTOMER_Record",
+    "entry": "data",
     "processors": [
         {
             "column": "scale",
@@ -10,10 +9,14 @@
         }
     ],
     "pre": [
-        "<?xml version=\"1.0\"?>",
-        "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope/\" soap:encodingStyle=\"http://www.w3.org/2003/05/soap-encoding\">"
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">",
+        "<soap:Body>",
+        "<putCUSTOMER xmlns=\"http://interfaces.ppss.prosrm.com/xsd\">"
     ],
     "post": [
+        "</putCUSTOMER>",
+        "</soap:Body>",
         "</soap:Envelope>"
     ],
     "onclose": [

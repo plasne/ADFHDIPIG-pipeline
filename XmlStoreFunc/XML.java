@@ -94,7 +94,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
         java.lang.String line = (java.lang.String) pre.get(i);
         out.writeBytes(line);
       }
-      out.writeBytes("<" + root + ">");
+      if (root.length > 0) out.writeBytes("<" + root + ">");
 
     }
 
@@ -106,7 +106,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
       // write any footers
       try {
-        out.writeBytes("</" + root + ">");
+        if (root.length > 0) out.writeBytes("</" + root + ">");
         for (int i = 0; i < post.size(); i++) {
           java.lang.String line = (java.lang.String) post.get(i);
           out.writeBytes(line);
@@ -336,7 +336,7 @@ public class XML extends StoreFunc {
         // parse the JSON (need the root before creating the writer)
         JSONParser parser = new JSONParser();
         JSONObject json = (JSONObject) parser.parse(raw);
-        root = json.get("root").toString();
+        root = json.get("root") ? json.get("root").toString() : "";
         entry = json.get("entry").toString();
         JSONArray procarray = (JSONArray) json.get("processors");
         if (procarray != null) {
