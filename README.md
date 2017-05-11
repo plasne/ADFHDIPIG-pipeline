@@ -45,3 +45,8 @@ This sample was written using Visual Studio 2015 and the Data Factory Tools for 
 2. deposits them in an Azure Storage Blob container
 3. runs a Pig script to normalize the data and put it into XML
 4. deposits the output files in an Azure Storage Blob container
+
+### NOTES
+
+* fully qualified names for jar files in pig DEFINE
+* pig -x local local.pig
