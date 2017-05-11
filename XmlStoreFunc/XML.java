@@ -117,6 +117,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
       // run onclose events
       for (int j = 0; j < onclose.size(); j++) {
+        Process p;
         try {
           java.lang.String cmd = (java.lang.String) onclose.get(j);
           cmd = cmd.replace("file:", "");
@@ -124,10 +125,10 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
           System.out.println("------------------------------");
           System.out.println(cmd);
           System.out.println("------------------------------");
-          Process p = Runtime.getRuntime().exec(cmd);
+          p = Runtime.getRuntime().exec(cmd);
           p.waitFor();
         } catch (Exception ex) {
-          throw new ExecException("onclose(" + j + "): " + reader.readLine(), 2109, PigException.BUG);
+          throw new ExecException("onclose(" + j + "): " + ex, 2109, PigException.BUG);
         }
         int exit = p.exitValue();
         if (exit != 0) {
