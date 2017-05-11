@@ -131,7 +131,9 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
           throw new ExecException("onclose(" + j + "): " + ex, 2109, PigException.BUG);
         }
         int exit = p.exitValue();
-        if (exit != 0) {
+        if (exit == 0) {
+          System.out.println("onclose(" + j + "): success.");
+        } else {
           BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
           throw new ExecException("onclose(" + j + ") [exit:" + exit + "]: " + reader.readLine(), 2110, PigException.BUG);
         }
