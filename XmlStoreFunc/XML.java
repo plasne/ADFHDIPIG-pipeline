@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.DataOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
@@ -123,9 +125,10 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
         System.out.println("------------------------------");
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
-        if (p != 0) {
+        int exit = p.exitValue();
+        if (exit != 0) {
           BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-          throw new ExecException("onclose(" + j + "): " + reader.readLine(), 2109, PigException.BUG);
+          throw new ExecException("onclose(" + j + ") [exit:" + exit + "]: " + reader.readLine(), 2109, PigException.BUG);
         }
       }
 
