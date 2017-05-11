@@ -113,6 +113,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
       }
 
       // run onclose events
+      System.out.println("!!!! STARTED !!!!");
       for (int j = 0; j < onclose.size(); j++) {
         java.lang.String cmd = (java.lang.String) onclose.get(j);
         cmd = cmd.replace("{file}", filename);
@@ -121,6 +122,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
         System.out.println("------------------------------");
         Runtime.getRuntime().exec(cmd);
       }
+      System.out.println("!!!! STOPPED !!!!");
 
     }
 
