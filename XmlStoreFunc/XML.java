@@ -51,10 +51,11 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
   private ArrayList<java.lang.String> pre;
   private ArrayList<java.lang.String> post;
 
-  public XMLOutputFormat(java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post) {
+  public XMLOutputFormat(java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post, ArrayList<java.lang.String> onclose) {
     this.root = root;
     this.pre = pre;
     this.post = post;
+    this.onclose = onclose;
   }
 
   @Override
@@ -63,26 +64,35 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     Path file = getDefaultWorkFile(job, ".xml");
     FileSystem fs = file.getFileSystem(conf);
     FSDataOutputStream out = fs.create(file, false);
-    return new XMLRecordWriter<T1, T2>(out, root, pre, post);
+    return new XMLRecordWriter<T1, T2>(out, file.toString(), root, pre, post, onclose);
   }
 
   protected static class XMLRecordWriter<T1, T2> extends RecordWriter<T1, T2> {
 
     private DataOutputStream out;
+    private java.lang.String filename;
     private java.lang.String root;
     private ArrayList<java.lang.String> pre;
     private ArrayList<java.lang.String> post;
+    private ArrayList<java.lang.String> onclose;
 
-    public XMLRecordWriter(DataOutputStream out, java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post) throws IOException {
+    public XMLRecordWriter(DataOutputStream out, java.lang.String filename, java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post, ArrayList<java.lang.String> onclose) throws IOException {
+
+      // local variables
       this.out = out;
+      this.filename = filename;
       this.root = root;
       this.pre = pre;
       this.post = post;
+      this.onclose = onclose;
+
+      // write any headers
       for (int i = 0; i < pre.size(); i++) {
         java.lang.String line = (java.lang.String) pre.get(i);
         out.writeBytes(line);
       }
       out.writeBytes("<" + root + ">");
+
     }
 
     public synchronized void write(T1 key, T2 value) throws IOException {
@@ -90,6 +100,8 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     }
 
     public synchronized void close(TaskAttemptContext job) throws IOException {
+
+      // write any footers
       try {
         out.writeBytes("</" + root + ">");
         for (int i = 0; i < post.size(); i++) {
@@ -99,6 +111,17 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
       } finally {
         out.close();
       }
+
+      // run onclose events
+      for (int j = 0; j < onclose.size(); j++) {
+        java.lang.String cmd = (java.lang.String) onclose.get(j);
+        cmd = cmd.replace("{file}", filename);
+        System.out.println("------------------------------");
+        System.out.println(cmd);
+        System.out.println("------------------------------");
+        Runtime.getRuntime().exec(cmd);
+      }
+
     }
 
   }
@@ -189,7 +212,6 @@ public class XML extends StoreFunc {
                 for (int k = 0; k < processor.children.size(); k++) {
                   java.lang.String child = (java.lang.String) processor.children.get(k);
                   xml.writeStartElement(child);
-                  //Double dv = Double.parseDouble(columns[k]);
                   java.lang.String v = (java.lang.String) columns[k];
                   xml.writeCharacters(v);
                   xml.writeEndElement();
@@ -326,13 +348,20 @@ public class XML extends StoreFunc {
             post.add(line);
           }
         }
+        JSONArray onclose_section = (JSONArray) json.get("onclose");
+        if (onclose_section != null) {
+          for (int i = 0; i < onclose_section.size(); i++) {
+            java.lang.String line = (java.lang.String) onclose_section.get(i);
+            onclose.add(line);
+          }
+        }
 
       }
 
     } catch (Exception ex) {
       throw new ExecException(ex);
     }
-    return new XMLOutputFormat<WritableComparable, Text>(root, pre, post);
+    return new XMLOutputFormat<WritableComparable, Text>(root, pre, post, onclose);
   }
 
   @Override

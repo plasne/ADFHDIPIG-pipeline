@@ -7,5 +7,3 @@ transform = FOREACH in GENERATE 'PP01' as ppa:chararray, 'PP02' as ppb:chararray
   ToString(CurrentTime(), 'yyyy-MM-dd HH:mm:ss') as current:chararray,
   '(4,4.54;6,7894.00;3,479.79)' as scale:chararray;
 STORE transform INTO './output.xml' USING output.XML('./config.json');
-response = STREAM transform THROUGH `curl -X POST -d @- http://pelasne-web.eastus2.cloudapp.azure.com`;
-DUMP response;
