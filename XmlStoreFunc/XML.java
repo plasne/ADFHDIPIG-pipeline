@@ -94,7 +94,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
         java.lang.String line = (java.lang.String) pre.get(i);
         out.writeBytes(line);
       }
-      if (root.length > 0) out.writeBytes("<" + root + ">");
+      if (root.length() > 0) out.writeBytes("<" + root + ">");
 
     }
 
@@ -106,7 +106,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
       // write any footers
       try {
-        if (root.length > 0) out.writeBytes("</" + root + ">");
+        if (root.length() > 0) out.writeBytes("</" + root + ">");
         for (int i = 0; i < post.size(); i++) {
           java.lang.String line = (java.lang.String) post.get(i);
           out.writeBytes(line);
