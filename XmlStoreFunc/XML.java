@@ -120,8 +120,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
         Process p;
         try {
           java.lang.String cmd = (java.lang.String) onclose.get(j);
-          cmd = cmd.replace("file:", "");
-          cmd = cmd.replace("{file}", filename);
+          cmd = cmd.replace("{file}", filename.replace("file:", ""));
           System.out.println("------------------------------");
           System.out.println(cmd);
           System.out.println("------------------------------");
