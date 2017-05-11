@@ -336,7 +336,7 @@ public class XML extends StoreFunc {
         // parse the JSON (need the root before creating the writer)
         JSONParser parser = new JSONParser();
         JSONObject json = (JSONObject) parser.parse(raw);
-        root = json.get("root") ? json.get("root").toString() : "";
+        root = (json.get("root") != null) ? json.get("root").toString() : "";
         entry = json.get("entry").toString();
         JSONArray procarray = (JSONArray) json.get("processors");
         if (procarray != null) {
