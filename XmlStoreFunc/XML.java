@@ -117,18 +117,22 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
       // run onclose events
       for (int j = 0; j < onclose.size(); j++) {
-        java.lang.String cmd = (java.lang.String) onclose.get(j);
-        cmd = cmd.replace("file:", "");
-        cmd = cmd.replace("{file}", filename);
-        System.out.println("------------------------------");
-        System.out.println(cmd);
-        System.out.println("------------------------------");
-        Process p = Runtime.getRuntime().exec(cmd);
-        p.waitFor();
+        try {
+          java.lang.String cmd = (java.lang.String) onclose.get(j);
+          cmd = cmd.replace("file:", "");
+          cmd = cmd.replace("{file}", filename);
+          System.out.println("------------------------------");
+          System.out.println(cmd);
+          System.out.println("------------------------------");
+          Process p = Runtime.getRuntime().exec(cmd);
+          p.waitFor();
+        } catch (Exception ex) {
+          throw new ExecException("onclose(" + j + "): " + reader.readLine(), 2109, PigException.BUG);
+        }
         int exit = p.exitValue();
         if (exit != 0) {
           BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-          throw new ExecException("onclose(" + j + ") [exit:" + exit + "]: " + reader.readLine(), 2109, PigException.BUG);
+          throw new ExecException("onclose(" + j + ") [exit:" + exit + "]: " + reader.readLine(), 2110, PigException.BUG);
         }
       }
 
