@@ -297,6 +297,7 @@ public class XML extends StoreFunc {
   public OutputFormat getOutputFormat() throws IOException {
     ArrayList<java.lang.String> pre = new ArrayList<java.lang.String>();
     ArrayList<java.lang.String> post = new ArrayList<java.lang.String>();
+    ArrayList<java.lang.String> onclose = new ArrayList<java.lang.String>();
     try {
       UDFContext udfc = UDFContext.getUDFContext();
       if (config != null && !udfc.isFrontend()) { // only read on backend
