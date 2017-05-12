@@ -1,11 +1,11 @@
 ﻿{
   "$schema": "http://datafactories.schema.management.azure.com/schemas/2015-09-01/Microsoft.DataFactory.Table.json",
-  "name": "PigOutput",
+  "name": "FileOutput",
   "properties": {
-    "type": "AzureBlob",
-    "linkedServiceName": "AzureStorage",
+    "type": "FileShare",
+    "linkedServiceName": "FileShare",
     "typeProperties": {
-      "folderPath": "pelasne-pig-2017-03-09t22-26-52-136z/user/plasne/output-{date}{time}",
+      "folderPath": "share",
       "partitionedBy": [
         {
           "name": "date",

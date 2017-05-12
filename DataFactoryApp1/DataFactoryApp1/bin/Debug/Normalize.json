@@ -10,18 +10,17 @@
           "typeProperties": {
             "source": {
               "type": "FileSystemSource",
-              "recursive": false,
+              "recursive": true,
               "sourceRetryCount": 1
             },
             "sink": {
               "type": "BlobSink",
-              "writeBatchSize": 0,
-              "writeBatchTimeout": "00:00:00"
+              "blobWriterOverwriteFiles": true
             }
           },
           "inputs": [
             {
-              "name": "FilesOnFTP"
+              "name": "FtpInput"
             }
           ],
           "outputs": [
@@ -58,8 +57,8 @@
             "scriptLinkedService": "AzureStorage",
             "defines": {
               "storage": "wasb://pelasne-pig-2017-03-09t22-26-52-136z@pelasnepigstore.blob.core.windows.net",
-              "input": "$$Text.Format('user/plasne/input/input-{0:yyMMdd}T{0:hhmm}.csv', SliceStart)",
-              "output": "$$Text.Format('user/plasne/output/output-{0:yyMMdd}T{0:hhmm}', SliceStart)"
+              "input": "$$Text.Format('user/plasne/input-{0:yyyyMMddhhmm}', SliceEnd)",
+              "output": "$$Text.Format('user/plasne/output-{0:yyyyMMddhhmm}/process-{0:yyyyMMddhhmm}', SliceEnd)"
             }
           },
           "policy": {
@@ -72,9 +71,44 @@
             "frequency": "Minute",
             "interval": 30
           }
+        },
+        {
+          "name": "CopyToFS",
+          "type": "Copy",
+          "typeProperties": {
+            "source": {
+              "type": "BlobSource",
+              "recursive": true,
+              "sourceRetryCount": 1
+            },
+            "sink": {
+              "type": "FileSystemSink",
+              "copyBehavior": "PreserveHierarchy",
+              "sinkRetryCount": 1
+            }
+          },
+          "inputs": [
+            {
+              "name": "PigOutput"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "FileOutput"
+            }
+          ],
+          "policy": {
+            "timeout": "01:00:00",
+            "concurrency": 4,
+            "retry": 1
+          },
+          "scheduler": {
+            "frequency": "Minute",
+            "interval": 30
+          }
         }
       ],
-        "start": "2017-04-04T00:00:00Z",
-        "end": "2017-04-05T00:00:00Z"
+        "start": "2017-05-12T00:00:00Z",
+        "end": "2017-05-13T00:00:00Z"
     }
 }

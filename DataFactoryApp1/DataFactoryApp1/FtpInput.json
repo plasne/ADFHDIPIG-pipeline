@@ -1,27 +1,26 @@
 ﻿{
   "$schema": "http://datafactories.schema.management.azure.com/schemas/2015-09-01/Microsoft.DataFactory.Table.json",
-  "name": "FilesOnFTP",
+  "name": "FtpInput",
   "properties": {
     "external":  true,
     "type": "FileShare",
     "linkedServiceName": "FTP",
     "typeProperties": {
-      "fileName": "input-{date}T{time}.csv",
-      "folderPath": "files",
+      "folderPath": "input/input-{date}{time}",
       "partitionedBy": [
         {
           "name": "date",
           "value": {
             "type": "DateTime",
-            "date": "SliceStart",
-            "format": "yyMMdd"
+            "date": "SliceEnd",
+            "format": "yyyyMMdd"
           }
         },
         {
           "name": "time",
           "value": {
             "type": "DateTime",
-            "date": "SliceStart",
+            "date": "SliceEnd",
             "format": "hhmm"
           }
         }

@@ -28,7 +28,9 @@
   </ItemGroup>
   <ItemGroup>
     <Script Include="AzureStorage.json" />
-    <Script Include="FilesOnFTP.json" />
+    <Script Include="FileOutput.json" />
+    <Script Include="FileShare.json" />
+    <Script Include="FtpInput.json" />
     <Script Include="FTP.json" />
     <Script Include="HDInsight.json" />
     <Script Include="Normalize.json" />

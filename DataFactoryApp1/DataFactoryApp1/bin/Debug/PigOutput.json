@@ -5,7 +5,25 @@
     "type": "AzureBlob",
     "linkedServiceName": "AzureStorage",
     "typeProperties": {
-      "folderPath": "pelasne-pig-2017-03-09t22-26-52-136z/user/plasne/output"
+      "folderPath": "pelasne-pig-2017-03-09t22-26-52-136z/user/plasne/output-{date}{time}",
+      "partitionedBy": [
+        {
+          "name": "date",
+          "value": {
+            "type": "DateTime",
+            "date": "SliceEnd",
+            "format": "yyyyMMdd"
+          }
+        },
+        {
+          "name": "time",
+          "value": {
+            "type": "DateTime",
+            "date": "SliceEnd",
+            "format": "hhmm"
+          }
+        }
+      ]
     },
     "availability": {
       "frequency": "Minute",
