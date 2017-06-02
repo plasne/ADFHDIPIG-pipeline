@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
@@ -140,8 +141,8 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
       // remove file if it is empty
       if (count > 0) {
-        Path path = Paths.get(filename.replace("file:", ""));
-        Files.delete(path);
+        File file = new File(filename.replace("file:", ""));
+        file.delete();
       }
 
     }
