@@ -102,7 +102,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
     public synchronized void write(T1 key, T2 value) throws IOException {
       out.writeBytes(value.toString());
-      //count++;
+      count++;
     }
 
     public synchronized void close(TaskAttemptContext job) throws IOException {
@@ -140,10 +140,10 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
       }
 
       // remove file if it is empty
-      //if (count > 0) {
-        //File file = new File(filename.replace("file:", ""));
-        //file.delete();
-      //}
+      if (count > 0) {
+        File file = new File(filename.replace("file:", ""));
+        file.delete();
+      }
 
     }
 
