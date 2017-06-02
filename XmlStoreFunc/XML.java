@@ -78,6 +78,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
     private ArrayList<java.lang.String> pre;
     private ArrayList<java.lang.String> post;
     private ArrayList<java.lang.String> onclose;
+    private int count;
 
     public XMLRecordWriter(DataOutputStream out, java.lang.String filename, java.lang.String root, ArrayList<java.lang.String> pre, ArrayList<java.lang.String> post, ArrayList<java.lang.String> onclose) throws IOException {
 
@@ -100,6 +101,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
 
     public synchronized void write(T1 key, T2 value) throws IOException {
       out.writeBytes(value.toString());
+      count++;
     }
 
     public synchronized void close(TaskAttemptContext job) throws IOException {
@@ -134,6 +136,12 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
           BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
           throw new ExecException("onclose(" + j + ") [exit:" + exit + "]: " + reader.readLine(), 2110, PigException.BUG);
         }
+      }
+
+      // remove file if it is empty
+      if (count > 0) {
+        Path path = Paths.get(filename.replace("file:", ""));
+        Files.delete(path);
       }
 
     }

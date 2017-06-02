@@ -44,5 +44,5 @@ x_customers = FOREACH in_customers GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CU
   CONCAT('(', QTY1, ',', VAL1, ';', QTY2, ',', VAL2, ')') as scale:chararray;
 
 -- store as XML
-STORE x_products INTO '/user/plasne/output-201705120930/product-xml' USING output.XML('/user/plasne/config.json');
-STORE x_customers INTO '/user/plasne/output-201705120930/customer-xml' USING output.XML('/user/plasne/config.json');
+STORE x_products INTO '/user/plasne/output-201705120930/product-xml' USING output.XML('./error.json');
+STORE x_customers INTO '/user/plasne/output-201705120930/customer-xml' USING output.XML('./error.json');
