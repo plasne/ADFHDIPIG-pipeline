@@ -7,10 +7,13 @@ DEFINE CSVLoader org.apache.pig.piggybank.storage.CSVLoader();
 sh echo "-1,,,,,,,,,,," | hdfs dfs -put - /user/plasne/input-201705120930/product-csv/empty.csv
 
 -- load all product CSVs
-in_products = LOAD '/user/plasne/input-201705120930/product-csv' USING CSVLoader(',')
+raw_products = LOAD '/user/plasne/input-201705120930/product-csv' USING CSVLoader(',')
   AS (CUSTOMER_SEGMENT_ID:int, CUSTOMER_SEGMENT_DESC:chararray, CUSTOMER_ID:int, CUSTOMER_DESC:chararray,
   CUSTOMER_DEST_LOC:chararray, CUSTOMER_DEST_LOC_DESC:chararray, SALES_REP:chararray, extime:chararray,
   QTY1:chararray, VAL1:chararray, QTY2:chararray, VAL2:chararray);
+
+-- remove any fake rows
+SPLIT raw_products INTO in_products IF CUSTOMER_SEGMENT_ID >= 0;
 
 -- transform products
 x_products = FOREACH in_products GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUSTOMER_DEST_LOC_DESC,
