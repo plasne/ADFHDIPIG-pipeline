@@ -51,5 +51,5 @@ x_customers = FOREACH in_customers GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CU
 sh mkdir out
 
 -- store as XML /user/plasne/output-201705120930    /user/plasne/config.json
-STORE x_products INTO './out/product-xml' -- USING output.XML('./config.json');
-STORE x_customers INTO './out/customer-xml' -- USING output.XML('./config.json');
+STORE x_products INTO './out/product-xml'; -- USING output.XML('./config.json');
+STORE x_customers INTO './out/customer-xml'; -- USING output.XML('./config.json');
