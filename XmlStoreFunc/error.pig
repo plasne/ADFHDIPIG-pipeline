@@ -7,7 +7,7 @@ DEFINE CSVLoader org.apache.pig.piggybank.storage.CSVLoader();
 --sh echo "-1,,,,,,,,,,," | hdfs dfs -put - /user/plasne/input-201705120930/product-csv/empty.csv
 mkdir input
 mkdir input/product-csv
-sh echo "-1,,,,,,,,,,," > /input/product-csv/empty.csv
+sh echo "-1,,,,,,,,,,," > input/product-csv/empty.csv
 
 -- load all product CSVs   /user/plasne/input-201705120930/product-csv
 raw_products = LOAD './input/product-csv' USING CSVLoader(',')
@@ -29,7 +29,7 @@ x_products = FOREACH in_products GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUST
 -- ensure there is at least one customer file
 --sh echo "-1,,,,,,,,,,," | hdfs dfs -put - /user/plasne/input-201705120930/customer-csv/empty.csv
 mkdir input/customer-csv
-sh echo "-1,,,,,,,,,,," > /input/customer-csv/empty.csv
+sh echo "-1,,,,,,,,,,," > input/customer-csv/empty.csv
 
 -- load all customer CSVs     /user/plasne/input-201705120930/customer-csv
 raw_customers = LOAD './input/customer-csv' USING CSVLoader(',')
@@ -49,5 +49,5 @@ x_customers = FOREACH in_customers GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CU
   CONCAT('(', QTY1, ',', VAL1, ';', QTY2, ',', VAL2, ')') as scale:chararray;
 
 -- store as XML /user/plasne/output-201705120930    /user/plasne/config.json
-STORE x_products INTO './output/product-xml' USING output.XML('./config.json');
-STORE x_customers INTO './output/customer-xml' USING output.XML('./config.json');
+STORE x_products INTO './out/product-xml' USING output.XML('./config.json');
+STORE x_customers INTO './out/customer-xml' USING output.XML('./config.json');
