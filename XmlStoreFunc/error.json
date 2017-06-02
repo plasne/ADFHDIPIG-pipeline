@@ -1,0 +1,11 @@
+{
+    "entry": "data",
+    "processors": [
+        {
+            "column": "scale",
+            "type": "scale",
+            "node": "Scale",
+            "children": [ "Scale_Quantity", "Scale_Value" ]
+        }
+    ]
+}
