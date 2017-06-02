@@ -142,7 +142,7 @@ class XMLOutputFormat<T1, T2> extends TextOutputFormat<T1, T2> {
       // remove file if it is empty
       if (count > 0) {
         File file = new File(filename.replace("file:", ""));
-        file.delete();
+        //file.delete();
       }
 
     }
