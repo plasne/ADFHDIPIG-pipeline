@@ -19,7 +19,7 @@
         "</soap:Body>",
         "</soap:Envelope>"
     ],
-    "onclose": [
+    "onclose-disabled": [
         "curl -X POST -d @{file} http://pelasne-web.eastus2.cloudapp.azure.com"
     ]
 }
