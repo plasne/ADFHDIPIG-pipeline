@@ -13,8 +13,8 @@ raw_products = LOAD '/user/plasne/input-201705120930/product-csv' USING CSVLoade
   QTY1:chararray, VAL1:chararray, QTY2:chararray, VAL2:chararray);
 
 -- remove any fake rows
---SPLIT raw_products INTO in_products IF CUSTOMER_SEGMENT_ID >= 0, ignore_products IF CUSTOMER_SEGMENT < 0;
-in_products = FILTER raw_products BY CUSTOMER_SEGMENT_ID >= 0;
+SPLIT raw_products INTO in_products IF CUSTOMER_SEGMENT_ID >= 0, ignore_products IF CUSTOMER_SEGMENT < 0;
+--in_products = FILTER raw_products BY CUSTOMER_SEGMENT_ID >= 0;
 
 -- transform products
 x_products = FOREACH in_products GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUSTOMER_DEST_LOC_DESC,
@@ -33,8 +33,8 @@ raw_customers = LOAD '/user/plasne/input-201705120930/customer-csv' USING CSVLoa
   QTY1:chararray, VAL1:chararray, QTY2:chararray, VAL2:chararray);
 
 -- remove any fake rows
---SPLIT raw_customers INTO in_customers IF CUSTOMER_SEGMENT_ID >= 0, ignore_customers IF CUSTOMER_SEGMENT < 0;
-in_customers = FILTER raw_customers BY CUSTOMER_SEGMENT_ID >= 0;
+SPLIT raw_customers INTO in_customers IF CUSTOMER_SEGMENT_ID >= 0, ignore_customers IF CUSTOMER_SEGMENT < 0;
+--in_customers = FILTER raw_customers BY CUSTOMER_SEGMENT_ID >= 0;
 
 -- transform customers
 x_customers = FOREACH in_customers GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUSTOMER_DEST_LOC_DESC,
