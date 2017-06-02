@@ -5,8 +5,8 @@ DEFINE CSVLoader org.apache.pig.piggybank.storage.CSVLoader();
 
 -- ensure there is at least one product file
 --sh echo "-1,,,,,,,,,,," | hdfs dfs -put - /user/plasne/input-201705120930/product-csv/empty.csv
-mkdir input
-mkdir input/product-csv
+sh mkdir input
+sh mkdir input/product-csv
 sh echo "-1,,,,,,,,,,," > input/product-csv/empty.csv
 
 -- load all product CSVs   /user/plasne/input-201705120930/product-csv
@@ -28,7 +28,7 @@ x_products = FOREACH in_products GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUST
 
 -- ensure there is at least one customer file
 --sh echo "-1,,,,,,,,,,," | hdfs dfs -put - /user/plasne/input-201705120930/customer-csv/empty.csv
-mkdir input/customer-csv
+sh mkdir input/customer-csv
 sh echo "-1,,,,,,,,,,," > input/customer-csv/empty.csv
 
 -- load all customer CSVs     /user/plasne/input-201705120930/customer-csv
@@ -47,6 +47,8 @@ x_customers = FOREACH in_customers GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CU
   ToString(ToDate(extime, 'yyyyMMdd HH:mm:ss'), 'yyyy-MM-dd HH:mm:ss') as Extraction_Time:chararray,
   SALES_REP,
   CONCAT('(', QTY1, ',', VAL1, ';', QTY2, ',', VAL2, ')') as scale:chararray;
+
+sh mkdir out
 
 -- store as XML /user/plasne/output-201705120930    /user/plasne/config.json
 STORE x_products INTO './out/product-xml' USING output.XML('./config.json');
