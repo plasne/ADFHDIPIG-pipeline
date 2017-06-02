@@ -35,7 +35,7 @@ raw_customers = LOAD '/user/plasne/input-201705120930/customer-csv' USING CSVLoa
 SPLIT raw_customers INTO in_customers IF CUSTOMER_SEGMENT_ID >= 0, ignore_customers IF CUSTOMER_SEGMENT < 0;
 
 -- transform customers
-x_customers = FOREACH in_products GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUSTOMER_DEST_LOC_DESC,
+x_customers = FOREACH in_customers GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUSTOMER_DEST_LOC_DESC,
   CUSTOMER_ID, CUSTOMER_SEGMENT_DESC, CUSTOMER_SEGMENT_ID,
   ToString(ToDate(extime, 'yyyyMMdd HH:mm:ss'), 'yyyy-MM-dd HH:mm:ss') as Extraction_Time:chararray,
   SALES_REP,
