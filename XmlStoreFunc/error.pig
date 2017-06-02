@@ -13,7 +13,7 @@ raw_products = LOAD '/user/plasne/input-201705120930/product-csv' USING CSVLoade
   QTY1:chararray, VAL1:chararray, QTY2:chararray, VAL2:chararray);
 
 -- remove any fake rows
-SPLIT raw_products INTO in_products IF CUSTOMER_SEGMENT_ID >= 0;
+SPLIT raw_products INTO in_products IF CUSTOMER_SEGMENT_ID >= 0 OTHERWISE ignore_products;
 
 -- transform products
 x_products = FOREACH in_products GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUSTOMER_DEST_LOC_DESC,
