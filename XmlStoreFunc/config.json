@@ -14,7 +14,7 @@
         "<soap:Body>",
         "<putCUSTOMER xmlns=\"http://interfaces.ppss.prosrm.com/xsd\">"
     ],
-    "post": [
+    "post-disabled": [
         "</putCUSTOMER>",
         "</soap:Body>",
         "</soap:Envelope>"
