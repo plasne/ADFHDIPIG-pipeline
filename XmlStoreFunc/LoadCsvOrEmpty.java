@@ -21,11 +21,11 @@ public class LoadCsvOrEmpty extends CSVLoader {
 
   @Override
   public Tuple getNext() throws IOException {
-    if (hasFiles) {
-      return super.getNext();
-    } else {
+    //if (hasFiles) {
+    //  return super.getNext();
+    //} else {
       return null;
-    }
+    //}
   }
 
   @Override
