@@ -17,12 +17,13 @@ public class LoadCsvOrEmpty extends CSVLoader {
 
   @Override
   public void setLocation(String location, Job job) throws IOException {
+    System.out.println("start setLocation");
     UDFContext udfc = UDFContext.getUDFContext();
     if (!udfc.isFrontend()) { // only read on backend
       String folder = location.replace("file:", "");
 
       // support local and hadoop
-      if (location.startsWith("./")) {
+      if (folder.startsWith("./")) {
 
         // read from the local file system
         //raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
