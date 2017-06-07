@@ -4,9 +4,9 @@ import java.io.IOException;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.pig.piggybank.storage.CSVLoader;
 
-class LoadCsvOrEmpty extends CSVLoader {
+public class LoadCsvOrEmpty extends CSVLoader {
 
-  public LoadCsvOrEmpty(String delim) {
+  public LoadCsvOrEmpty() {
   }
 
   @Override
