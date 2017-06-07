@@ -46,15 +46,15 @@ public class LoadCsvOrEmpty extends CSVLoader {
         Configuration conf = udfc.getJobConf();
         FileSystem fs = FileSystem.get(conf);
         Path path = new Path(folder);
-        if (fs.exists(path)) {
-          RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(path, true);
-          while (i_fs.hasNext()) {
-            LocatedFileStatus status = i_fs.next();
-            if (status.isFile() && status.getBlockSize() > 0) {
-              hasFiles = true;
-            }
-          }
-        }
+        //if (fs.exists(path)) {
+        //  RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(path, true);
+        //  while (i_fs.hasNext()) {
+        //   LocatedFileStatus status = i_fs.next();
+        //    if (status.isFile() && status.getBlockSize() > 0) {
+        //      hasFiles = true;
+        //    }
+        //  }
+        //}
         fs.close();
 
       }
