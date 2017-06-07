@@ -27,6 +27,8 @@ public class LoadCsvOrEmpty extends CSVLoader {
       // support local and hadoop
       if (folder.startsWith("./")) {
 
+        System.out.println("!!!!!!!!!!!!! wrong");
+
         // read from the local file system
         //raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
 
@@ -54,6 +56,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
       }
     }
 
+    System.out.println("!!!!!!!!!!!!! end setLocation");
     super.setLocation(location, job);
   }
 
