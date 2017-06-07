@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.pig.piggybank.storage.CSVLoader;
 import org.apache.pig.impl.util.UDFContext;
 import org.apache.pig.PigWarning;
+import org.apache.pig.data.Tuple;
 
 public class LoadCsvOrEmpty extends CSVLoader {
 
