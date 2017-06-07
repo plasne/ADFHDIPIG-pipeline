@@ -17,11 +17,15 @@ public class LoadCsvOrEmpty extends CSVLoader {
   }
 
   @Override
+  public Tuple getNext() throws IOException {
+    return null;
+  }
+
+  @Override
   public void setLocation(String location, Job job) throws IOException {
     UDFContext udfc = UDFContext.getUDFContext();
     if (!udfc.isFrontend()) { // only read on backend
       String folder = location.replace("file:", "");
-      warn("BACKEND", PigWarning.UDF_WARNING_1);
 
       // support local and hadoop
       if (folder.startsWith("./")) {
