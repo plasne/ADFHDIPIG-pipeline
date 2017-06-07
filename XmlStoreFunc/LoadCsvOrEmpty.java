@@ -19,6 +19,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
   public void setLocation(String location, Job job) throws IOException {
     UDFContext udfc = UDFContext.getUDFContext();
     if (!udfc.isFrontend()) { // only read on backend
+      String folder = location.replace("file:", "");
 
       // support local and hadoop
       if (location.startsWith("./")) {
@@ -31,7 +32,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
         // see if there are files to process
         Configuration conf = udfc.getJobConf();
         FileSystem fs = FileSystem.get(conf);
-        RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(new Path(location), true);
+        RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(new Path(folder), true);
         while (i_fs.hasNext()) {
           LocatedFileStatus status = i_fs.next();
           if (status.isFile() && status.getBlockSize() > 0) {
