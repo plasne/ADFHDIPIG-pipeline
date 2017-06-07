@@ -8,6 +8,7 @@ import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.pig.piggybank.storage.CSVLoader;
+import org.apache.pig.impl.util.UDFContext;
 
 public class LoadCsvOrEmpty extends CSVLoader {
 
@@ -18,14 +19,15 @@ public class LoadCsvOrEmpty extends CSVLoader {
   public void setLocation(String location, Job job) throws IOException {
 
     // support local and hadoop
-    if (config.startsWith("./")) {
+    if (location.startsWith("./")) {
 
       // read from the local file system
-      raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
+      //raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
 
     } else {
 
       // see if there are files to process
+      UDFContext udfc = UDFContext.getUDFContext();
       Configuration conf = udfc.getJobConf();
       FileSystem fs = FileSystem.get(conf);
       RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(new Path(location), true);
