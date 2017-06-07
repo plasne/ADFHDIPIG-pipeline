@@ -14,12 +14,18 @@ import org.apache.pig.data.Tuple;
 
 public class LoadCsvOrEmpty extends CSVLoader {
 
+  boolean hasFiles = false;
+
   public LoadCsvOrEmpty() {
   }
 
   @Override
   public Tuple getNext() throws IOException {
-    return null;
+    if (hasFiles) {
+      return super.getNext();
+    } else {
+      return null;
+    }
   }
 
   @Override
@@ -43,9 +49,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
         while (i_fs.hasNext()) {
           LocatedFileStatus status = i_fs.next();
           if (status.isFile() && status.getBlockSize() > 0) {
-            warn("process: " + status.getPath().getName(), PigWarning.UDF_WARNING_2);
-          } else {
-            warn("ignore: " + status.getPath().getName(), PigWarning.UDF_WARNING_3);
+            hasFiles = true;
           }
         }
         fs.close();
