@@ -64,6 +64,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
   public Tuple getNext() throws IOException {
     if (hasFiles) {
       Tuple t = super.getNext();
+      /*
       if (t != null) {
 
         // verify number of columns
@@ -89,6 +90,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
         }
 
       }
+      */
       return t;
     } else {
       return null;
@@ -99,6 +101,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
   public void setLocation(String location, Job job) throws IOException {
 
     // load config on backend
+    /*
     UDFContext udfc = UDFContext.getUDFContext();
     if (!hasConfig && !udfc.isFrontend()) {
       try {
@@ -141,6 +144,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
         throw new ExecException(ex);
       }
     }
+    */
 
     // support local and hadoop
     String combiner = location.endsWith("/") ? "" : "/";
