@@ -5,7 +5,7 @@ package input;
 // write out logs
 // support configuration of an empty directory
 
-import java.lang.Integer;
+import java.lang.Integer.parseInt;
 import java.io.IOException;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.fs.Path;
