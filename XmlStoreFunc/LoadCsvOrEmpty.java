@@ -9,10 +9,12 @@ import java.lang.Integer;
 import java.util.Scanner;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
@@ -64,22 +66,25 @@ public class LoadCsvOrEmpty extends CSVLoader {
       if (t != null) {
 
         // verify number of columns
-        if (t.size() != columns.size()) {
-          throw new ExecException("size " + t.size() + " vs " + columns.size(), 2200, PigException.BUG);
+        int size = columns.size();
+        if (t.size() != size) {
+          throw new ExecException("size " + t.size() + " vs " + size, 2200, PigException.BUG);
         }
 
-        DataType type = t.getType(i);
-        Object value = t.get(i);
-        Column column = columns[i];
-        switch (column.type.toLowerCase()) {
-          case "bool":
-          case "boolean":
-            if (type != DataType.BOOLEAN) throw new ExecException("expected boolean but saw " + type.toString(), 2201, PigException.BUG);
-            break;
-          case "int":
-          case "integer":
-            if (type != DataType.INTEGER) throw new ExecException("expected integer but saw " + type.toString(), 2201, PigException.BUG);
-            break;
+        for (int i = 0; i < size; i++) {
+          DataType type = t.getType(i);
+          Object value = t.get(i);
+          Column column = columns[i];
+          switch (column.type.toLowerCase()) {
+            case "bool":
+            case "boolean":
+              if (type != DataType.BOOLEAN) throw new ExecException("expected boolean but saw " + type.toString(), 2201, PigException.BUG);
+              break;
+            case "int":
+            case "integer":
+              if (type != DataType.INTEGER) throw new ExecException("expected integer but saw " + type.toString(), 2201, PigException.BUG);
+              break;
+          }
         }
 
       }
