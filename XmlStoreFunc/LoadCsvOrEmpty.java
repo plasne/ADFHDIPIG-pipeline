@@ -72,7 +72,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
         }
 
         for (int i = 0; i < size; i++) {
-          DataType type = t.getType(i);
+          byte type = t.getType(i);
           Object value = t.get(i);
           Column column = columns[i];
           switch (column.type.toLowerCase()) {
