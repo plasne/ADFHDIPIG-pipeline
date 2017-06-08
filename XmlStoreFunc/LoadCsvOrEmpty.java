@@ -37,7 +37,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
 
     // only check the path on the backend
     UDFContext udfc = UDFContext.getUDFContext();
-    if (!udfc.isFrontend()) {
+    //if (!udfc.isFrontend()) {
       String combiner = location.endsWith("/") ? "" : "/";
       String folder = location.replace("file:", "") + combiner + target;
 
@@ -50,7 +50,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
       } else {
 
         // see if there are files to process
-        Configuration conf = udfc.getJobConf();
+        Configuration conf = job.getConfiguration(); //udfc.getJobConf();
         FileSystem fs = FileSystem.get(conf);
         Path path = new Path(folder);
         if (fs.exists(path)) {
@@ -66,11 +66,11 @@ public class LoadCsvOrEmpty extends CSVLoader {
 
       }
 
-      throw new ExecException("set location: " + folder, 2110, PigException.BUG);
-      //super.setLocation(folder, job);
-    } else {
-      super.setLocation(location, job);
-    }
+      //throw new ExecException("set location: " + folder, 2110, PigException.BUG);
+      super.setLocation(folder, job);
+    //} else {
+      //super.setLocation(location, job);
+    //}
     
   }
 
