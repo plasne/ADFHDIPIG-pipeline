@@ -62,7 +62,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   String target;
   String config;
   private ArrayList<Column> columns = new ArrayList<Column>();
-  TupleFactory tupleFactory = new TupleFactory();
 
   public LoadCsvOrEmpty(String target, String config) {
     this.target = target;
@@ -81,8 +80,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           throw new ExecException("size " + t.size() + " vs " + size, 2200, PigException.BUG);
         }
 
-        Tuple tx = tupleFactory.newTuple(size);
-
         for (int i = 0; i < size; i++) {
           byte type = t.getType(i);
           Object value = t.get(i);
@@ -91,7 +88,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
             case "bool":
             case "boolean":
               try {
-                tx.set(i, DataType.toBoolean(value));
+                t.set(i, DataType.toBoolean(value));
               } catch (Exception ex) {
                 throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
               }
@@ -99,23 +96,21 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
             case "int":
             case "integer":
               try {
-                tx.set(i, DataType.toInteger(value));
+                t.set(i, DataType.toInteger(value));
               } catch (Exception ex) {
                 throw new ExecException("expected integer but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
               }
               break;
             case "number":
             case "double":
-              tx.set(i, DataType.toDouble(value));
+              t.set(i, DataType.toDouble(value));
               break;
           }
         }
 
-        return tx;
-      } else {
-        return t;
       }
 
+      return t;
     } else {
       return null;
     }
