@@ -1,5 +1,10 @@
 package input;
 
+// support local filesystem
+// support validation
+// write out logs
+// support configuration of an empty directory
+
 import java.io.IOException;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.fs.Path;
@@ -18,15 +23,26 @@ public class LoadCsvOrEmpty extends CSVLoader {
 
   boolean hasFiles = false;
   String target;
+  int columns;
 
-  public LoadCsvOrEmpty(String target) {
+  public LoadCsvOrEmpty(String target, int columns) {
     this.target = target;
+    this.columns = columns;
   }
 
   @Override
   public Tuple getNext() throws IOException {
     if (hasFiles) {
-      return super.getNext();
+      Tuple t = super.getNext();
+      if (t != null) {
+
+        // verify number of columns
+        if (t.size() != columns) {
+          throw new ExecException("size " + t.size() + " vs " + columns, 2200, PigException.BUG);
+        }
+
+      }
+      return t;
     } else {
       return null;
     }
@@ -34,50 +50,41 @@ public class LoadCsvOrEmpty extends CSVLoader {
 
   @Override
   public void setLocation(String location, Job job) throws IOException {
+    String combiner = location.endsWith("/") ? "" : "/";
+    String folder = location.replace("file:", "") + combiner + target;
 
-    // only check the path on the backend
-    UDFContext udfc = UDFContext.getUDFContext();
-    //if (!udfc.isFrontend()) {
-      String combiner = location.endsWith("/") ? "" : "/";
-      String folder = location.replace("file:", "") + combiner + target;
+    // support local and hadoop
+    if (folder.startsWith("./")) {
 
-      // support local and hadoop
-      if (folder.startsWith("./")) {
+      // read from the local file system
+      //raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
 
-        // read from the local file system
-        //raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
+    } else {
 
-      } else {
-
-        // see if there are files to process
-        Configuration conf = job.getConfiguration(); //udfc.getJobConf();
-        FileSystem fs = FileSystem.get(conf);
-        Path path = new Path(folder);
-        if (fs.exists(path)) {
-          RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(path, true);
-          while (i_fs.hasNext()) {
-           LocatedFileStatus status = i_fs.next();
-            if (status.isFile() && status.getBlockSize() > 0) {
-              hasFiles = true;
-            }
+      // see if there are files to process
+      Configuration conf = job.getConfiguration(); //udfc.getJobConf();
+      FileSystem fs = FileSystem.get(conf);
+      Path path = new Path(folder);
+      if (fs.exists(path)) {
+        RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(path, true);
+        while (i_fs.hasNext()) {
+          LocatedFileStatus status = i_fs.next();
+          if (status.isFile() && status.getBlockSize() > 0) {
+            hasFiles = true;
           }
         }
-        fs.close();
-
       }
+      fs.close();
 
-      if (hasFiles) {
-        super.setLocation(folder, job);
-      } else {
-        super.setLocation(location, job);
-      }
+    }
 
-      //throw new ExecException("set location: " + folder, 2110, PigException.BUG);
-      //super.setLocation(folder, job);
-    //} else {
-      //super.setLocation(location, job);
-    //}
-    
+    // return either the specified location or the empty location
+    if (hasFiles) {
+      super.setLocation(folder, job);
+    } else {
+      super.setLocation(location, job);
+    }
+
   }
 
 }
