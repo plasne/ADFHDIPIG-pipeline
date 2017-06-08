@@ -74,15 +74,15 @@ public class LoadCsvOrEmpty extends CSVLoader {
         for (int i = 0; i < size; i++) {
           byte type = t.getType(i);
           Object value = t.get(i);
-          Column column = columns[i];
+          Column column = columns.get(i);
           switch (column.type.toLowerCase()) {
             case "bool":
             case "boolean":
-              if (type != DataType.BOOLEAN) throw new ExecException("expected boolean but saw " + type.toString(), 2201, PigException.BUG);
+              if (type != DataType.BOOLEAN) throw new ExecException("expected boolean but saw " + value.toString(), 2201, PigException.BUG);
               break;
             case "int":
             case "integer":
-              if (type != DataType.INTEGER) throw new ExecException("expected integer but saw " + type.toString(), 2201, PigException.BUG);
+              if (type != DataType.INTEGER) throw new ExecException("expected integer but saw " + value.toString(), 2201, PigException.BUG);
               break;
           }
         }
