@@ -130,6 +130,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
   public ResourceSchema getSchema(String location, Job job) throws IOException {
     List<FieldSchema> list = new ArrayList<FieldSchema>();
+    /*
     if (columns != null) {
       for (int i = 0; i < columns.size(); i++) {
         Column column = columns.get(i);
@@ -149,6 +150,12 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         }
       }
     }
+    */
+    list.add(new FieldSchema("id", DataType.INTEGER));
+    list.add(new FieldSchema("value", DataType.INTEGER));
+    list.add(new FieldSchema("cost", DataType.DOUBLE));
+    list.add(new FieldSchema("account", DataType.INTEGER));
+    list.add(new FieldSchema("routing", DataType.INTEGER));
     return new ResourceSchema(new Schema(list));
   }
 
