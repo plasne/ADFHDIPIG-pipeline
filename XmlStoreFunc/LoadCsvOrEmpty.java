@@ -67,7 +67,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
       }
 
       throw new ExecException("set location: " + folder, 2110, PigException.BUG);
-      super.setLocation(folder, job);
+      //super.setLocation(folder, job);
     } else {
       super.setLocation(location, job);
     }
