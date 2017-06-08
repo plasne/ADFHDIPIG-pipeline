@@ -15,24 +15,28 @@ import org.apache.pig.data.Tuple;
 public class LoadCsvOrEmpty extends CSVLoader {
 
   boolean hasFiles = false;
+  String target;
 
-  public LoadCsvOrEmpty() {
+  public LoadCsvOrEmpty(String target) {
+    this.target = target;
   }
 
   @Override
   public Tuple getNext() throws IOException {
-    //if (hasFiles) {
-    //  return super.getNext();
-    //} else {
+    if (hasFiles) {
+      return super.getNext();
+    } else {
       return null;
-    //}
+    }
   }
 
   @Override
   public void setLocation(String location, Job job) throws IOException {
+    String folder = location.replace("file:", "") + "/" + target;
+
+    // only check the path on the backend
     UDFContext udfc = UDFContext.getUDFContext();
-    if (!udfc.isFrontend()) { // only read on backend
-      String folder = location.replace("file:", "");
+    if (!udfc.isFrontend()) {
 
       // support local and hadoop
       if (folder.startsWith("./")) {
@@ -45,22 +49,22 @@ public class LoadCsvOrEmpty extends CSVLoader {
         // see if there are files to process
         Configuration conf = udfc.getJobConf();
         FileSystem fs = FileSystem.get(conf);
-        //Path path = new Path(folder);
-        //if (fs.exists(path)) {
-        //  RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(path, true);
-        //  while (i_fs.hasNext()) {
-        //   LocatedFileStatus status = i_fs.next();
-        //    if (status.isFile() && status.getBlockSize() > 0) {
-        //      hasFiles = true;
-        //    }
-        //  }
-        //}
+        Path path = new Path(folder);
+        if (fs.exists(path)) {
+          RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(path, true);
+          while (i_fs.hasNext()) {
+           LocatedFileStatus status = i_fs.next();
+            if (status.isFile() && status.getBlockSize() > 0) {
+              hasFiles = true;
+            }
+          }
+        }
         fs.close();
 
       }
     }
 
-    super.setLocation(location, job);
+    super.setLocation(folder, job);
   }
 
 }
