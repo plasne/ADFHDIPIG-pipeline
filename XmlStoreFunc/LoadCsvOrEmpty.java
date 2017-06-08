@@ -128,14 +128,14 @@ public class LoadCsvOrEmpty extends CSVLoader {
         // parse the JSON (need the root before creating the writer)
         JSONParser parser = new JSONParser();
         JSONObject json = (JSONObject) parser.parse(raw);
-        JSONArray columns = (JSONArray) json.get("columns");
-        if (columns != null) {
-          for (int i = 0; i < columns.size(); i++) {
-            JSONObject column = (JSONObject) columns.get(i);
-            String name = column.get("name").toString();
-            String type = column.get("type").toString();
-            String onWrongType = column.get("onWrongType").toString();
-            columns.add(new Column(name, type, onWrongType));
+        JSONArray cc = (JSONArray) json.get("columns");
+        if (cc != null) {
+          for (int i = 0; i < cc.size(); i++) {
+            JSONObject c = (JSONObject) cc.get(i);
+            String name = c.get("name").toString();
+            String type = c.get("type").toString();
+            String onWrongType = c.get("onWrongType").toString();
+            this.columns.add(new Column(name, type, onWrongType));
           }
         }
 
