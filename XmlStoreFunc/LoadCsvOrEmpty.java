@@ -32,6 +32,7 @@ import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.ResourceSchema;
+import org.apache.pig.ResourceStatistics;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 import org.json.simple.JSONObject;
@@ -107,6 +108,14 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     } else {
       return null;
     }
+  }
+
+  public setPartitionFilter getStatistics(String location, Job job) throws IOException {
+    return null;
+  }
+
+  public String[] getPartitionKeys(String location, Job job) throws IOException {
+    return null;
   }
 
   public void setPartitionFilter(Expression partitionFilter) throws IOException {
