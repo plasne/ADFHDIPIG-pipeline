@@ -32,12 +32,12 @@ public class LoadCsvOrEmpty extends CSVLoader {
 
   @Override
   public void setLocation(String location, Job job) throws IOException {
-    String combiner = location.endsWith("/") ? "" : "/";
-    String folder = location.replace("file:", "") + combiner + target;
 
     // only check the path on the backend
     UDFContext udfc = UDFContext.getUDFContext();
     if (!udfc.isFrontend()) {
+      String combiner = location.endsWith("/") ? "" : "/";
+      String folder = location.replace("file:", "") + combiner + target;
 
       // support local and hadoop
       if (folder.startsWith("./")) {
@@ -63,9 +63,12 @@ public class LoadCsvOrEmpty extends CSVLoader {
         fs.close();
 
       }
-    }
 
-    super.setLocation(folder, job);
+      super.setLocation(folder, job);
+    } else {
+      super.setLocation(location, job);
+    }
+    
   }
 
 }
