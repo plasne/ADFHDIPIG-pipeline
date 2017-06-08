@@ -101,9 +101,9 @@ public class LoadCsvOrEmpty extends CSVLoader {
   public void setLocation(String location, Job job) throws IOException {
 
     // load config on backend
-    /*
     UDFContext udfc = UDFContext.getUDFContext();
     if (!hasConfig && !udfc.isFrontend()) {
+      hasConfig = true;
       try {
         String raw;
         
@@ -144,7 +144,6 @@ public class LoadCsvOrEmpty extends CSVLoader {
         throw new ExecException(ex);
       }
     }
-    */
 
     // support local and hadoop
     String combiner = location.endsWith("/") ? "" : "/";
