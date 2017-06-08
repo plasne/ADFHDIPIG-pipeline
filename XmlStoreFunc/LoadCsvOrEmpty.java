@@ -5,7 +5,7 @@ package input;
 // write out logs
 // support configuration of an empty directory
 
-import java.lang.Integer.parseInt;
+import java.lang.Integer;
 import java.io.IOException;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.fs.Path;
@@ -28,7 +28,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
 
   public LoadCsvOrEmpty(String target, String columns) {
     this.target = target;
-    this.columns = parseInt(columns);
+    this.columns = Integer.parseInt(columns);
   }
 
   @Override
