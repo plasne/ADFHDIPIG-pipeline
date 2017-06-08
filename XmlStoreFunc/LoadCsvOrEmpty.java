@@ -143,7 +143,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         }
       }
     }
-    return new ResourceSchema(new Schema(list));
+    throw new ExecException("schema!!!", 2201, PigException.BUG);
+    //return new ResourceSchema(new Schema(list));
   }
 
   @Override
