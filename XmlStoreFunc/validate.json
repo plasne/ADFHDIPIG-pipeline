@@ -1,0 +1,29 @@
+{
+    "columns": [
+        {
+            "name": "id",
+            "type": "int",
+            "onWrongType": "fail"
+        },
+        {
+            "name": "value",
+            "type": "int",
+            "onWrongType": "skip"
+        },
+        {
+            "name": "cost",
+            "type": "double",
+            "onWrongType": "fail"
+        },
+        {
+            "name": "account",
+            "type": "int",
+            "onWrongType": "fail"
+        },
+        {
+            "name": "routing",
+            "type": "int",
+            "onWrongType": "fail"
+        }
+    ]
+}
