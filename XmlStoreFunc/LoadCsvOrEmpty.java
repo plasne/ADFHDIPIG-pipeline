@@ -109,7 +109,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     }
   }
 
-  public setPartitionField(Expression partitionFilter) throws IOException {
+  public void setPartitionField(Expression partitionFilter) throws IOException {
     // nothing to do
   }
 
