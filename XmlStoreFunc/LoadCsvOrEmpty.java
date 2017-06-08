@@ -122,7 +122,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     // nothing to do
   }
 
-  public ResourceSchema getSchema(String location, Job job) {
+  public ResourceSchema getSchema(String location, Job job) throws IOException {
     ArrayList<FieldSchema> list = new ArrayList<FieldSchema>();
     if (columns != null) {
       for (int i = 0; i < columns.size(); i++) {
