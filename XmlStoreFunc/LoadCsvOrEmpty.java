@@ -62,6 +62,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   String target;
   String config;
   private ArrayList<Column> columns = new ArrayList<Column>();
+  TupleFactory tupleFactory = new TupleFactory();
 
   public LoadCsvOrEmpty(String target, String config) {
     this.target = target;
@@ -80,7 +81,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           throw new ExecException("size " + t.size() + " vs " + size, 2200, PigException.BUG);
         }
 
-        Tuple tx = TupleFactory.newTuple(size);
+        Tuple tx = tupleFactory.newTuple(size);
 
         for (int i = 0; i < size; i++) {
           byte type = t.getType(i);
