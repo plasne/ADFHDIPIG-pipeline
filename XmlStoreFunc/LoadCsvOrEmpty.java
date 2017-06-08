@@ -64,7 +64,6 @@ public class LoadCsvOrEmpty extends CSVLoader {
   public Tuple getNext() throws IOException {
     if (hasFiles) {
       Tuple t = super.getNext();
-      /*
       if (t != null) {
 
         // verify number of columns
@@ -73,6 +72,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
           throw new ExecException("size " + t.size() + " vs " + size, 2200, PigException.BUG);
         }
 
+/*
         for (int i = 0; i < size; i++) {
           byte type = t.getType(i);
           Object value = t.get(i);
@@ -88,9 +88,9 @@ public class LoadCsvOrEmpty extends CSVLoader {
               break;
           }
         }
-
+*/
       }
-      */
+
       return t;
     } else {
       return null;
