@@ -24,11 +24,15 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.pig.piggybank.storage.CSVLoader;
 import org.apache.pig.impl.util.UDFContext;
+import org.apache.pig.LoadMetadata;
 import org.apache.pig.PigException;
 import org.apache.pig.PigWarning;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.backend.executionengine.ExecException;
+import org.apache.pig.ResourceSchema;
+import org.apache.pig.impl.logicalLayer.schema.Schema;
+import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -47,7 +51,7 @@ class Column {
 
 }
 
-public class LoadCsvOrEmpty extends CSVLoader {
+public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
   boolean hasFiles = false;
   boolean hasConfig = false;
@@ -79,7 +83,11 @@ public class LoadCsvOrEmpty extends CSVLoader {
           switch (column.type.toLowerCase()) {
             case "bool":
             case "boolean":
-              if (type != DataType.BOOLEAN) throw new ExecException("expected boolean but saw " + value.toString(), 2201, PigException.BUG);
+              try {
+                boolean v = DataType.toBoolean(value);
+              } catch (Exception ex) {
+                throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+              }
               break;
             case "int":
             case "integer":
@@ -98,6 +106,30 @@ public class LoadCsvOrEmpty extends CSVLoader {
     } else {
       return null;
     }
+  }
+
+  public ResourceSchema getSchema() {
+    ArrayList<FieldSchema> list = new ArrayList<FieldSchema>();
+    if (columns != null) {
+      for (int i = 0; i < columns.size(); i++) {
+        Column column = columns.get(i);
+        switch (column.type.toLowerCase()) {
+          case "bool":
+          case "boolean":
+            list.add(new FieldSchema(column.name, DataType.BOOLEAN));
+            break;
+          case "int":
+          case "integer":
+            list.add(new FieldSchema(column.name, DataType.INTEGER));
+            break;
+          case "number":
+          case "double":
+            list.add(new FieldSchema(column.name, DataType.DOUBLE));
+            break;
+        }
+      }
+    }
+    return new ResourceSchema(new Schema(list));
   }
 
   @Override
