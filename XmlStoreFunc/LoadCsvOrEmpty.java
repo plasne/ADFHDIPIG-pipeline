@@ -34,6 +34,7 @@ import org.apache.pig.data.Tuple;
 import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.ResourceSchema;
 import org.apache.pig.ResourceStatistics;
+import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.logicalLayer.schema.Schema;
 import org.apache.pig.impl.logicalLayer.schema.Schema.FieldSchema;
 import org.json.simple.JSONObject;
@@ -79,6 +80,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           throw new ExecException("size " + t.size() + " vs " + size, 2200, PigException.BUG);
         }
 
+        Tuple tx = TupleFactory.newTuple(size);
+
         for (int i = 0; i < size; i++) {
           byte type = t.getType(i);
           Object value = t.get(i);
@@ -87,7 +90,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
             case "bool":
             case "boolean":
               try {
-                boolean v = DataType.toBoolean(value);
+                tx.set(i, DataType.toBoolean(value));
               } catch (Exception ex) {
                 throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
               }
@@ -95,17 +98,23 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
             case "int":
             case "integer":
               try {
-                int v = DataType.toInteger(value);
+                tx.set(i, DataType.toInteger(value));
               } catch (Exception ex) {
                 throw new ExecException("expected integer but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
               }
               break;
+            case "number":
+            case "double":
+              tx.set(i, DataType.toDouble(value));
+              break;
           }
         }
 
+        return tx;
+      } else {
+        return t;
       }
 
-      return t;
     } else {
       return null;
     }
