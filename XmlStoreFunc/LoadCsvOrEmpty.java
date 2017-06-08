@@ -83,7 +83,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
               break;
             case "int":
             case "integer":
-              if (type != DataType.INTEGER) throw new ExecException("expected integer but saw " + value.toString(), 2201, PigException.BUG);
+              if (type != DataType.INTEGER) throw new ExecException("expected integer but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
               break;
           }
         }
