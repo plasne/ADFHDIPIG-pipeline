@@ -9,6 +9,7 @@ import java.lang.Integer;
 import java.util.Scanner;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
@@ -123,7 +124,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   }
 
   public ResourceSchema getSchema(String location, Job job) throws IOException {
-    ArrayList<FieldSchema> list = new ArrayList<FieldSchema>();
+    List<FieldSchema> list = new ArrayList<FieldSchema>();
     if (columns != null) {
       for (int i = 0; i < columns.size(); i++) {
         Column column = columns.get(i);
