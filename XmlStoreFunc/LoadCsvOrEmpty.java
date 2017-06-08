@@ -27,7 +27,7 @@ public class LoadCsvOrEmpty extends CSVLoader {
 
   public LoadCsvOrEmpty(String target, String columns) {
     this.target = target;
-    this.columns = int.Parse(columns);
+    this.columns = parseInt(columns);
   }
 
   @Override
