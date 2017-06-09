@@ -128,7 +128,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           }
 
         }
-      } while (skipped)
+      } while (skipped);
       return t;
 
     } else {
