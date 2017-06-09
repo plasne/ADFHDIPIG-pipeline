@@ -74,6 +74,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       boolean skipped = false;
       do {
         t = super.getNext();
+        skipped = false;
         if (t != null) {
 
           // verify number of columns
@@ -83,48 +84,50 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           }
 
           for (int i = 0; i < size; i++) {
-            byte type = t.getType(i);
-            Object value = t.get(i);
-            Column column = columns.get(i);
-            switch (column.type.toLowerCase()) {
-              case "bool":
-              case "boolean":
-                try {
-                  t.set(i, DataType.toBoolean(value));
-                } catch (Exception ex) {
-                  if (column.onWrongType.equals("skip")) {
-                    // log skipped
-                    skipped = true;
-                  } else {
-                    throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+            if (!skipped) {
+              byte type = t.getType(i);
+              Object value = t.get(i);
+              Column column = columns.get(i);
+              switch (column.type.toLowerCase()) {
+                case "bool":
+                case "boolean":
+                  try {
+                    t.set(i, DataType.toBoolean(value));
+                  } catch (Exception ex) {
+                    if (column.onWrongType.equals("skip")) {
+                      // log skipped
+                      skipped = true;
+                    } else {
+                      throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                    }
                   }
-                }
-                break;
-              case "int":
-              case "integer":
-                try {
-                  t.set(i, DataType.toInteger(value));
-                } catch (Exception ex) {
-                  if (column.onWrongType.equals("skip")) {
-                    // log skipped
-                    skipped = true;
-                  } else {
-                    throw new ExecException("expected integer but saw " + DataType.findTypeName(type) + " onWrongType: " + column.onWrongType, 2201, PigException.BUG);
+                  break;
+                case "int":
+                case "integer":
+                  try {
+                    t.set(i, DataType.toInteger(value));
+                  } catch (Exception ex) {
+                    if (column.onWrongType.equals("skip")) {
+                      // log skipped
+                      skipped = true;
+                    } else {
+                      throw new ExecException("expected integer but saw " + DataType.findTypeName(type) + " onWrongType: " + column.onWrongType, 2201, PigException.BUG);
+                    }
                   }
-                }
-                break;
-              case "number":
-              case "double":
-                try {
-                  t.set(i, DataType.toDouble(value));
-                } catch (Exception ex) {
-                  if (column.onWrongType.equals("skip")) {
-                    skipped = true;
-                  } else {
-                    throw new ExecException("expected double but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                  break;
+                case "number":
+                case "double":
+                  try {
+                    t.set(i, DataType.toDouble(value));
+                  } catch (Exception ex) {
+                    if (column.onWrongType.equals("skip")) {
+                      skipped = true;
+                    } else {
+                      throw new ExecException("expected double but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                    }
                   }
-                }
-                break;
+                  break;
+              }
             }
           }
 
