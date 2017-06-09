@@ -58,7 +58,6 @@ class Column {
 public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
   boolean hasFiles = false;
-  boolean hasConfig = false;
   String target;
   String config;
   private ArrayList<Column> columns = new ArrayList<Column>();
@@ -129,43 +128,9 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   }
 
   public ResourceSchema getSchema(String location, Job job) throws IOException {
-    List<FieldSchema> list = new ArrayList<FieldSchema>();
-    /*
-    if (columns != null) {
-      for (int i = 0; i < columns.size(); i++) {
-        Column column = columns.get(i);
-        switch (column.type.toLowerCase()) {
-          case "bool":
-          case "boolean":
-            list.add(new FieldSchema(column.name, DataType.BOOLEAN));
-            break;
-          case "int":
-          case "integer":
-            list.add(new FieldSchema(column.name, DataType.INTEGER));
-            break;
-          case "number":
-          case "double":
-            list.add(new FieldSchema(column.name, DataType.DOUBLE));
-            break;
-        }
-      }
-    }
-    */
-    list.add(new FieldSchema("id", DataType.INTEGER));
-    list.add(new FieldSchema("value", DataType.INTEGER));
-    list.add(new FieldSchema("cost", DataType.DOUBLE));
-    list.add(new FieldSchema("account", DataType.INTEGER));
-    list.add(new FieldSchema("routing", DataType.INTEGER));
-    return new ResourceSchema(new Schema(list));
-  }
 
-  @Override
-  public void setLocation(String location, Job job) throws IOException {
-
-    // load config on backend
-    UDFContext udfc = UDFContext.getUDFContext();
-    if (!hasConfig && !udfc.isFrontend()) {
-      hasConfig = true;
+    // read the config
+    if (columns.size() < 1) {
       try {
         String raw;
         
@@ -198,7 +163,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
             String name = c.get("name").toString();
             String type = c.get("type").toString();
             String onWrongType = c.get("onWrongType").toString();
-            this.columns.add(new Column(name, type, onWrongType));
+            columns.add(new Column(name, type, onWrongType));
           }
         }
 
@@ -206,6 +171,32 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         throw new ExecException(ex);
       }
     }
+
+    // build the output
+    List<FieldSchema> list = new ArrayList<FieldSchema>();
+    for (int i = 0; i < columns.size(); i++) {
+      Column column = columns.get(i);
+      switch (column.type.toLowerCase()) {
+        case "bool":
+        case "boolean":
+          list.add(new FieldSchema(column.name, DataType.BOOLEAN));
+          break;
+        case "int":
+        case "integer":
+          list.add(new FieldSchema(column.name, DataType.INTEGER));
+          break;
+        case "number":
+        case "double":
+          list.add(new FieldSchema(column.name, DataType.DOUBLE));
+          break;
+      }
+    }
+    return new ResourceSchema(new Schema(list));
+
+  }
+
+  @Override
+  public void setLocation(String location, Job job) throws IOException {
 
     // support local and hadoop
     String combiner = location.endsWith("/") ? "" : "/";
