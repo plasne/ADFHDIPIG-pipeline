@@ -127,33 +127,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     // nothing to do
   }
 
-  public ResourceSchema getSchema(String location, Job job) throws IOException {
-
-    // build the output
-    List<FieldSchema> list = new ArrayList<FieldSchema>();
-    for (int i = 0; i < columns.size(); i++) {
-      Column column = columns.get(i);
-      switch (column.type.toLowerCase()) {
-        case "bool":
-        case "boolean":
-          list.add(new FieldSchema(column.name, DataType.BOOLEAN));
-          break;
-        case "int":
-        case "integer":
-          list.add(new FieldSchema(column.name, DataType.INTEGER));
-          break;
-        case "number":
-        case "double":
-          list.add(new FieldSchema(column.name, DataType.DOUBLE));
-          break;
-      }
-    }
-    return new ResourceSchema(new Schema(list));
-
-  }
-
-  @Override
-  public void setLocation(String location, Job job) throws IOException {
+  private void readConfig() {
 
     // read the config
     if (columns.size() < 1) {
@@ -197,6 +171,42 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         throw new ExecException(ex);
       }
     }
+
+  }
+
+  public ResourceSchema getSchema(String location, Job job) throws IOException {
+
+    // read the config
+    readConfig();
+
+    // build the output
+    List<FieldSchema> list = new ArrayList<FieldSchema>();
+    for (int i = 0; i < columns.size(); i++) {
+      Column column = columns.get(i);
+      switch (column.type.toLowerCase()) {
+        case "bool":
+        case "boolean":
+          list.add(new FieldSchema(column.name, DataType.BOOLEAN));
+          break;
+        case "int":
+        case "integer":
+          list.add(new FieldSchema(column.name, DataType.INTEGER));
+          break;
+        case "number":
+        case "double":
+          list.add(new FieldSchema(column.name, DataType.DOUBLE));
+          break;
+      }
+    }
+    return new ResourceSchema(new Schema(list));
+
+  }
+
+  @Override
+  public void setLocation(String location, Job job) throws IOException {
+
+    // read the config
+    readConfig();
 
     // support local and hadoop
     String combiner = location.endsWith("/") ? "" : "/";
