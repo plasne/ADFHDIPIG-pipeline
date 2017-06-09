@@ -206,7 +206,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       }
 
       // open the log file
-      if (log != null) {
+      if (log == null) {
         String combiner = location.endsWith("/") ? "" : "/";
         String folder = location.replace("file:", "") + combiner + "input.log";
 
@@ -215,7 +215,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         FileSystem hdfs = FileSystem.get(path.toUri(), conf);
         if (hdfs.exists(path)) hdfs.delete(path, true); 
         OutputStream os = hdfs.create(path);
-        log = new BufferedWriter( new OutputStreamWriter( os, "UTF-8" ) );
+        log = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
         hdfs.close();
         
       }
