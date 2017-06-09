@@ -127,7 +127,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     // nothing to do
   }
 
-  private void readConfig() {
+  private void readConfig(Job job) {
 
     // read the config
     if (columns.size() < 1) {
@@ -177,7 +177,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   public ResourceSchema getSchema(String location, Job job) throws IOException {
 
     // read the config
-    readConfig();
+    readConfig(job);
 
     // build the output
     List<FieldSchema> list = new ArrayList<FieldSchema>();
@@ -206,7 +206,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   public void setLocation(String location, Job job) throws IOException {
 
     // read the config
-    readConfig();
+    readConfig(job);
 
     // support local and hadoop
     String combiner = location.endsWith("/") ? "" : "/";
