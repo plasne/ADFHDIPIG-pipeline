@@ -70,9 +70,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   @Override
   public Tuple getNext() throws IOException {
     if (hasFiles) {
+      Tuple t;
       boolean skipped = false;
       do {
-        Tuple t = super.getNext();
+        t = super.getNext();
         if (t != null) {
 
           // verify number of columns
