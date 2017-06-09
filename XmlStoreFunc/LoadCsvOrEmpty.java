@@ -127,7 +127,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     // nothing to do
   }
 
-  private void readConfig(Job job) {
+  private void readConfig(Job job) throws IOException {
 
     // read the config
     if (columns.size() < 1) {
