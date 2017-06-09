@@ -214,7 +214,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         Path path = new Path(folder);
         FileSystem hdfs = FileSystem.get(path.toUri(), conf);
         if (hdfs.exists(path)) hdfs.delete(path, true); 
-        log.write("skip\n"); os = hdfs.create(file);
+        OutputStream os = hdfs.create(file);
         log = new BufferedWriter( new OutputStreamWriter( os, "UTF-8" ) );
         hdfs.close();
         
