@@ -89,7 +89,11 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
               try {
                 t.set(i, DataType.toBoolean(value));
               } catch (Exception ex) {
-                throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                if (column.onWrongType == "skip") {
+                  // log skipped
+                } else {
+                  throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                }
               }
               break;
             case "int":
@@ -97,12 +101,24 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
               try {
                 t.set(i, DataType.toInteger(value));
               } catch (Exception ex) {
-                throw new ExecException("expected integer but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                if (column.onWrongType == "skip") {
+                  // log skipped
+                } else {
+                  throw new ExecException("expected integer but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                }
               }
               break;
             case "number":
             case "double":
-              t.set(i, DataType.toDouble(value));
+              try {
+                t.set(i, DataType.toDouble(value));
+              } catch (Exception ex) {
+                if (column.onWrongType == "skip") {
+                  // log skipped
+                } else {
+                  throw new ExecException("expected double but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                }
+              }
               break;
           }
         }
@@ -162,7 +178,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
             JSONObject c = (JSONObject) cc.get(i);
             String name = c.get("name").toString();
             String type = c.get("type").toString();
-            String onWrongType = c.get("onWrongType").toString();
+            String onWrongType = (c.get("onWrongType") != null) ? c.get("onWrongType").toString() : "fail";
             columns.add(new Column(name, type, onWrongType));
           }
         }
