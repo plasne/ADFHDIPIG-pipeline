@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -211,8 +213,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         Configuration conf = new Configuration();
         Path path = new Path(folder);
         FileSystem hdfs = FileSystem.get(path.toUri(), conf);
-        if ( hdfs.exists( file )) { hdfs.delete( file, true ); } 
-        OutputStream os = hdfs.create(file);
+        if (hdfs.exists(path)) hdfs.delete(path, true); 
+        log.write("skip\n"); os = hdfs.create(file);
         log = new BufferedWriter( new OutputStreamWriter( os, "UTF-8" ) );
         hdfs.close();
         
