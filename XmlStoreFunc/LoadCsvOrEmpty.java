@@ -89,7 +89,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
               try {
                 t.set(i, DataType.toBoolean(value));
               } catch (Exception ex) {
-                if (column.onWrongType == "skip") {
+                if (column.onWrongType.equals("skip")) {
                   // log skipped
                 } else {
                   throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
@@ -101,10 +101,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
               try {
                 t.set(i, DataType.toInteger(value));
               } catch (Exception ex) {
-                if (column.onWrongType == "skip") {
+                if (column.onWrongType.equals("skip")) {
                   // log skipped
                 } else {
-                  throw new ExecException("expected integer but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                  throw new ExecException("expected integer but saw " + DataType.findTypeName(type) + " onWrongType: " + column.onWrongType, 2201, PigException.BUG);
                 }
               }
               break;
@@ -113,7 +113,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
               try {
                 t.set(i, DataType.toDouble(value));
               } catch (Exception ex) {
-                if (column.onWrongType == "skip") {
+                if (column.onWrongType.equals("skip")) {
                   // log skipped
                 } else {
                   throw new ExecException("expected double but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
