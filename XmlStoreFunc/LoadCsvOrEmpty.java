@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -61,6 +62,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   String target;
   String config;
   private ArrayList<Column> columns = new ArrayList<Column>();
+  BufferedWriter log;
 
   public LoadCsvOrEmpty(String target, String config) {
     this.target = target;
@@ -73,6 +75,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       Tuple t;
       boolean skipped = false;
       do {
+        log.write("read\n");
         t = super.getNext();
         skipped = false;
         if (t != null) {
@@ -95,7 +98,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     t.set(i, DataType.toBoolean(value));
                   } catch (Exception ex) {
                     if (column.onWrongType.equals("skip")) {
-                      // log skipped
+                      log.write("skip\n");
                       skipped = true;
                     } else {
                       throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
@@ -108,7 +111,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     t.set(i, DataType.toInteger(value));
                   } catch (Exception ex) {
                     if (column.onWrongType.equals("skip")) {
-                      // log skipped
+                      log.write("skip\n");
                       skipped = true;
                     } else {
                       throw new ExecException("expected integer but saw " + DataType.findTypeName(type) + " onWrongType: " + column.onWrongType, 2201, PigException.BUG);
@@ -121,6 +124,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     t.set(i, DataType.toDouble(value));
                   } catch (Exception ex) {
                     if (column.onWrongType.equals("skip")) {
+                      log.write("skip\n");
                       skipped = true;
                     } else {
                       throw new ExecException("expected double but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
@@ -133,6 +137,9 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
         }
       } while (skipped);
+      if (t == null) {
+        log.write("close file\n");
+      }
       return t;
 
     } else {
@@ -152,10 +159,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     // nothing to do
   }
 
-  private void readConfig(Job job) throws IOException {
-
-    // read the config
+  private void readConfig(String location, Job job) throws IOException {
     if (columns.size() < 1) {
+
+      // read the configuration
       try {
         String raw;
         
@@ -195,14 +202,29 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       } catch (Exception ex) {
         throw new ExecException(ex);
       }
-    }
 
+      // open the log file
+      if (log != null) {
+        String combiner = location.endsWith("/") ? "" : "/";
+        String folder = location.replace("file:", "") + combiner + "input.log";
+
+        Configuration conf = new Configuration();
+        Path path = new Path(folder);
+        FileSystem hdfs = FileSystem.get(path.toUri(), conf);
+        if ( hdfs.exists( file )) { hdfs.delete( file, true ); } 
+        OutputStream os = hdfs.create(file);
+        log = new BufferedWriter( new OutputStreamWriter( os, "UTF-8" ) );
+        hdfs.close();
+        
+      }
+
+    }
   }
 
   public ResourceSchema getSchema(String location, Job job) throws IOException {
 
     // read the config
-    readConfig(job);
+    readConfig(location, job);
 
     // build the output
     List<FieldSchema> list = new ArrayList<FieldSchema>();
@@ -231,7 +253,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   public void setLocation(String location, Job job) throws IOException {
 
     // read the config
-    readConfig(job);
+    readConfig(location, job);
 
     // support local and hadoop
     String combiner = location.endsWith("/") ? "" : "/";
