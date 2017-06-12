@@ -1,4 +1,5 @@
 {
+    "root": "root",
     "entry": "data",
     "processors": [
         {
@@ -8,18 +9,18 @@
             "children": [ "Scale_Quantity", "Scale_Value" ]
         }
     ],
-    "pre-disabled": [
+    "pre": [
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
         "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">",
         "<soap:Body>",
         "<putCUSTOMER xmlns=\"http://interfaces.ppss.prosrm.com/xsd\">"
     ],
-    "post-disabled": [
+    "post": [
         "</putCUSTOMER>",
         "</soap:Body>",
         "</soap:Envelope>"
     ],
-    "onclose-disabled": [
+    "onclose": [
         "curl -X POST -d @{file} http://pelasne-web.eastus2.cloudapp.azure.com"
     ]
 }
