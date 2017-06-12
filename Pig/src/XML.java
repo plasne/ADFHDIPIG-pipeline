@@ -353,7 +353,7 @@ public class XML extends StoreFunc {
             JSONObject proc = (JSONObject) procarray.get(i);
             java.lang.String column = proc.get("column").toString();
             java.lang.String type = proc.get("type").toString();
-            java.lang.String node = proc.get("node").toString();
+            java.lang.String node = (proc.get("node") != null) ? proc.get("node").toString() : column;
             JSONArray children = (JSONArray) proc.get("children");
             processors.add(new Processor(column, type, node, children));
           }
