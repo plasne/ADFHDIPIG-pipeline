@@ -1,5 +1,5 @@
-REGISTER output.jar;
-REGISTER json-simple-1.1.jar;
+REGISTER lib/output.jar;
+REGISTER lib/json-simple-1.1.jar;
 REGISTER /usr/hdp/2.5.4.0-121/pig/piggybank.jar;
 DEFINE CSVLoader org.apache.pig.piggybank.storage.CSVLoader();
 
