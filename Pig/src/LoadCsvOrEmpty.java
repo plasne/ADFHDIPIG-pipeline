@@ -87,7 +87,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
           PigLogger pigLogger = PhysicalOperator.getPigLogger();
           if (pigLogger != null) {
-            pigLogger.warn("custom error: " + t.size());
+            pigLogger.warn(null, "custom error: " + t.size(), PigWarning.UDF_WARNING_1);
           }
 
           // verify number of columns
