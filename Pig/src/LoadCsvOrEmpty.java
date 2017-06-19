@@ -362,7 +362,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         String level = "INFO";
         cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message, level)));
       } catch (Exception ex) {
-        throw new ExecException("could not create log: " + ex.getMessage(), 2202, PigException.BUG);
+        throw new ExecException(ex, 2202, PigException.BUG);
       }
     }
 
