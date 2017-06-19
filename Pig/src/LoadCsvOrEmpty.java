@@ -50,7 +50,7 @@ import com.microsoft.windowsazure.services.table.client.CloudTable;
 import com.microsoft.windowsazure.services.table.client.TableOperation;
 import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
 
-class LogEntity extends TableServiceEntity {
+public class LogEntity extends TableServiceEntity {
   private String message;
   private String level;
   private String deploymentId;
