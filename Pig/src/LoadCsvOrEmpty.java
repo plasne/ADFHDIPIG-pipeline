@@ -142,7 +142,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       Tuple t;
       boolean skipped = false;
       do {
-        log.write("read\n");
         t = super.getNext();
         skipped = false;
         if (t != null) {
@@ -165,7 +164,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     t.set(i, DataType.toBoolean(value));
                   } catch (Exception ex) {
                     if (column.onWrongType.equals("skip")) {
-                      log.write("skip\n");
                       skipped = true;
                     } else {
                       throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
@@ -178,7 +176,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     t.set(i, DataType.toInteger(value));
                   } catch (Exception ex) {
                     if (column.onWrongType.equals("skip")) {
-                      log.write("skip\n");
                       skipped = true;
                     } else {
                       throw new ExecException("expected integer but saw " + DataType.findTypeName(type) + " onWrongType: " + column.onWrongType, 2201, PigException.BUG);
@@ -191,7 +188,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     t.set(i, DataType.toDouble(value));
                   } catch (Exception ex) {
                     if (column.onWrongType.equals("skip")) {
-                      log.write("skip\n");
                       skipped = true;
                     } else {
                       throw new ExecException("expected double but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
@@ -205,7 +201,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         }
       } while (skipped);
       if (t == null) {
-        log.write("close file\n");
+        //log.write("close file\n");
       }
       return t;
 
