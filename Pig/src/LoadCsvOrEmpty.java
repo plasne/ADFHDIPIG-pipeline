@@ -251,7 +251,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         // parse the JSON (need the root before creating the writer)
         JSONParser parser = new JSONParser();
         JSONObject json = (JSONObject) parser.parse(raw);
-        JSONObject logging = json.get("logging");
+        JSONObject logging = (JSONObject) json.get("logging");
         if (logging != null) {
           logging_storageAccount = logging.get("storageAccount").toString();
           logging_accountKey = logging.get("accountKey").toString();
@@ -358,7 +358,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       String partitionKey = "1";
       String rowKey = "1";
       String message = "message goes here";
-      cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message)));
+      String level = "INFO";
+      cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message, info)));
     }
 
     // return either the specified location or the empty location
