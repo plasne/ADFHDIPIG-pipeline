@@ -1,6 +1,5 @@
 # Building a data pipeline using Azure Data Factory
 
-* THE LOG4J DETAILS NEED TO BE PUT BELOW
 * DOCUMENT THE REQD FILES SCENARIO
 * MAKE SURE ALL LINKS WORK
 * LOG4J SHOULD BE EXTENDED TO INCLUDE A TRANSACTION # (customer-date-time)
@@ -199,7 +198,7 @@ There are a number of technologies in play that all have their own logging (YARN
 
 The solution was to implement a central store for all logs using log4j (which is supported by all the desired platforms). Each platform has a log4j.properties file while contains details about the configuration, including where those logs are stored.
 
-There are a few sample projects on GitHub that implement log4j appenders that can store to Azure Storage. We used XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+There are a few sample projects on GitHub that implement log4j appenders that can store to Azure Storage. I used https://github.com/JMayrbaeurl/azure-log4j. It also needs the 0.4.4 version of the Azure SDK for Java, the JAR for which can be found here: https://mvnrepository.com/artifact/com.microsoft.windowsazure/microsoft-windowsazure-api/0.4.4.
 
 Of course, the above libraries and all the configuration changes need to be pushed across all servers, so a Script Action was needed. I wrote [deploy.sh](Pig/logging/deploy.sh) for this purpose.
 
