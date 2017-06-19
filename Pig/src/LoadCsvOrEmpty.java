@@ -50,7 +50,10 @@ import com.microsoft.windowsazure.services.table.client.CloudTable;
 import com.microsoft.windowsazure.services.table.client.TableOperation;
 import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
 
-public class LogEntity extends TableServiceEntity {
+import com.microsoft.windowsazure.log4j.LogEntity;
+
+/*
+class LogEntity extends TableServiceEntity {
   private String message;
   private String level;
   private String deploymentId;
@@ -80,7 +83,6 @@ public class LogEntity extends TableServiceEntity {
     this.level = level;
   }
 
-/*
   public final String getDeploymentId() {
 		return deploymentId;
 	}
@@ -96,9 +98,9 @@ public class LogEntity extends TableServiceEntity {
 	public final void setRoleInstanceId(String roleInstanceId) {
 		this.roleInstanceId = roleInstanceId;
 	}
-*/
 
 }
+*/
 
 class Column {
   public String name;
@@ -304,12 +306,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 		
 		LogEntity result = new LogEntity(partitionKey, rowKey, message, level);
 		
-    /*
 		if (RoleEnvironment.isAvailable()) {
 			result.setDeploymentId(RoleEnvironment.getDeploymentId());
 			result.setRoleInstanceId(RoleEnvironment.getCurrentRoleInstance().getId());
 		}
-    */
 		
 		return result;
 	}
