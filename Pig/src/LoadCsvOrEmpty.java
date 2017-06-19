@@ -307,9 +307,9 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     return s == null || s.trim().isEmpty();
   }
 
-	private LogEntity createLogEntity(final String partitionKey, final String rowKey, final String message) {
+	private LogEntity createLogEntity(final String partitionKey, final String rowKey, final String message, final String level) {
 		
-		LogEntity result = new LogEntity(partitionKey, rowKey, message);
+		LogEntity result = new LogEntity(partitionKey, rowKey, message, level);
 		
 		if (RoleEnvironment.isAvailable()) {
 			result.setDeploymentId(RoleEnvironment.getDeploymentId());
@@ -359,7 +359,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       String rowKey = "1";
       String message = "message goes here";
       String level = "INFO";
-      cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message, info)));
+      cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message, level)));
     }
 
     // return either the specified location or the empty location
