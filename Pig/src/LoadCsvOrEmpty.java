@@ -45,6 +45,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import org.apache.pig.backend.hadoop.executionengine.physicalLayer.PhysicalOperator;
+import org.apache.pig.backend.hadoop.executionengine.physicalLayer.PigLogger;
+
 class Column {
   public String name;
   public String type;
@@ -81,6 +84,11 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         t = super.getNext();
         skipped = false;
         if (t != null) {
+
+          PigLogger pigLogger = PhysicalOperator.getPigLogger();
+          if (pigLogger != null) {
+            pigLogger.warn("custom error: " + t.size());
+          }
 
           // verify number of columns
           int size = columns.size();
