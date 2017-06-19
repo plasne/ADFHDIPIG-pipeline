@@ -1,4 +1,9 @@
 {
+    "logging": {
+        "storageAccount": "pelasnepigstore",
+        "tableName": "LoadLogs",
+        "accountKey": "????"
+    },
     "columns": [
         {
             "name": "id",

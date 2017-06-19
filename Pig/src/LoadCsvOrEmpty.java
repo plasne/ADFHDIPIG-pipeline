@@ -12,9 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
-import java.io.BufferedWriter;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -45,8 +42,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import org.apache.pig.backend.hadoop.executionengine.physicalLayer.PhysicalOperator;
-import org.apache.pig.backend.hadoop.executionengine.physicalLayer.PigLogger;
+import com.microsoft.windowsazure.serviceruntime.RoleEnvironment;
+import com.microsoft.windowsazure.services.core.storage.CloudStorageAccount;
+import com.microsoft.windowsazure.services.core.storage.StorageCredentialsAccountAndKey;
+import com.microsoft.windowsazure.services.core.storage.StorageException;
+import com.microsoft.windowsazure.services.table.client.CloudTable;
+import com.microsoft.windowsazure.services.table.client.TableOperation;
 
 class Column {
   public String name;
@@ -63,11 +64,14 @@ class Column {
 
 public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
-  boolean hasFiles = false;
-  String target;
-  String config;
+  private boolean hasFiles = false;
+  private String target;
+  private String config;
   private ArrayList<Column> columns = new ArrayList<Column>();
-  BufferedWriter log;
+  private String logging_storageAccount;
+  private String logging_accountKey;
+  private String logging_tableName;
+  private CloudTable cloudTable;
 
   public LoadCsvOrEmpty(String target, String config) {
     this.target = target;
@@ -84,11 +88,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         t = super.getNext();
         skipped = false;
         if (t != null) {
-
-          PigLogger pigLogger = PhysicalOperator.getPigLogger();
-          if (pigLogger != null) {
-            pigLogger.warn(null, "custom error: " + t.size(), PigWarning.UDF_WARNING_1);
-          }
 
           // verify number of columns
           int size = columns.size();
@@ -198,6 +197,12 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         // parse the JSON (need the root before creating the writer)
         JSONParser parser = new JSONParser();
         JSONObject json = (JSONObject) parser.parse(raw);
+        JSONObject logging = json.get("logging");
+        if (logging != null) {
+          logging_storageAccount = logging.get("storageAccount").toString();
+          logging_accountKey = logging.get("accountKey").toString();
+          logging_tableName = logging.get("tableName").toString();
+        }
         JSONArray cc = (JSONArray) json.get("columns");
         if (cc != null) {
           for (int i = 0; i < cc.size(); i++) {
@@ -211,21 +216,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
       } catch (Exception ex) {
         throw new ExecException(ex);
-      }
-
-      // open the log file
-      if (log == null) {
-        String combiner = location.endsWith("/") ? "" : "/";
-        String folder = location.replace("file:", "") + combiner + "input.log";
-
-        Configuration conf = new Configuration();
-        Path path = new Path(folder);
-        FileSystem hdfs = FileSystem.get(path.toUri(), conf);
-        if (hdfs.exists(path)) hdfs.delete(path, true); 
-        OutputStream os = hdfs.create(path);
-        log = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-        hdfs.close();
-        
       }
 
     }
@@ -259,6 +249,22 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
   }
 
+  private static boolean empty(final String s) {
+    return s == null || s.trim().isEmpty();
+  }
+
+	private LogEntity createLogEntity(final String partitionKey, final String rowKey, final String message) {
+		
+		LogEntity result = new LogEntity(partitionKey, rowKey, message);
+		
+		if (RoleEnvironment.isAvailable()) {
+			result.setDeploymentId(RoleEnvironment.getDeploymentId());
+			result.setRoleInstanceId(RoleEnvironment.getCurrentRoleInstance().getId());
+		}
+		
+		return result;
+	}
+
   @Override
   public void setLocation(String location, Job job) throws IOException {
 
@@ -290,6 +296,15 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       }
       fs.close();
 
+    }
+
+    // start logging
+    if (cloudTable == null && !empty(logging_storageAccount) && !empty(logging_accountKey) && !empty(logging_tableName)) {
+      CloudStorageAccount account = new CloudStorageAccount(new StorageCredentialsAccountAndKey(logging_storageAccount, logging_accountKey), true);
+      String partitionKey = "1";
+      String rowKey = "1";
+      String message = "message goes here";
+      cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message)));
     }
 
     // return either the specified location or the empty location
