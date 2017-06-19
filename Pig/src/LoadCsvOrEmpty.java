@@ -80,30 +80,23 @@ class LogEntity extends TableServiceEntity {
     this.level = level;
   }
 
-public final String getDeploymentId() {
+/*
+  public final String getDeploymentId() {
 		return deploymentId;
 	}
 
-	/**
-	 * @param deploymentId the deploymentId to set
-	 */
 	public final void setDeploymentId(String deploymentId) {
 		this.deploymentId = deploymentId;
 	}
 
-	/**
-	 * @return the roleInstanceId
-	 */
 	public final String getRoleInstanceId() {
 		return roleInstanceId;
 	}
 
-	/**
-	 * @param roleInstanceId the roleInstanceId to set
-	 */
 	public final void setRoleInstanceId(String roleInstanceId) {
 		this.roleInstanceId = roleInstanceId;
 	}
+*/
 
 }
 
@@ -311,10 +304,12 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 		
 		LogEntity result = new LogEntity(partitionKey, rowKey, message, level);
 		
+    /*
 		if (RoleEnvironment.isAvailable()) {
 			result.setDeploymentId(RoleEnvironment.getDeploymentId());
 			result.setRoleInstanceId(RoleEnvironment.getCurrentRoleInstance().getId());
 		}
+    */
 		
 		return result;
 	}
