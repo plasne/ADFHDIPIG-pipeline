@@ -354,12 +354,16 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
     // start logging
     if (cloudTable == null && !empty(logging_storageAccount) && !empty(logging_accountKey) && !empty(logging_tableName)) {
-      CloudStorageAccount account = new CloudStorageAccount(new StorageCredentialsAccountAndKey(logging_storageAccount, logging_accountKey), true);
-      String partitionKey = "1";
-      String rowKey = "1";
-      String message = "message goes here";
-      String level = "INFO";
-      cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message, level)));
+      try {
+        CloudStorageAccount account = new CloudStorageAccount(new StorageCredentialsAccountAndKey(logging_storageAccount, logging_accountKey), true);
+        String partitionKey = "1";
+        String rowKey = "1";
+        String message = "message goes here";
+        String level = "INFO";
+        cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message, level)));
+      } catch (Exception ex) {
+        throw new ExecException("could not create log: " + ex.getMessage(), 2202, PigException.BUG);
+      }
     }
 
     // return either the specified location or the empty location
