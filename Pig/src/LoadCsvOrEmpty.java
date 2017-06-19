@@ -360,6 +360,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         String rowKey = "1";
         String message = "message goes here";
         String level = "INFO";
+        cloudTable = account.createCloudTableClient().getTableReference(logging_tableName);
+				cloudTable.createIfNotExist();
         cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message, level)));
       } catch (Exception ex) {
         throw new ExecException(ex);
