@@ -48,6 +48,64 @@ import com.microsoft.windowsazure.services.core.storage.StorageCredentialsAccoun
 import com.microsoft.windowsazure.services.core.storage.StorageException;
 import com.microsoft.windowsazure.services.table.client.CloudTable;
 import com.microsoft.windowsazure.services.table.client.TableOperation;
+import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
+
+class LogEntity extends TableServiceEntity {
+  private String message;
+  private String level;
+  private String deploymentId;
+  private String roleInstanceId;
+
+  public LogEntity(final String partitionKey, final String rowKey, final String message, final String level) {
+    super();
+    this.partitionKey = partitionKey;
+    this.rowKey = rowKey;
+    this.message = message;
+    this.level = level;
+  }
+
+  public final String getMessage() {
+    return message;
+  }
+
+  public final void setMessage(String message) {
+    this.message = message;
+  }
+
+  public final String getLevel() {
+    return level;
+  }
+
+  public final void setLevel(String level) {
+    this.level = level;
+  }
+
+public final String getDeploymentId() {
+		return deploymentId;
+	}
+
+	/**
+	 * @param deploymentId the deploymentId to set
+	 */
+	public final void setDeploymentId(String deploymentId) {
+		this.deploymentId = deploymentId;
+	}
+
+	/**
+	 * @return the roleInstanceId
+	 */
+	public final String getRoleInstanceId() {
+		return roleInstanceId;
+	}
+
+	/**
+	 * @param roleInstanceId the roleInstanceId to set
+	 */
+	public final void setRoleInstanceId(String roleInstanceId) {
+		this.roleInstanceId = roleInstanceId;
+	}
+
+}
 
 class Column {
   public String name;
