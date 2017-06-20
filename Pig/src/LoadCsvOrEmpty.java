@@ -257,12 +257,16 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     return s == null || s.trim().isEmpty();
   }
 
-	private void log(final String level, final String message) {
-    String partitionKey = instanceId;
-    String rowKey = Integer.toString(instanceIndex);
-    LogEntity entity = new LogEntity(partitionKey, rowKey, message, level);
-    cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
-    instanceIndex++;
+	private void log(final String level, final String message) throws IOException {
+    try {
+      String partitionKey = instanceId;
+      String rowKey = Integer.toString(instanceIndex);
+      LogEntity entity = new LogEntity(partitionKey, rowKey, message, level);
+      cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
+      instanceIndex++;
+    } catch (Exception ex) {
+      throw new ExecException(ex); // wrap the exception
+    }
 	}
 
   @Override
@@ -318,7 +322,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         TableQuery<LogEntity> query = TableQuery.from(logging_tableName, LogEntity.class).where("(PartitionKey eq '" + instanceId + "')");
 
         // Loop through the results, displaying information about the entity.
-        String last;
+        String last = "(none)";
         for (LogEntity entity : cloudTable.getServiceClient().execute(query)) {
         //for (LogEntity entity : cloudTable.execute(partitionQuery)) {
           last = entity.getRowKey();
