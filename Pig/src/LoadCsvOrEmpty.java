@@ -1,12 +1,5 @@
 package input;
 
-// support local filesystem
-
-
-// support skipping based on wrong number of columns
-// support string columns
-// support configuration of an empty directory
-
 import java.lang.Integer;
 import java.util.Scanner;
 import java.util.Map;
@@ -86,6 +79,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   private CloudTable cloudTable;
   private String filename;
   private int rowIndex;
+  private int totalSkipped;
 
   public LoadCsvOrEmpty(String instanceId, String target, String empty, String config) {
     this.instanceId = instanceId;
@@ -111,6 +105,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
             String size_mismatch = "[" + filename + ", line:" + rowIndex + "]: expected " + size + " columns, but found " + t.size() + ".";
             if (onWrongColumnCount.equals("skip")) {
               log("SKIP", size_mismatch);
+              totalSkipped++;
               skipped = true;
             } else {
               log("FAIL", size_mismatch);
@@ -133,6 +128,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a boolean was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
                       log("SKIP", typecast_fail);
+                      totalSkipped++;
                       skipped = true;
                     } else {
                       log("FAIL", typecast_fail);
@@ -148,6 +144,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: an integer was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
                       log("SKIP", typecast_fail);
+                      totalSkipped++;
                       skipped = true;
                     } else {
                       log("FAIL", typecast_fail);
@@ -163,6 +160,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a double was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
                       log("SKIP", typecast_fail);
+                      totalSkipped++;
                       skipped = true;
                     } else {
                       log("FAIL", typecast_fail);
@@ -178,6 +176,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a string was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
                       log("SKIP", typecast_fail);
+                      totalSkipped++;
                       skipped = true;
                     } else {
                       log("FAIL", typecast_fail);
@@ -192,7 +191,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         }
       } while (skipped);
       if (t == null) {
-        log("INFO", "Completed reading from file: " + filename + ".");
+        log("INFO", "Completed reading from file: " + filename + "; " + (rowIndex - 1) + " row(s) read; " + totalSkipped + " row(s) skipped.");
       }
       return t;
 
@@ -208,6 +207,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     if (hasFiles && !new_filename.equals(filename)) {
       filename = new_filename;
       rowIndex = 0;
+      totalSkipped = 0;
       log("INFO", "Started reading from file: " + filename + ".");
     }
   }
@@ -340,7 +340,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     if (target_folder.startsWith("./")) {
 
       // read from the local file system
-      //raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
+      raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
 
     } else {
 

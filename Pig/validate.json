@@ -2,7 +2,7 @@
     "logging": {
         "storageAccount": "pelasnepigstore",
         "tableName": "LoadLogs",
-        "accountKey": "UU8KF04sceNhQqXIGqNk94+HnyT+1De5VySjLu4tqgp5uw8RZbuPNBAf6TKa577GeWB0nZ0mWcCCfBPWCdyadA=="
+        "accountKey": "????"
     },
     "onWrongColumnCount": "skip",
     "columns": [
@@ -13,7 +13,7 @@
         },
         {
             "name": "value",
-            "type": "string",
+            "type": "int",
             "onWrongType": "skip"
         },
         {
