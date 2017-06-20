@@ -387,15 +387,15 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
     // return either the specified location, the original location, or the empty location
     if (hasFiles) {
-      log("INFO", combiner + target + " found to contain file(s).");
+      log("INFO", target_combiner + target + " found to contain file(s).");
       super.setLocation(target_folder, job);
     } else if (empty(empty)) {
-      log("INFO", combiner + target + " does not exist or is empty; using " + location + ".");
+      log("INFO", target_combiner + target + " does not exist or is empty; using " + location + ".");
       super.setLocation(location, job);
     } else {
       String empty_combiner = location.endsWith("/") || empty.startsWith("/") ? "" : "/";
       String empty_folder = location.replace("file:", "") + empty_combiner + empty;
-      log("INFO", combiner + target + " does not exist or is empty; using " + empty_combiner + empty + ".");
+      log("INFO", target_combiner + target + " does not exist or is empty; using " + empty_combiner + empty + ".");
       super.setLocation(empty_folder, job);
     }
 
