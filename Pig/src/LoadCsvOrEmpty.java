@@ -49,7 +49,7 @@ import com.microsoft.windowsazure.services.table.client.CloudTable;
 import com.microsoft.windowsazure.services.table.client.TableOperation;
 import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
 import com.microsoft.windowsazure.services.table.client.TableQuery;
-import com.microsoft.windowsazure.services.table.client.QueryComparisons;
+import com.microsoft.windowsazure.services.table.client.TableQuery.QueryComparisons;
 import com.microsoft.windowsazure.log4j.LogEntity;
 
 class Column {
