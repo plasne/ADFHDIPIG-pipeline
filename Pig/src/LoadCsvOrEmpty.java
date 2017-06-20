@@ -41,7 +41,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 import com.microsoft.windowsazure.serviceruntime.RoleEnvironment;
 import com.microsoft.windowsazure.services.core.storage.CloudStorageAccount;
 import com.microsoft.windowsazure.services.core.storage.StorageCredentialsAccountAndKey;
@@ -49,58 +48,7 @@ import com.microsoft.windowsazure.services.core.storage.StorageException;
 import com.microsoft.windowsazure.services.table.client.CloudTable;
 import com.microsoft.windowsazure.services.table.client.TableOperation;
 import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
-
 import com.microsoft.windowsazure.log4j.LogEntity;
-
-/*
-class LogEntity extends TableServiceEntity {
-  private String message;
-  private String level;
-  private String deploymentId;
-  private String roleInstanceId;
-
-  public LogEntity(final String partitionKey, final String rowKey, final String message, final String level) {
-    super();
-    this.partitionKey = partitionKey;
-    this.rowKey = rowKey;
-    this.message = message;
-    this.level = level;
-  }
-
-  public final String getMessage() {
-    return message;
-  }
-
-  public final void setMessage(String message) {
-    this.message = message;
-  }
-
-  public final String getLevel() {
-    return level;
-  }
-
-  public final void setLevel(String level) {
-    this.level = level;
-  }
-
-  public final String getDeploymentId() {
-		return deploymentId;
-	}
-
-	public final void setDeploymentId(String deploymentId) {
-		this.deploymentId = deploymentId;
-	}
-
-	public final String getRoleInstanceId() {
-		return roleInstanceId;
-	}
-
-	public final void setRoleInstanceId(String roleInstanceId) {
-		this.roleInstanceId = roleInstanceId;
-	}
-
-}
-*/
 
 class Column {
   public String name;
@@ -118,6 +66,8 @@ class Column {
 public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
   private boolean hasFiles = false;
+  private String instanceId;
+  private int instanceIndex;
   private String target;
   private String config;
   private ArrayList<Column> columns = new ArrayList<Column>();
@@ -126,7 +76,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   private String logging_tableName;
   private CloudTable cloudTable;
 
-  public LoadCsvOrEmpty(String target, String config) {
+  public LoadCsvOrEmpty(String instanceId, String target, String config) {
+    this.instanceId = instanceId;
     this.target = target;
     this.config = config;
   }
@@ -306,10 +257,12 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 		
 		LogEntity result = new LogEntity(partitionKey, rowKey, message, level);
 		
+    /*
 		if (RoleEnvironment.isAvailable()) {
 			result.setDeploymentId(RoleEnvironment.getDeploymentId());
 			result.setRoleInstanceId(RoleEnvironment.getCurrentRoleInstance().getId());
 		}
+    */
 		
 		return result;
 	}
@@ -351,9 +304,9 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     if (cloudTable == null && !empty(logging_storageAccount) && !empty(logging_accountKey) && !empty(logging_tableName)) {
       try {
         CloudStorageAccount account = new CloudStorageAccount(new StorageCredentialsAccountAndKey(logging_storageAccount, logging_accountKey), true);
-        String partitionKey = "1";
-        String rowKey = "1";
-        String message = "message goes here";
+        String partitionKey = instanceId;
+        String rowKey = instanceIndex.toString();
+        String message = "new message goes here";
         String level = "INFO";
         cloudTable = account.createCloudTableClient().getTableReference(logging_tableName);
 				cloudTable.createIfNotExist();
