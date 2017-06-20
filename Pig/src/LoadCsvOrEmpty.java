@@ -170,7 +170,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
   @Override
   public void prepareToRead(RecordReader reader, PigSplit split) {
-    String filename = ((FileSplit)split.getWrappedSplit()).getPath();
+    String filename = ((FileSplit)split.getWrappedSplit()).getPath().getName();
     log("INFO", "new file: " + filename);
   }
 
