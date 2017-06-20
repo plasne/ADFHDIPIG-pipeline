@@ -4,7 +4,7 @@ REGISTER lib/json-simple-1.1.jar;
 REGISTER /usr/local/customize/azure-api-0.4.4.jar;
 REGISTER /usr/hdp/2.5.4.0-121/pig/piggybank.jar;
 
-in = LOAD '/user/plasne/input' USING input.LoadCsvOrEmpty('customer-20170620T1100', 'input', 'empty', '/user/plasne/validate.json');
+in = LOAD '/user/plasne' USING input.LoadCsvOrEmpty('customer-20170620T1100', 'input', 'empty', '/user/plasne/validate.json');
 DESCRIBE in;
 
 transform = FOREACH in GENERATE CUSTOMER_DESC, CUSTOMER_DEST_LOC, CUSTOMER_DEST_LOC_DESC,
