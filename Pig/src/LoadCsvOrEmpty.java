@@ -87,9 +87,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   private String filename;
   private int rowIndex;
 
-  public LoadCsvOrEmpty(String instanceId, String target, String config) {
+  public LoadCsvOrEmpty(String instanceId, String target, String empty, String config) {
     this.instanceId = instanceId;
     this.target = target;
+    this.empty = empty;
     this.config = config;
   }
 
@@ -258,7 +259,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           logging_accountKey = logging.get("accountKey").toString();
           logging_tableName = logging.get("tableName").toString();
         }
-        String empty = (json.get("empty") != null) ? json.get("empty").toString() : "";
         String onWrongColumnCount = (json.get("onWrongColumnCount") != null) ? json.get("onWrongColumnCount").toString() : "fail";
         JSONArray cc = (JSONArray) json.get("columns");
         if (cc != null) {

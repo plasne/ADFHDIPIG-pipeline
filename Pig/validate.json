@@ -2,9 +2,8 @@
     "logging": {
         "storageAccount": "pelasnepigstore",
         "tableName": "LoadLogs",
-        "accountKey": "UU8KF04sceNhQqXIGqNk94+HnyT+1De5VySjLu4tqgp5uw8RZbuPNBAf6TKa577GeWB0nZ0mWcCCfBPWCdyadA=="
+        "accountKey": "????"
     },
-    "empty": "/empty",
     "onWrongColumnCount": "skip",
     "columns": [
         {
