@@ -180,6 +180,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       rowIndex = 0;
       log("INFO", "Started reading from file: " + filename + ".");
     }
+    filename = new_filename;
   }
 
   public ResourceStatistics getStatistics(String location, Job job) throws IOException {
@@ -283,7 +284,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     if (cloudTable != null) {
       try {
         String partitionKey = instanceId;
-        String rowKey = Integer.toString(instanceIndex) + "-" + String.format("%04d", logEntryIndex);
+        String rowKey = String.format("%04d", instanceIndex) + "-" + String.format("%04d", logEntryIndex);
         LogEntity entity = new LogEntity(partitionKey, rowKey, level, message);
         cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
         logEntryIndex++;
