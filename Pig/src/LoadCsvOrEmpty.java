@@ -51,7 +51,7 @@ import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
 import com.microsoft.windowsazure.services.table.client.TableQuery;
 import com.microsoft.windowsazure.services.table.client.TableQuery.QueryComparisons;
 //import com.microsoft.windowsazure.log4j.LogEntity;
-import input.LogEntity;
+//import input.LogEntity;
 
 class Column {
   public String name;
