@@ -1,8 +1,10 @@
 package input;
 
 // support local filesystem
-// support validation
-// write out logs
+
+
+// support skipping based on wrong number of columns
+// support string columns
 // support configuration of an empty directory
 
 import java.lang.Integer;
@@ -75,6 +77,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   private int logEntryIndex;
   private String target;
   private String config;
+  private String empty;
+  private String onWrongColumnCount;
   private ArrayList<Column> columns = new ArrayList<Column>();
   private String logging_storageAccount;
   private String logging_accountKey;
@@ -104,10 +108,16 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           int size = columns.size();
           if (t.size() != size) {
             String size_mismatch = "[" + filename + ", line:" + rowIndex + "]: expected " + size + " columns, but found " + t.size() + ".";
-            log("FAIL", size_mismatch);
-            throw new ExecException(size_mismatch, 2200, PigException.BUG);
+            if (onWrongColumnCount.equals("skip")) {
+              log("SKIP", size_mismatch);
+              skipped = true;
+            } else {
+              log("FAIL", size_mismatch);
+              throw new ExecException(size_mismatch, 2200, PigException.BUG);
+            }
           }
 
+          // verify the right types
           for (int i = 0; i < size; i++) {
             if (!skipped) {
               byte type = t.getType(i);
@@ -124,6 +134,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                       log("SKIP", typecast_fail);
                       skipped = true;
                     } else {
+                      log("FAIL", typecast_fail);
                       throw new ExecException(typecast_fail, 2201, PigException.BUG);
                     }
                   }
@@ -138,6 +149,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                       log("SKIP", typecast_fail);
                       skipped = true;
                     } else {
+                      log("FAIL", typecast_fail);
                       throw new ExecException(typecast_fail, 2201, PigException.BUG);
                     }
                   }
@@ -152,6 +164,22 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                       log("SKIP", typecast_fail);
                       skipped = true;
                     } else {
+                      log("FAIL", typecast_fail);
+                      throw new ExecException(typecast_fail, 2201, PigException.BUG);
+                    }
+                  }
+                  break;
+                case "string":
+                case "chararray":
+                  try {
+                    t.set(i, DataType.toString(value));
+                  } catch (Exception ex) {
+                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a string was expected, but the value was '" + value + "'.";
+                    if (column.onWrongType.equals("skip")) {
+                      log("SKIP", typecast_fail);
+                      skipped = true;
+                    } else {
+                      log("FAIL", typecast_fail);
                       throw new ExecException(typecast_fail, 2201, PigException.BUG);
                     }
                   }
@@ -230,6 +258,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           logging_accountKey = logging.get("accountKey").toString();
           logging_tableName = logging.get("tableName").toString();
         }
+        String empty = (json.get("empty") != null) ? json.get("empty").toString() : "";
+        String onWrongColumnCount = (json.get("onWrongColumnCount") != null) ? json.get("onWrongColumnCount").toString() : "fail";
         JSONArray cc = (JSONArray) json.get("columns");
         if (cc != null) {
           for (int i = 0; i < cc.size(); i++) {
@@ -270,6 +300,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         case "double":
           list.add(new FieldSchema(column.name, DataType.DOUBLE));
           break;
+        case "string":
+        case "chararray":
+          list.add(new FieldSchema(column.name, DataType.CHARARRAY));
+          break;
       }
     }
     return new ResourceSchema(new Schema(list));
@@ -301,9 +335,9 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     readConfig(location, job);
 
     // support local and hadoop
-    String combiner = location.endsWith("/") ? "" : "/";
-    String folder = location.replace("file:", "") + combiner + target;
-    if (folder.startsWith("./")) {
+    String target_combiner = location.endsWith("/") || target.startsWith("/") ? "" : "/";
+    String target_folder = location.replace("file:", "") + target_combiner + target;
+    if (target_folder.startsWith("./")) {
 
       // read from the local file system
       //raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
@@ -313,7 +347,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       // see if there are files to process
       Configuration conf = job.getConfiguration();
       FileSystem fs = FileSystem.get(conf);
-      Path path = new Path(folder);
+      Path path = new Path(target_folder);
       if (fs.exists(path)) {
         RemoteIterator<LocatedFileStatus> i_fs = fs.listFiles(path, true);
         while (i_fs.hasNext()) {
@@ -351,13 +385,18 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       }
     }
 
-    // return either the specified location or the empty location
+    // return either the specified location, the original location, or the empty location
     if (hasFiles) {
-      log("INFO", "/" + target + " found to contain file(s).");
-      super.setLocation(folder, job);
-    } else {
-      log("INFO", "/" + target + " does not exist or is empty.");
+      log("INFO", combiner + target + " found to contain file(s).");
+      super.setLocation(target_folder, job);
+    } else if (empty(empty)) {
+      log("INFO", combiner + target + " does not exist or is empty; using " + location + ".");
       super.setLocation(location, job);
+    } else {
+      String empty_combiner = location.endsWith("/") || empty.startsWith("/") ? "" : "/";
+      String empty_folder = location.replace("file:", "") + empty_combiner + empty;
+      log("INFO", combiner + target + " does not exist or is empty; using " + empty_combiner + empty + ".");
+      super.setLocation(empty_folder, job);
     }
 
   }
