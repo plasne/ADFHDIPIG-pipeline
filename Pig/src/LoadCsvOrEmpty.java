@@ -94,6 +94,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         skipped = false;
         if (t != null) {
 
+          log("INFO", "read line");
+
           // verify number of columns
           int size = columns.size();
           if (t.size() != size) {
@@ -161,6 +163,12 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     } else {
       return null;
     }
+  }
+
+  @Override
+  public void prepareToRead(RecordReader reader, PigSplit split) {
+    String filename = ((FileSplit)split.getWrappedSplit()).getPath();
+    log("INFO", "new file: " + filename);
   }
 
   public ResourceStatistics getStatistics(String location, Job job) throws IOException {
@@ -261,14 +269,16 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   }
 
 	private void log(final String level, final String message) throws IOException {
-    try {
-      String partitionKey = instanceId;
-      String rowKey = Integer.toString(instanceIndex) + "-" + Integer.toString(logEntryIndex);
-      LogEntity entity = new LogEntity(partitionKey, rowKey, message, level);
-      cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
-      logEntryIndex++;
-    } catch (Exception ex) {
-      throw new ExecException(ex); // wrap the exception
+    if (cloudTable != null) {
+      try {
+        String partitionKey = instanceId;
+        String rowKey = Integer.toString(instanceIndex) + "-" + Integer.toString(logEntryIndex);
+        LogEntity entity = new LogEntity(partitionKey, rowKey, level, message);
+        cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
+        logEntryIndex++;
+      } catch (Exception ex) {
+        throw new ExecException(ex); // wrap the exception
+      }
     }
 	}
 
@@ -331,8 +341,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
     // return either the specified location or the empty location
     if (hasFiles) {
+      log("INFO", "hasFiles");
       super.setLocation(folder, job);
     } else {
+      log("INFO", "has no Files");
       super.setLocation(location, job);
     }
 
