@@ -317,7 +317,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
         // Loop through the results, displaying information about the entity.
         String last;
-        for (LogEntity entity : cloudTable.execute(partitionQuery)) {
+        for (LogEntity entity : cloudTable.getServiceClient().execute(logging_tableName, partitionQuery)) {
+        //for (LogEntity entity : cloudTable.execute(partitionQuery)) {
           last = entity.getRowKey();
         }
 
