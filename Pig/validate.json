@@ -7,29 +7,64 @@
     "onWrongColumnCount": "skip",
     "columns": [
         {
-            "name": "id",
-            "type": "int",
-            "onWrongType": "fail"
-        },
-        {
-            "name": "value",
+            "name": "CUSTOMER_SEGMENT_ID",
             "type": "int",
             "onWrongType": "skip"
         },
         {
-            "name": "cost",
-            "type": "double",
-            "onWrongType": "fail"
+            "name": "CUSTOMER_SEGMENT_DESC",
+            "type": "string",
+            "onWrongType": "skip"
         },
         {
-            "name": "account",
+            "name": "CUSTOMER_ID",
             "type": "int",
-            "onWrongType": "fail"
+            "onWrongType": "skip"
         },
         {
-            "name": "routing",
-            "type": "int",
-            "onWrongType": "fail"
+            "name": "CUSTOMER_DESC",
+            "type": "string",
+            "onWrongType": "skip"
+        },
+        {
+            "name": "CUSTOMER_DEST_LOC",
+            "type": "string",
+            "onWrongType": "skip"
+        },
+        {
+            "name": "CUSTOMER_DEST_LOC_DESC",
+            "type": "string",
+            "onWrongType": "skip"
+        },
+        {
+            "name": "SALES_REP",
+            "type": "string",
+            "onWrongType": "skip"
+        },
+        {
+            "name": "extime",
+            "type": "string",
+            "onWrongType": "skip"
+        },
+        {
+            "name": "QTY1",
+            "type": "string",
+            "onWrongType": "skip"
+        },
+        {
+            "name": "VAL1",
+            "type": "string",
+            "onWrongType": "skip"
+        },
+        {
+            "name": "QTY2",
+            "type": "string",
+            "onWrongType": "skip"
+        },
+        {
+            "name": "VAL2",
+            "type": "string",
+            "onWrongType": "skip"
         }
     ]
 }
