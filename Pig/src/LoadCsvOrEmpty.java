@@ -80,6 +80,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   private String logging_accountKey;
   private String logging_tableName;
   private CloudTable cloudTable;
+  private String filename;
+  private int rowIndex;
 
   public LoadCsvOrEmpty(String instanceId, String target, String config) {
     this.instanceId = instanceId;
@@ -93,16 +95,15 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       Tuple t;
       boolean skipped = false;
       do {
+        rowIndex++;
         t = super.getNext();
         skipped = false;
         if (t != null) {
 
-          log("INFO", "read line");
-
           // verify number of columns
           int size = columns.size();
           if (t.size() != size) {
-            String size_mismatch = "size " + t.size() + " vs " + size;
+            String size_mismatch = "[" + filename + ", line:" + rowIndex + "]: expected " + size + " columns, but found " + t.size() + ".";
             log("FAIL", size_mismatch);
             throw new ExecException(size_mismatch, 2200, PigException.BUG);
           }
@@ -118,11 +119,12 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   try {
                     t.set(i, DataType.toBoolean(value));
                   } catch (Exception ex) {
+                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a boolean was expected " + size + " columns, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
-                      log("WARN", "skipped");
+                      log("SKIP", typecast_fail);
                       skipped = true;
                     } else {
-                      throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                      throw new ExecException(typecast_fail, 2201, PigException.BUG);
                     }
                   }
                   break;
@@ -131,11 +133,12 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   try {
                     t.set(i, DataType.toInteger(value));
                   } catch (Exception ex) {
+                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: an integer was expected " + size + " columns, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
-                      log("WARN", "skipped");
+                      log("SKIP", typecast_fail);
                       skipped = true;
                     } else {
-                      throw new ExecException("expected integer but saw " + DataType.findTypeName(type) + " onWrongType: " + column.onWrongType, 2201, PigException.BUG);
+                      throw new ExecException(typecast_fail, 2201, PigException.BUG);
                     }
                   }
                   break;
@@ -144,11 +147,12 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   try {
                     t.set(i, DataType.toDouble(value));
                   } catch (Exception ex) {
+                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a double was expected " + size + " columns, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
-                      log("WARN", "skipped");
+                      log("SKIP", typecast_fail);
                       skipped = true;
                     } else {
-                      throw new ExecException("expected double but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
+                      throw new ExecException(typecast_fail, 2201, PigException.BUG);
                     }
                   }
                   break;
@@ -159,7 +163,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         }
       } while (skipped);
       if (t == null) {
-        log("INFO", "file completed.");
+        log("INFO", "Completed reading from file: " + filename + ".");
       }
       return t;
 
@@ -171,8 +175,11 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   @Override
   public void prepareToRead(RecordReader reader, PigSplit split) throws IOException {
     super.prepareToRead(reader, split);
-    String filename = ((FileSplit)split.getWrappedSplit()).getPath().getName();
-    log("INFO", "new file: " + filename);
+    String new_filename = ((FileSplit)split.getWrappedSplit()).getPath().getName();
+    if (!filename.equals(new_filename)) {
+      rowIndex = 0;
+      log("INFO", "Started reading from file: " + filename + ".");
+    }
   }
 
   public ResourceStatistics getStatistics(String location, Job job) throws IOException {
@@ -276,7 +283,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     if (cloudTable != null) {
       try {
         String partitionKey = instanceId;
-        String rowKey = Integer.toString(instanceIndex) + "-" + Integer.toString(logEntryIndex);
+        String rowKey = Integer.toString(instanceIndex) + "-" + String.format("%04d", logEntryIndex);
         LogEntity entity = new LogEntity(partitionKey, rowKey, level, message);
         cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
         logEntryIndex++;
@@ -319,8 +326,9 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
     }
 
-    // start logging
-    if (cloudTable == null && !empty(logging_storageAccount) && !empty(logging_accountKey) && !empty(logging_tableName)) {
+    // enable logging to an Azure Table
+    UDFContext udfc = UDFContext.getUDFContext();
+    if (!udfc.isFrontend() && cloudTable == null && !empty(logging_storageAccount) && !empty(logging_accountKey) && !empty(logging_tableName)) {
       try {
 
         // create the table
@@ -336,10 +344,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           if (consider > instanceIndex) instanceIndex = consider;
         }
         instanceIndex++;
-
-        UDFContext udfc = UDFContext.getUDFContext();
-
-        log("INFO", "Load started: " + udfc.isFrontend());
+        
       } catch (Exception ex) {
         throw new ExecException(ex);
       }
@@ -347,10 +352,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
     // return either the specified location or the empty location
     if (hasFiles) {
-      log("INFO", "hasFiles");
+      log("INFO", "/" + target + " found to contain file(s).");
       super.setLocation(folder, job);
     } else {
-      log("INFO", "has no Files");
+      log("INFO", "/" + target + " does not exist or is empty.");
       super.setLocation(location, job);
     }
 
