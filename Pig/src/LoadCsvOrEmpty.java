@@ -310,14 +310,16 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         // get the existing items
         //cloudTable.getServiceClient().execute(logging_tableName, TableOperation.retrieve(instanceId, ));
 
-        String partitionFilter = TableQuery.generateFilterCondition("PartitionKey", QueryComparisons.EQUAL, instanceId);
+        //String partitionFilter = TableQuery.generateFilterCondition("PartitionKey", QueryComparisons.EQUAL, instanceId);
 
         // Specify a partition query, using "Smith" as the partition key filter.
-        TableQuery<LogEntity> partitionQuery = TableQuery.from(LogEntity.class).where(partitionFilter);
+        //TableQuery<LogEntity> partitionQuery = TableQuery.from(LogEntity.class).where(partitionFilter);
+
+        TableQuery<LogEntity> query = TableQuery.from(logging_tableName, LogEntity.class).where("(PartitionKey eq '" + instanceId + "')");
 
         // Loop through the results, displaying information about the entity.
         String last;
-        for (LogEntity entity : cloudTable.getServiceClient().execute(logging_tableName, partitionQuery)) {
+        for (LogEntity entity : cloudTable.getServiceClient().execute(query)) {
         //for (LogEntity entity : cloudTable.execute(partitionQuery)) {
           last = entity.getRowKey();
         }
