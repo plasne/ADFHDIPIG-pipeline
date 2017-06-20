@@ -317,7 +317,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         // make the instance index one higher than the last
         TableQuery<LogEntity> query = TableQuery.from(logging_tableName, LogEntity.class).where("(PartitionKey eq '" + instanceId + "')");
         for (LogEntity entity : cloudTable.getServiceClient().execute(query)) {
-          int consider = Integer.toString(entity.getRowKey().split("-")[0]);
+          String id = entity.getRowKey().split("-");
+          int consider = Integer.toString(id[0]);
           if (consider > instanceIndex) instanceIndex = consider;
         }
         instanceIndex++;
