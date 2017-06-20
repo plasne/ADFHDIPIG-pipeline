@@ -50,8 +50,6 @@ import com.microsoft.windowsazure.services.table.client.TableOperation;
 import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
 import com.microsoft.windowsazure.services.table.client.TableQuery;
 import com.microsoft.windowsazure.services.table.client.TableQuery.QueryComparisons;
-//import com.microsoft.windowsazure.log4j.LogEntity;
-//import input.LogEntity;
 
 class Column {
   public String name;
@@ -71,6 +69,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   private boolean hasFiles = false;
   private String instanceId;
   private int instanceIndex;
+  private int logEntryIndex;
   private String target;
   private String config;
   private ArrayList<Column> columns = new ArrayList<Column>();
@@ -115,6 +114,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     t.set(i, DataType.toBoolean(value));
                   } catch (Exception ex) {
                     if (column.onWrongType.equals("skip")) {
+                      log("WARN", "skipped");
                       skipped = true;
                     } else {
                       throw new ExecException("expected boolean but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
@@ -127,6 +127,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     t.set(i, DataType.toInteger(value));
                   } catch (Exception ex) {
                     if (column.onWrongType.equals("skip")) {
+                      log("WARN", "skipped");
                       skipped = true;
                     } else {
                       throw new ExecException("expected integer but saw " + DataType.findTypeName(type) + " onWrongType: " + column.onWrongType, 2201, PigException.BUG);
@@ -139,6 +140,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                     t.set(i, DataType.toDouble(value));
                   } catch (Exception ex) {
                     if (column.onWrongType.equals("skip")) {
+                      log("WARN", "skipped");
                       skipped = true;
                     } else {
                       throw new ExecException("expected double but saw " + DataType.findTypeName(type), 2201, PigException.BUG);
@@ -152,7 +154,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         }
       } while (skipped);
       if (t == null) {
-        //log.write("close file\n");
+        log("INFO", "file completed.");
       }
       return t;
 
@@ -261,10 +263,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 	private void log(final String level, final String message) throws IOException {
     try {
       String partitionKey = instanceId;
-      String rowKey = Integer.toString(instanceIndex);
+      String rowKey = Integer.toString(instanceIndex) + "-" + Integer.toString(logEntryIndex);
       LogEntity entity = new LogEntity(partitionKey, rowKey, message, level);
       cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
-      instanceIndex++;
+      logEntryIndex++;
     } catch (Exception ex) {
       throw new ExecException(ex); // wrap the exception
     }
@@ -312,26 +314,15 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         cloudTable = account.createCloudTableClient().getTableReference(logging_tableName);
 				cloudTable.createIfNotExist();
 
-        // get the existing items
-        //cloudTable.getServiceClient().execute(logging_tableName, TableOperation.retrieve(instanceId, ));
-
-        //String partitionFilter = TableQuery.generateFilterCondition("PartitionKey", QueryComparisons.EQUAL, instanceId);
-
-        // Specify a partition query, using "Smith" as the partition key filter.
-        //TableQuery<LogEntity> partitionQuery = TableQuery.from(LogEntity.class).where(partitionFilter);
-
+        // make the instance index one higher than the last
         TableQuery<LogEntity> query = TableQuery.from(logging_tableName, LogEntity.class).where("(PartitionKey eq '" + instanceId + "')");
-
-        // Loop through the results, displaying information about the entity.
-        String last = "(none)";
         for (LogEntity entity : cloudTable.getServiceClient().execute(query)) {
-        //for (LogEntity entity : cloudTable.execute(partitionQuery)) {
-          last = entity.getRowKey();
+          int consider = Integer.toString(entity.getRowKey().split("-")[0]);
+          if (consider > instanceIndex) instanceIndex = consider;
         }
+        instanceIndex++;
 
-        throw new ExecException("thrown; last was: " + last);
-
-        //log("INFO", "Load started");
+        log("INFO", "Load started");
       } catch (Exception ex) {
         throw new ExecException(ex);
       }
