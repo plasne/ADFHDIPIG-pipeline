@@ -119,7 +119,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   try {
                     t.set(i, DataType.toBoolean(value));
                   } catch (Exception ex) {
-                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a boolean was expected " + size + " columns, but the value was '" + value + "'.";
+                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a boolean was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
                       log("SKIP", typecast_fail);
                       skipped = true;
@@ -133,7 +133,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   try {
                     t.set(i, DataType.toInteger(value));
                   } catch (Exception ex) {
-                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: an integer was expected " + size + " columns, but the value was '" + value + "'.";
+                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: an integer was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
                       log("SKIP", typecast_fail);
                       skipped = true;
@@ -147,7 +147,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   try {
                     t.set(i, DataType.toDouble(value));
                   } catch (Exception ex) {
-                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a double was expected " + size + " columns, but the value was '" + value + "'.";
+                    String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a double was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
                       log("SKIP", typecast_fail);
                       skipped = true;
@@ -176,7 +176,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
   public void prepareToRead(RecordReader reader, PigSplit split) throws IOException {
     super.prepareToRead(reader, split);
     String new_filename = ((FileSplit)split.getWrappedSplit()).getPath().getName();
-    if (new_filename.equals(filename)) {
+    if (!new_filename.equals(filename)) {
       rowIndex = 0;
       log("INFO", "Started reading from file: " + filename + ".");
     }
