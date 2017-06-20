@@ -177,10 +177,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     super.prepareToRead(reader, split);
     String new_filename = ((FileSplit)split.getWrappedSplit()).getPath().getName();
     if (!new_filename.equals(filename)) {
+      filename = new_filename;
       rowIndex = 0;
       log("INFO", "Started reading from file: " + filename + ".");
     }
-    filename = new_filename;
   }
 
   public ResourceStatistics getStatistics(String location, Job job) throws IOException {
