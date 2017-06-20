@@ -305,7 +305,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
       try {
         CloudStorageAccount account = new CloudStorageAccount(new StorageCredentialsAccountAndKey(logging_storageAccount, logging_accountKey), true);
         String partitionKey = instanceId;
-        String rowKey = instanceIndex.toString();
+        String rowKey = instanceIndex;
         String message = "new message goes here";
         String level = "INFO";
         cloudTable = account.createCloudTableClient().getTableReference(logging_tableName);
