@@ -95,7 +95,9 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           // verify number of columns
           int size = columns.size();
           if (t.size() != size) {
-            throw new ExecException("size " + t.size() + " vs " + size, 2200, PigException.BUG);
+            String size_mismatch = "size " + t.size() + " vs " + size;
+            log("FAIL", size_mismatch);
+            throw new ExecException(size_mismatch, 2200, PigException.BUG);
           }
 
           for (int i = 0; i < size; i++) {
@@ -253,18 +255,12 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     return s == null || s.trim().isEmpty();
   }
 
-	private LogEntity createLogEntity(final String partitionKey, final String rowKey, final String message, final String level) {
-		
-		LogEntity result = new LogEntity(partitionKey, rowKey, message, level);
-		
-    /*
-		if (RoleEnvironment.isAvailable()) {
-			result.setDeploymentId(RoleEnvironment.getDeploymentId());
-			result.setRoleInstanceId(RoleEnvironment.getCurrentRoleInstance().getId());
-		}
-    */
-		
-		return result;
+	private void log(final String level, final String message) {
+    String partitionKey = instanceId;
+    String rowKey = Integer.toString(instanceIndex);
+    LogEntity entity = new LogEntity(partitionKey, rowKey, message, level);
+    cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
+    instanceIndex++;
 	}
 
   @Override
@@ -303,14 +299,29 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     // start logging
     if (cloudTable == null && !empty(logging_storageAccount) && !empty(logging_accountKey) && !empty(logging_tableName)) {
       try {
+
+        // create the table
         CloudStorageAccount account = new CloudStorageAccount(new StorageCredentialsAccountAndKey(logging_storageAccount, logging_accountKey), true);
-        String partitionKey = instanceId;
-        String rowKey = Integer.toString(instanceIndex);
-        String message = "new message goes here";
-        String level = "INFO";
         cloudTable = account.createCloudTableClient().getTableReference(logging_tableName);
 				cloudTable.createIfNotExist();
-        cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(this.createLogEntity(partitionKey, rowKey, message, level)));
+
+        // get the existing items
+        //cloudTable.getServiceClient().execute(logging_tableName, TableOperation.retrieve(instanceId, ));
+
+        String partitionFilter = TableQuery.generateFilterCondition("PartitionKey", QueryComparisons.EQUAL, instanceId);
+
+        // Specify a partition query, using "Smith" as the partition key filter.
+        TableQuery<LogEntity> partitionQuery = TableQuery.from(LogEntity.class).where(partitionFilter);
+
+        // Loop through the results, displaying information about the entity.
+        String last;
+        for (LogEntity entity : cloudTable.execute(partitionQuery)) {
+          last = entity.getRowKey();
+        }
+
+        throw new ExecException("thrown; last was: " + last);
+
+        //log("INFO", "Load started");
       } catch (Exception ex) {
         throw new ExecException(ex);
       }
