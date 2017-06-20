@@ -337,7 +337,9 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         }
         instanceIndex++;
 
-        log("INFO", "Load started");
+        UDFContext udfc = UDFContext.getUDFContext();
+
+        log("INFO", "Load started: " + udfc.isFrontend());
       } catch (Exception ex) {
         throw new ExecException(ex);
       }
