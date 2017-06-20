@@ -340,12 +340,10 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     if (target_folder.startsWith("./")) {
 
       // read from the local file system
-      //Path path = new Path(target_folder);
       File dir = new File(target_folder);
       if (dir.isDirectory() && dir.list().length > 0) {
         hasFiles = true;
       }
-      //raw = new String(Files.readAllBytes(Paths.get(config)), StandardCharsets.UTF_8);
 
     } else {
 
