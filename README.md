@@ -106,10 +106,15 @@ REGISTER lib/json-simple-1.1.jar;
 REGISTER /usr/local/customize/azure-api-0.4.4.jar;
 REGISTER /usr/hdp/2.5.4.0-121/pig/piggybank.jar;
 
-raw = LOAD '/user/plasne' USING input.LoadCsvOrEmpty('input', '/user/plasne/validate.json');
+raw = LOAD '/user/plasne' USING input.LoadCsvOrEmpty('customer-20170620T1100', 'input', 'empty', '/user/plasne/validate.json');
 ```
 
-All 3 of those JAR files must be registered. You specify to load the root folder (user/plasne) which must exist, then as a parameter, you specify the subfolder (input) that contains the files to load (which may or may not exist or contain files). The last parameter is the location of a JSON configuration file that contains the schema for the files and how to handle validation failures.
+All 4 of those JAR files must be registered. You specify to load the root folder (user/plasne) which must exist, the the following parameters:
+
+* instanceId - This will be used as the partitionKey in the Azure Table for logging. It is the way to identify this particular job.
+* proposed subfolder - This will be the subfolder that contains the files you are trying to load (which may or may not exist or contain files).
+* empty subfolder - This will be the subfolder that contains nothing (or an empty file in the case of WASB). This is used when the subfolder doesn't exist or doesn't have files.
+* configuration - This is the location of a JSON configuration file that contains the schema for the files and how to handle validation failures.
 
 A sample configuration file has been provided [validate.json](Pig/validate.json).
 
