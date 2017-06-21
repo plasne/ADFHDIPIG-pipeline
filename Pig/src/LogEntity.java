@@ -1,5 +1,6 @@
 package input;
 
+import java.util.Calendar;
 import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
 
 public class LogEntity extends TableServiceEntity {
