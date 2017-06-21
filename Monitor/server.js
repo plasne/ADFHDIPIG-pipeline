@@ -35,12 +35,15 @@ function queryForAllInstances(instanceId) {
         const query = new azure.TableQuery().where("PartitionKey eq ?", instanceId);
         let execute = (continuationToken) => new Promise((resolve, reject) => {
             service.queryEntities(table_instance, query, continuationToken, (error, result, response) => {
-                if (error) reject(error);
-                Array.prototype.push.apply(entries, result.entries);
-                if (result.continuationToken == null) {
-                    resolve();
+                if (error) {
+                    reject(error);
                 } else {
-                    execute(result.continuationToken).then(() => resolve(), error => reject(error));
+                    Array.prototype.push.apply(entries, result.entries);
+                    if (result.continuationToken == null) {
+                        resolve();
+                    } else {
+                        execute(result.continuationToken).then(() => resolve(), error => reject(error));
+                    }
                 }
             });
         });
@@ -49,18 +52,21 @@ function queryForAllInstances(instanceId) {
 }
 
 // function to get all logs from the associated logs table service
-function queryForAssociatedLogs(ts) {
+function queryForAssociatedLogs(apk, low_ark, high_ark) {
     return new Promise((resolve_all, reject_all) => {
         const entries = [];
-        const query = new azure.TableQuery().where("PartitionKey eq ?", instanceId);
+        const query = new azure.TableQuery().where("PartitionKey eq ?", apk).and("RowKey ge ?", low_ark).and("RowKey le ?", high_ark);
         let execute = (continuationToken) => new Promise((resolve, reject) => {
-            service.queryEntities(table_instance, query, continuationToken, (error, result, response) => {
-                if (error) reject(error);
-                Array.prototype.push.apply(entries, result.entries);
-                if (result.continuationToken == null) {
-                    resolve();
+            service.queryEntities(table_debug, query, continuationToken, (error, result, response) => {
+                if (error) {
+                    reject(error);
                 } else {
-                    execute(result.continuationToken).then(() => resolve(), error => reject(error));
+                    Array.prototype.push.apply(entries, result.entries);
+                    if (result.continuationToken == null) {
+                        resolve();
+                    } else {
+                        execute(result.continuationToken).then(() => resolve(), error => reject(error));
+                    }
                 }
             });
         });
@@ -90,10 +96,11 @@ app.get("/logs", (req, res) => {
                         index: rowKey[1],
                         ts: entry.Timestamp._,
                         level: entry.Level._,
-                        msg: entry.Message._
+                        msg: entry.Message._,
+                        apk: entry.AssociatedPK._,
+                        ark: entry.AssociatedRK._
                     };
                 });
-                console.log(output);
                 res.send(output);
             }, error => {
                 console.error(error);
@@ -111,25 +118,25 @@ app.get("/logs", (req, res) => {
 
 // get the associated YARN/PIG logs
 app.get("/associated", (req, res) => {
-    const ts = req.query.ts;
-    if (ts) {
+    const apk = req.query.apk;
+    const ark = req.query.ark;
+    if (apk && ark) {
 
         // ensure the table exists
         createTableIfNotExists(table_debug).then(result => {
 
             // read all instance logs
-            queryForAssociatedLogs(ts).then(entries => {
+            const low_ark = big(ark).subtract(5 * 60 * 1000).toString(); // 5 min before
+            const high_ark = big(ark).add(5 * 60 * 1000).toString(); // 5 min after
+            queryForAssociatedLogs(apk, low_ark, high_ark).then(entries => {
                 const output = entries.map(entry => {
                     const rowKey = entry.RowKey._.split("-");
                     return {
-                        instance: rowKey[0],
-                        index: rowKey[1],
                         ts: entry.Timestamp._,
                         level: entry.Level._,
                         msg: entry.Message._
                     };
                 });
-                console.log(output);
                 res.send(output);
             }, error => {
                 console.error(error);
@@ -148,10 +155,12 @@ app.get("/associated", (req, res) => {
 // startup the server
 app.listen(80, () => {
 
+/*
     const long = big(2).power(63).subtract(1);
     const current = Date.parse("2017-06-19T00:00:00.000Z");
     const s = long.subtract(current).toString();
     console.log(s);
+*/
 
     console.log("listening on port 80...");
 });

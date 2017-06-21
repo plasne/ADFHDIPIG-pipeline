@@ -1,7 +1,7 @@
 
 $(document).ready(() => {
 
-    // create the datatable
+    // create the datatables
     const instance_logs = $("#instance_logs").DataTable({
         ajax: {
             url: "/logs",
@@ -15,13 +15,25 @@ $(document).ready(() => {
             { data: "msg" }
         ]
     });
+    const associated_logs = $("#associated_logs").DataTable({
+        ajax: {
+            url: "/associated",
+            dataSrc: ""
+        },
+        processing: true,
+        columns: [
+            { data: "ts", width: "200px" },
+            { data: "level", width: "50px" },
+            { data: "msg" }
+        ]
+    });
 
     // add selection
     $("#instance_logs").on("click", "tbody tr", function() {
         instance_logs.$("tr.selected").removeClass("selected");
         $(this).addClass("selected");
         const row = instance_logs.row(this).data();
-        alert(row.ts);
+        associated_logs.ajax.url("/associated?apk=" + row.apk + "&ark=" + row.ark).load();
     });
 
     // get the specified logs
