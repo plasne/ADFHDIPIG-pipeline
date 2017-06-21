@@ -389,7 +389,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         }
         instanceIndex++;
         
-        Configuration conf udfc.getJobConf();
+        Configuration conf = udfc.getJobConf();
         log("CONF", conf.toString());
         log("CONF", "pig.alias = " + conf.get("pig.alias"));
         log("CONF", "pig.script.id = " + conf.get("pig.script.id"));
