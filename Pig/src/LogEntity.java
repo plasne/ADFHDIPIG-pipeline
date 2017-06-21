@@ -52,7 +52,7 @@ public class LogEntity extends TableServiceEntity {
 	}
 
 	public final String getAssociated() {
-		return message;
+		return associated;
 	}
 
 	public final void setAssociated(String associated) {
