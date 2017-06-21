@@ -88,6 +88,17 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     this.config = config;
   }
 
+  private void skip(String message) throws IOException {
+    if (totalSkipped < 21) {
+      log("SKIP", message);
+    } else if (totalSkipped == 21) {
+      log("SKIP", "More rows were skipped, but will not be logged to keep the logs from being flooded.");
+    } else {
+      // don't log
+    }
+    totalSkipped++;
+  }
+
   @Override
   public Tuple getNext() throws IOException {
     if (hasFiles) {
@@ -104,8 +115,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
           if (t.size() != size) {
             String size_mismatch = "[" + filename + ", line:" + rowIndex + "]: expected " + size + " columns, but found " + t.size() + ".";
             if (onWrongColumnCount.equals("skip")) {
-              log("SKIP", size_mismatch);
-              totalSkipped++;
+              skip(size_mismatch);
               skipped = true;
             } else {
               log("FAIL", size_mismatch);
@@ -127,8 +137,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   } catch (Exception ex) {
                     String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a boolean was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
-                      log("SKIP", typecast_fail);
-                      totalSkipped++;
+                      skip(typecast_fail);
                       skipped = true;
                     } else {
                       log("FAIL", typecast_fail);
@@ -143,8 +152,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   } catch (Exception ex) {
                     String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: an integer was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
-                      log("SKIP", typecast_fail);
-                      totalSkipped++;
+                      skip(typecast_fail);
                       skipped = true;
                     } else {
                       log("FAIL", typecast_fail);
@@ -159,8 +167,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   } catch (Exception ex) {
                     String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a double was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
-                      log("SKIP", typecast_fail);
-                      totalSkipped++;
+                      skip(typecast_fail);
                       skipped = true;
                     } else {
                       log("FAIL", typecast_fail);
@@ -175,8 +182,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
                   } catch (Exception ex) {
                     String typecast_fail = "[" + filename + ", line:" + rowIndex + ", column:" + i + "]: a string was expected, but the value was '" + value + "'.";
                     if (column.onWrongType.equals("skip")) {
-                      log("SKIP", typecast_fail);
-                      totalSkipped++;
+                      skip(typecast_fail);
                       skipped = true;
                     } else {
                       log("FAIL", typecast_fail);
