@@ -9,7 +9,8 @@ public class LogEntity extends TableServiceEntity {
 
     private String level;
 	private String message;
-	private String associated;
+    private String associatedPK;
+	private String associatedRK;
 	
     public LogEntity() {
         super();
@@ -27,11 +28,12 @@ public class LogEntity extends TableServiceEntity {
         // create an associated timestamp for coorelating logs
         Calendar calendar = Calendar.getInstance();
         Timestamp max = new Timestamp(new Date(Long.MAX_VALUE).getTime());
+        this.associatedRK = String.valueOf(max.getTime() - calendar.getTimeInMillis());
         calendar.set(Calendar.HOUR, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        this.associated = String.valueOf(max.getTime() - calendar.getTimeInMillis());
+        this.associatedPK = String.valueOf(max.getTime() - calendar.getTimeInMillis());
 
 	}
 
@@ -51,12 +53,20 @@ public class LogEntity extends TableServiceEntity {
 		this.message = message;
 	}
 
-	public final String getAssociated() {
-		return associated;
+	public final String getAssociatedPK() {
+		return associatedPK;
 	}
 
-	public final void setAssociated(String associated) {
-		this.associated = associated;
+	public final void setAssociatedPK(String associated) {
+		this.associatedPK = associatedPK;
+	}
+
+	public final String getAssociatedRK() {
+		return associatedRK;
+	}
+
+	public final void setAssociatedRK(String associated) {
+		this.associatedRK = associatedRK;
 	}
 
 }
