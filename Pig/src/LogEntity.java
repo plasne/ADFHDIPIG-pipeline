@@ -2,6 +2,7 @@ package input;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Date;
 import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
 
 public class LogEntity extends TableServiceEntity {
