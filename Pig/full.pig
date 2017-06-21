@@ -1,3 +1,5 @@
+SET DEFAULT_PARALLEL 2;
+
 REGISTER lib/input.jar;
 REGISTER lib/output.jar;
 REGISTER lib/json-simple-1.1.jar;
