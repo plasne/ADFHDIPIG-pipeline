@@ -49,6 +49,8 @@ import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
 import com.microsoft.windowsazure.services.table.client.TableQuery;
 import com.microsoft.windowsazure.services.table.client.TableQuery.QueryComparisons;
 
+import java.io.StringWriter;
+
 class Column {
   public String name;
   public String type;
@@ -390,8 +392,9 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         instanceIndex++;
         
         Configuration conf = udfc.getJobConf();
-        log("CONF", conf.toString());
-        log("CONF", "pig.alias = " + conf.get("pig.alias"));
+        StringWriter c = new StringWriter();
+        Configuration.dumpConfiguration(conf, c);
+        log("CONF", c.toString();
         log("CONF", "pig.script.id = " + conf.get("pig.script.id"));
 
       } catch (Exception ex) {
