@@ -372,6 +372,8 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
     }
 
+    String nt = "";
+
     // enable logging to an Azure Table
     UDFContext udfc = UDFContext.getUDFContext();
     if (!udfc.isFrontend() && cloudTable == null && !empty(logging_storageAccount) && !empty(logging_accountKey) && !empty(logging_tableName)) {
@@ -382,23 +384,18 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         cloudTable = account.createCloudTableClient().getTableReference(logging_tableName);
 				cloudTable.createIfNotExist();
 
-        // make the instance index one higher than the last
-        TableQuery<LogEntity> query = TableQuery.from(logging_tableName, LogEntity.class).where("(PartitionKey eq '" + instanceId + "')");
-        for (LogEntity entity : cloudTable.getServiceClient().execute(query)) {
-          String[] id = entity.getRowKey().split("-");
-          int consider = Integer.parseInt(id[0]);
-          if (consider > instanceIndex) instanceIndex = consider;
-        }
-        instanceIndex++;
         
         Configuration conf = udfc.getJobConf();
         StringWriter c = new StringWriter();
         Configuration.dumpConfiguration(conf, c);
-        log("CONF", c.toString());
+        //log("CONF", c.toString());
+        nt = c.toString();
+        throw new ExecException(nt, 2203, PigException.BUG);
         log("CONF", "pig.script.id = " + conf.get("pig.script.id"));
 
       } catch (Exception ex) {
-        throw new ExecException(ex);
+        throw new ExecException(nt, 2204, PigException.BUG);
+        //throw new ExecException(ex);
       }
     }
 
