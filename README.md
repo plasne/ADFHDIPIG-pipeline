@@ -73,7 +73,18 @@ This is not comprehensive, but rather shows a representative sample of the activ
 
 ## Required and optional files
 
-I mentioned in the requirements that some pipelines would have a collection of required files (for instance, customer and product files might have to be present in order for the processing to work). This is accomplished by XXXXXXXXXXXXXXXXXXXXXXX.
+I mentioned in the requirements that some pipelines would have a collection of required files (for instance, customer and product files might have to be present in order for the processing to work). This is accomplished by specifying multiple *input* folders in the activity - Data Factory will wait for all the inputs to be available before running the activity. For example:
+
+```json
+"inputs": [
+  {
+    "name": "test-ppiv4-001-customer-dev-ds-piginput"
+  },
+  {
+    "name": "test-ppiv4-001-customer-dev-ds-piginputB"
+  }
+],
+```
 
 I also mentioned that some sometimes there are optional files (for instance, there could be customer, product, and cost basis files all provided to a pipeline and it could process all of those types, or maybe just one or two if that is all that is available). The solution was:
 
@@ -210,6 +221,14 @@ As previously mentioned, the LoadCsvOrEmpty LoadFunc can be used to handle optio
 ![log screenshot](/images/log-ss.png)
 
 You must load a log by instanceId, so it is a good idea to have a naming scheme that is documented somewhere and used consistently. There is no specific way to associate the YARN, Pig, etc. logs with the instance logs, but when you click on an entry in the Instance Logs the Associated Logs will load showing everything 5 minutes before through 5 minutes after.
+
+To run the application, you must have Node.js installed. You can then execute with the following command:
+
+```bash
+node server.js
+```
+
+The application presents a web service running on port 80, so you may need to use "sudo" in order to bind to that port. You can then access the application by typing "http://localhost" into a browser.
 
 ## Other notes
 
