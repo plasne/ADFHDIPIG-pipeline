@@ -1,7 +1,5 @@
 # Building a data pipeline using Azure Data Factory
 
-* DOCUMENT THE REQD FILES SCENARIO
-
 ## The challenge
 
 A software ISV offers their customers data processing using a proprietary system. The customers might have the raw data in any number of formats, required fields may be spread across multiple files, etc. The goal of this project was to build a flexible pipeline process that could ingest any number of files/records and produce a series of XML files which are in the required format of the proprietary system. Then to collect the files from the system (also in XML) and push those through another pipeline that outputs files that the customer can consume (typically CSV).
