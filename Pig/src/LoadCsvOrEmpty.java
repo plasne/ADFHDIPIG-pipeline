@@ -391,7 +391,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         //log("CONF", c.toString());
         nt = c.toString();
         throw new ExecException(nt, 2203, PigException.BUG);
-        log("CONF", "pig.script.id = " + conf.get("pig.script.id"));
+        //log("CONF", "pig.script.id = " + conf.get("pig.script.id"));
 
       } catch (Exception ex) {
         throw new ExecException(nt, 2204, PigException.BUG);
