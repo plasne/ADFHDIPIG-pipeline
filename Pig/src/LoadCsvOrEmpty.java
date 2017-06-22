@@ -325,7 +325,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     if (cloudTable != null) {
       try {
         String partitionKey = instanceId;
-        String rowKey = jobId + "-" + String.format("%04d", logEntryIndex);
+        String rowKey = jobId + "." + String.format("%04d", logEntryIndex);
         LogEntity entity = new LogEntity(partitionKey, rowKey, level, message);
         cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
         logEntryIndex++;
