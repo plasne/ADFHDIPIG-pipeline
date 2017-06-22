@@ -1,7 +1,6 @@
 # Building a data pipeline using Azure Data Factory
 
 * DOCUMENT THE REQD FILES SCENARIO
-* A DASHBOARD NEEDS TO BE CREATED TO RETURN ALL LOGS FOR A GIVEN TRANSACTION # SHOULD BE BUILT
 
 ## The challenge
 
@@ -46,6 +45,7 @@ There were quite a few customizations that needed to be implemented to meet the 
 There are quite a few folders and files in this repository, so before I get into the specifics, I will provide an overview of what is contained here:
 
 * DataFactoryApp1 - The Visual Studio sample for an ADF pipeline.
+* Monitor - A Node.js app for viewing the logs (see [Troubleshooting](#troubleshooting) below).
 * Pig
   * lib - JAR files that are needed to compile and run these samples.
   * logging - The files for configuring centralized logging for log4j.
@@ -111,7 +111,7 @@ raw = LOAD '/user/plasne' USING input.LoadCsvOrEmpty('customer-20170620T1100', '
 
 All 4 of those JAR files must be registered. You specify to load the root folder (user/plasne) which must exist, the the following parameters:
 
-* instanceId - This will be used as the partitionKey in the Azure Table for logging. It is the way to identify this particular job.
+* instanceId - This will be used as the partitionKey in the Azure Table for logging (see [Troubleshooting](#troubleshooting) below). It is the way to identify this particular job. You will need to generate this programmatically, for ex. Acme-20170620T1100 might be a good instanceId.
 * proposed subfolder - This will be the subfolder that contains the files you are trying to load (which may or may not exist or contain files).
 * empty subfolder - This will be the subfolder that contains nothing (or an empty file in the case of WASB). This is used when the subfolder doesn't exist or doesn't have files.
 * configuration - This is the location of a JSON configuration file that contains the schema for the files and how to handle validation failures.
@@ -202,6 +202,14 @@ The solution was to implement a central store for all logs using log4j (which is
 There are a few sample projects on GitHub that implement log4j appenders that can store to Azure Storage. I used https://github.com/JMayrbaeurl/azure-log4j. It also needs the 0.4.4 version of the Azure SDK for Java, the JAR for which can be found here: https://mvnrepository.com/artifact/com.microsoft.windowsazure/microsoft-windowsazure-api/0.4.4.
 
 Of course, the above libraries and all the configuration changes need to be pushed across all servers, so a Script Action was needed. I wrote [deploy.sh](Pig/logging/deploy.sh) for this purpose.
+
+## <a name="troubleshooting"></a> Troubleshooting
+
+As previously mentioned, the LoadCsvOrEmpty LoadFunc can be used to handle optional files and validation. When that LoadFunc is used it logs what it discovers and how it handles it to an Azure Table. You can then use the included Node.js monitoring app in [/Monitor](Monitor) to view those logs.
+
+![log screenshot](/images/log-ss.png)
+
+You must load a log by instanceId, so it is a good idea to have a naming scheme that is documented somewhere and used consistently. There is no specific way to associate the YARN, Pig, etc. logs with the instance logs, but when you click on an entry in the Instance Logs the Associated Logs will load showing everything 5 minutes before through 5 minutes after.
 
 ## Other notes
 

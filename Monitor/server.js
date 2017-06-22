@@ -90,10 +90,8 @@ app.get("/logs", (req, res) => {
             // read all instance logs
             queryForAllInstances(instanceId).then(entries => {
                 const output = entries.map(entry => {
-                    const rowKey = entry.RowKey._.split("-");
                     return {
-                        instance: rowKey[0],
-                        index: rowKey[1],
+                        index: entry.RowKey._,
                         ts: entry.Timestamp._,
                         level: entry.Level._,
                         msg: entry.Message._,

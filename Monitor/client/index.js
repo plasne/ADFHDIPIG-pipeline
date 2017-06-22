@@ -9,7 +9,7 @@ $(document).ready(() => {
         },
         processing: true,
         columns: [
-            { data: "index", width: "60px" },
+            { data: "index", width: "360px" },
             { data: "ts", width: "200px" },
             { data: "level", width: "50px" },
             { data: "msg" }
@@ -30,10 +30,12 @@ $(document).ready(() => {
 
     // add selection
     $("#instance_logs").on("click", "tbody tr", function() {
-        instance_logs.$("tr.selected").removeClass("selected");
-        $(this).addClass("selected");
-        const row = instance_logs.row(this).data();
-        associated_logs.ajax.url("/associated?apk=" + row.apk + "&ark=" + row.ark).load();
+        if (!$(this).hasClass("selected")) {
+            instance_logs.$("tr.selected").removeClass("selected");
+            $(this).addClass("selected");
+            const row = instance_logs.row(this).data();
+            associated_logs.ajax.url("/associated?apk=" + row.apk + "&ark=" + row.ark).load();
+        }
     });
 
     // get the specified logs
