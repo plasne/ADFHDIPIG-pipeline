@@ -386,7 +386,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
         // write out any debug details from the configuration
         Configuration conf = udfc.getJobConf();
-        log("CONF", "pig.script.id = " + conf.get("pig.script.id"));
+        log("INFO", "pig.script.id = " + conf.get("pig.script.id"));
 
       } catch (Exception ex) {
         throw new ExecException(ex);
