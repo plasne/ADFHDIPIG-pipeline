@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -49,8 +50,6 @@ import com.microsoft.windowsazure.services.table.client.TableServiceEntity;
 import com.microsoft.windowsazure.services.table.client.TableQuery;
 import com.microsoft.windowsazure.services.table.client.TableQuery.QueryComparisons;
 
-import java.io.StringWriter;
-
 class Column {
   public String name;
   public String type;
@@ -68,7 +67,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
   private boolean hasFiles = false;
   private String instanceId;
-  private int instanceIndex;
+  private String jobId;
   private int logEntryIndex;
   private String target;
   private String config;
@@ -326,7 +325,7 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
     if (cloudTable != null) {
       try {
         String partitionKey = instanceId;
-        String rowKey = String.format("%04d", instanceIndex) + "-" + String.format("%04d", logEntryIndex);
+        String rowKey = jobId + "-" + String.format("%04d", logEntryIndex);
         LogEntity entity = new LogEntity(partitionKey, rowKey, level, message);
         cloudTable.getServiceClient().execute(logging_tableName, TableOperation.insert(entity));
         logEntryIndex++;
@@ -372,8 +371,6 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
 
     }
 
-    String nt = "";
-
     // enable logging to an Azure Table
     UDFContext udfc = UDFContext.getUDFContext();
     if (!udfc.isFrontend() && cloudTable == null && !empty(logging_storageAccount) && !empty(logging_accountKey) && !empty(logging_tableName)) {
@@ -384,18 +381,15 @@ public class LoadCsvOrEmpty extends CSVLoader implements LoadMetadata {
         cloudTable = account.createCloudTableClient().getTableReference(logging_tableName);
 				cloudTable.createIfNotExist();
 
-        
+        // create a unique job ID for logging
+        jobId = UUID.randomUUID().toString();
+
+        // write out any debug details from the configuration
         Configuration conf = udfc.getJobConf();
-        StringWriter c = new StringWriter();
-        Configuration.dumpConfiguration(conf, c);
-        //log("CONF", c.toString());
-        nt = c.toString();
-        throw new ExecException(nt, 2203, PigException.BUG);
-        //log("CONF", "pig.script.id = " + conf.get("pig.script.id"));
+        log("CONF", "pig.script.id = " + conf.get("pig.script.id"));
 
       } catch (Exception ex) {
-        throw new ExecException(nt, 2204, PigException.BUG);
-        //throw new ExecException(ex);
+        throw new ExecException(ex);
       }
     }
 
