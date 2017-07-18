@@ -56,9 +56,10 @@
             "scriptPath": "pelasne-pig-2017-03-09t22-26-52-136z/user/plasne/normalize.pig",
             "scriptLinkedService": "AzureStorage",
             "defines": {
-              "storage": "wasb://pelasne-pig-2017-03-09t22-26-52-136z@pelasnepigstore.blob.core.windows.net",
-              "input": "$$Text.Format('user/plasne/input-{0:yyyyMMddhhmm}', SliceEnd)",
-              "output": "$$Text.Format('user/plasne/output-{0:yyyyMMddhhmm}/process-{0:yyyyMMddhhmm}', SliceEnd)"
+              "storage": "wasbs://input@pelasnepigclear.blob.core.windows.net",
+              "root": "user/plasne",
+              "input": "$$Text.Format('input-{0:yyyyMMddhhmm}', SliceEnd)",
+              "output": "$$Text.Format('output-{0:yyyyMMddhhmm}/process-{0:yyyyMMddhhmm}', SliceEnd)"
             }
           },
           "policy": {
