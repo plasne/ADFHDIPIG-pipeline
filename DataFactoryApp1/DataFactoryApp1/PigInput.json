@@ -3,9 +3,9 @@
   "name": "PigInput",
   "properties": {
     "type": "AzureBlob",
-    "linkedServiceName": "AzureStorage",
+    "linkedServiceName": "EncryptedStorage",
     "typeProperties": {
-      "folderPath": "pelasne-pig-2017-03-09t22-26-52-136z/user/plasne/input-{date}{time}",
+      "folderPath": "input/user/plasne/input-{date}{time}",
       "partitionedBy": [
         {
           "name": "date",
