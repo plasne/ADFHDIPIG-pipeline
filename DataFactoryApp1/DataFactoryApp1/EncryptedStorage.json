@@ -1,6 +1,6 @@
 {
     "$schema": "http://datafactories.schema.management.azure.com/schemas/2015-09-01/Microsoft.DataFactory.LinkedService.json",
-    "name": "AzureStorage",
+    "name": "EncryptedStorage",
     "properties": {
       "type": "AzureStorage",
       "typeProperties": {

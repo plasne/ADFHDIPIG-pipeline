@@ -54,7 +54,7 @@
           ],
           "typeProperties": {
             "scriptPath": "pelasne-pig-2017-03-09t22-26-52-136z/user/plasne/normalize.pig",
-            "scriptLinkedService": "AzureStorage",
+            "scriptLinkedService": "UnencryptedStorage",
             "defines": {
               "storage": "wasbs://input@pelasnepigclear.blob.core.windows.net",
               "root": "user/plasne",
