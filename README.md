@@ -16,7 +16,7 @@ There are some requirements of the ingress pipeline:
 * A sizable number of different files might be involved (up to 30).
 * Some customers need data processed in near-real-time (as low as 30 minute batches).
 * There may be multiple pipelines per customer.
-* A pipleine process might **require** some files while others might be **optional**.
+* A pipeline process might **require** some files while others might be **optional**.
 * The output files will always be XML.
 
 There are some requirements of the egress pipeline:
@@ -230,4 +230,4 @@ The application presents a web service running on port 80, so you may need to us
 
 ## Other notes
 
-When storing JAR files in WASB (the HDFS-compliant file store protocol for HDInsight), you must use fully qualified paths to the files (wasbs://storageaccounturl/containername/path/file). This is required for authentication.
+When storing JAR files in WASB (the HDFS-compliant file store protocol for HDInsight), you must use fully qualified paths to the files (wasbs://containername@accountname.blob.core.windows.net/folder). This is required for authentication.
