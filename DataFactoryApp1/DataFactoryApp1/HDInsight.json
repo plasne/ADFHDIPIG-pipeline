@@ -4,7 +4,7 @@
   "properties": {
     "type": "HDInsight",
     "typeProperties": {
-      "clusterUri": "https://pelasne-pig.azurehdinsight.net",
+      "clusterUri": "https://pelasne-hdi.azurehdinsight.net",
       "userName": "admin",
       "password": "????",
       "linkedServiceName": "UnencryptedStorage"

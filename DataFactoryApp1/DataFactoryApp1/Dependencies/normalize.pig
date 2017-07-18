@@ -2,7 +2,7 @@ REGISTER wasbs://pelasne-pig-2017-03-09t22-26-52-136z@pelasnepigstore.blob.core.
 REGISTER wasbs://pelasne-pig-2017-03-09t22-26-52-136z@pelasnepigstore.blob.core.windows.net/user/plasne/output.jar;
 REGISTER /usr/local/customize/azure-api-0.4.4.jar;
 REGISTER /usr/hdp/2.6.0.10-29/pig/lib/json-simple-1.1.jar;
-REGISTER /usr/hdp/2.5.4.0-121/pig/piggybank.jar;
+REGISTER /usr/hdp/2.6.0.10-29/pig/piggybank.jar;
 
 in = LOAD '$storage/$root' USING input.LoadCsvOrEmpty('$input', '$input/customer-csv', 'empty', '/user/plasne/validate.json');
 DESCRIBE in;
