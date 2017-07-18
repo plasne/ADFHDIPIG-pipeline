@@ -230,4 +230,4 @@ The application presents a web service running on port 80, so you may need to us
 
 ## Other notes
 
-When storing JAR files in WASB (the HDFS-compliant file store protocol for HDInsight), you must use fully qualified paths to the files (wasbs://storageaccounturl/containername/path/file). This is required for authentication.
+When storing JAR files in WASB (the HDFS-compliant file store protocol for HDInsight), you must use fully qualified paths to the files (wasbs://containername@accountname.blob.core.windows.net/folder). This is required for authentication.
