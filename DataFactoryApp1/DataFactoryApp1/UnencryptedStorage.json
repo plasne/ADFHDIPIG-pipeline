@@ -6,6 +6,5 @@
       "typeProperties": {
         "connectionString": "DefaultEndpointsProtocol=https;AccountName=pelasnepigstore;AccountKey=????"
       }
-        
     }
 }
