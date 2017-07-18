@@ -1,5 +1,3 @@
-SET DEFAULT_PARALLEL 2;
-
 REGISTER wasbs://pelasne-pig-2017-03-09t22-26-52-136z@pelasnepigstore.blob.core.windows.net/user/plasne/input.jar;
 REGISTER wasbs://pelasne-pig-2017-03-09t22-26-52-136z@pelasnepigstore.blob.core.windows.net/user/plasne/output.jar;
 REGISTER /usr/local/customize/azure-api-0.4.4.jar;

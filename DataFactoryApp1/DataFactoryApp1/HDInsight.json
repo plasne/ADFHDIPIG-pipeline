@@ -7,7 +7,7 @@
       "clusterUri": "https://pelasne-pig.azurehdinsight.net",
       "userName": "admin",
       "password": "????",
-      "linkedServiceName": "AzureStorage"
+      "linkedServiceName": "UnencryptedStorage"
     }
   }
 }
