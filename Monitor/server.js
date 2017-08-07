@@ -1,19 +1,35 @@
 
 // includes
 const config = require("config");
+const adal = require("adal-node");
 const azure = require("azure-storage");
+const request = require("request");
 const express = require("express");
 const big = require("big-number");
+const promisePool = require('es6-promise-pool');
+const moment = require("moment");
 
 // global variables
 const account = config.get("account");
 const key = config.get("key");
 const table_instance = config.get("table_instance");
 const table_debug = config.get("table_debug");
+const directory = config.get("directory");
+const subscriptionId = config.get("subscriptionId");
+const clientId = config.get("clientId");
+const clientSecret = config.get("clientSecret");
+const adf_version = config.get("adf_version");
 
 // instantiate express
 const app = express();
 app.use(express.static("client"));
+
+// extend string to convert to array
+String.prototype.toArrayOfStrings = function() {
+    return this.split(",").map(function(code) {
+        return code.trim();
+    });
+}
 
 // instantiate the table service
 const service = azure.createTableService(account, key);
@@ -74,9 +90,144 @@ function queryForAssociatedLogs(apk, low_ark, high_ark) {
     });
 }
 
-// redirect to index.html
+// redirect to default page
 app.get("/", (req, res) => {
-    res.redirect("/index.html");
+    res.redirect("/default.html");
+});
+
+// get a list of pipelines
+app.get("/pipelines", (req, res) => {
+
+    // authenticate against Azure APIs
+    const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
+    context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
+        if (!err) {
+
+            const resourceGroup = "pelasne-adf";
+            const dataFactory = "pelasne-adf";
+
+            // get the pipelines
+            request.get({
+                uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/Microsoft.DataFactory/datafactories/${dataFactory}/datapipelines?api-version=${adf_version}`,
+                headers: { Authorization: "Bearer " + tokenResponse.accessToken },
+                json: true
+            }, (err, response, body) => {
+                if (!err && response.statusCode == 200) {
+                    res.send(response.body.value);
+                } else {
+                    if (err) { console.error("err(201): " + err) } else { console.error("err(202) [" + response.statusCode + "]: " + response.statusMessage); console.log(body); };
+                }
+            });
+
+        } else {
+            res.status(500).send("err(200): Server calls could not authenticate.");
+        }
+    });
+
+});
+
+// get a list of slices
+app.get("/slices", (req, res) => {
+    let datasets = req.query.datasets;
+    if (datasets) {
+        datasets = datasets.toArrayOfStrings();
+
+        // authenticate against Azure APIs
+        const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
+        context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
+            if (!err) {
+
+                const resourceGroup = "pelasne-adf";
+                const dataFactory = "pelasne-adf";
+
+                const now = new Date("2017-05-14T00:00:00Z");
+                const startTimestamp = new Date(now - 96 * 60 * 60 * 1000).toISOString(); // 96 hours back
+                const endTimestamp = now.toISOString();
+
+                const slices = [];
+
+                // build a pool of queries to get data on all the specified datasets
+                let index = 0;
+                const pool = new promisePool(() => {
+                    if (index < datasets.length) {
+                        const dataset = datasets[index];
+                        index++;
+                        return new Promise((resolve, reject) => {
+                            request.get({
+                                uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/Microsoft.DataFactory/datafactories/${dataFactory}/datasets/${dataset}/slices?start=${startTimestamp}&end=${endTimestamp}&api-version=${adf_version}`,
+                                headers: { Authorization: "Bearer " + tokenResponse.accessToken },
+                                json: true
+                            }, (err, response, body) => {
+                                if (!err && response.statusCode == 200) {
+                                    response.body.value.forEach(slice => {
+                                        slice.dataset = dataset;
+                                        slices.push(slice);
+                                    });
+                                    resolve();
+                                } else {
+                                    reject( err || new Error(response.body) );
+                                }
+                            });
+                        });
+                    } else {
+                        return null;
+                    }
+                }, 4);
+                
+                // process the queries 4 at a time and when done send the results
+                pool.start().then(() => {
+                    res.send(slices);
+                }, error => {
+                    res.status(500).send("err(300): " + error.message);
+                });
+
+            } else {
+                res.status(500).send("err(200): Server calls could not authenticate.");
+            }
+        });
+
+    } else {
+        res.status(400).send("err(300): You must supply a dataset parameter.");
+    }
+});
+
+// get details on a slice run
+app.get("/slice", (req, res) => {
+    const dataset = req.query.dataset;
+    const start = parseInt(req.query.start);
+    if (dataset && !isNaN(start)) {
+        const startTimestamp = new moment(start).utc().format("YYYY-MM-DDTHH:mm:ss") + "Z";
+        console.log(startTimestamp);
+
+        // authenticate against Azure APIs
+        const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
+        context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
+            if (!err) {
+
+                const resourceGroup = "pelasne-adf";
+                const dataFactory = "pelasne-adf";
+
+                request.get({
+                    uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/Microsoft.DataFactory/datafactories/${dataFactory}/datasets/${dataset}/sliceruns?start=${startTimestamp}&api-version=${adf_version}`,
+                    headers: { Authorization: "Bearer " + tokenResponse.accessToken },
+                    json: true
+                }, (err, response, body) => {
+                    if (!err && response.statusCode == 200) {
+                        res.send(response.body.value);
+                    } else {
+                        console.log( JSON.stringify(response.body) );
+                        res.status(500).send("err(400): " + (err || JSON.stringify(response.body)));
+                    }
+                });
+
+            } else {
+                res.status(500).send("err(200): Server calls could not authenticate.");
+            }
+        });
+
+    } else {
+        res.status(400).send("err(300): You must supply a dataset and start parameter.");
+    }
 });
 
 // get instance logs
