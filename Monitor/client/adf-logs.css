@@ -1,0 +1,52 @@
+
+html, body {
+    font-family: Verdana, sans-serif;
+    font-size: medium;
+    padding: 0vmin;
+    margin: 0vmin;
+}
+
+.centered {
+    text-align: center;
+}
+
+.indent {
+    padding-left: 16px;
+}
+
+input, select {
+    font-family: Verdana, sans-serif;
+    font-size: medium;
+}
+
+#logs {
+    margin-top: 3vh;
+    margin-left: 1vw;
+    margin-right: 1vw;
+}
+
+#logs table tbody {
+    cursor: pointer;
+}
+
+#logs .selected {
+    background-color: #DDDDDD; /* fallback for IE */
+    background-color: var(--muted);
+}
+
+#logs .detail {
+    background-color: #EEEEEE;
+}
+
+#logs .detail-items,
+#logs .detail-btns
+{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#logs .detail-items > div,
+#logs .detail-btns > div
+{
+    padding: 1vmax;
+}

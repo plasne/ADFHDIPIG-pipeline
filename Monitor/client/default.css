@@ -1,0 +1,79 @@
+
+html, body {
+    font-family: Verdana, sans-serif;
+    padding: 0vmin;
+    margin: 0vmin;
+}
+
+#pipelines {
+    display: flex;
+    flex-direction: column;
+}
+
+#pipelines > div.pipeline {
+    margin-bottom: 1vh;
+    display: flex;
+    flex-direction: row;
+    height: 10vh;
+}
+
+#pipelines > div.pipeline > div.flow,
+#pipelines > div.pipeline > div.activity {
+    margin-left: 1vw;
+    margin-top: auto;
+    margin-bottom: auto;
+    position: relative;
+}
+
+#pipelines > div.pipeline > div.activity {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+#pipelines > div.pipeline > div.activity > div.icon,
+#pipelines > div.pipeline > div.activity > div.name {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#pipelines > div.pipeline > div.activity > div.bubble,
+#pipelines > div.pipeline > div.activity > div.counter {
+    position: absolute;
+    height: 2vmax;
+    width: 2vmax;
+}
+
+#pipelines > div.pipeline > div.activity > div.bubble {
+    top: 0vmax;
+}
+
+#pipelines > div.pipeline > div.activity > div.bubble.success {
+    left: 0vmax;
+}
+
+#pipelines > div.pipeline > div.activity > div.bubble.running {
+    left: 2.5vmax;
+}
+
+#pipelines > div.pipeline > div.activity > div.bubble.failure {
+    left: 5vmax;
+}
+
+#pipelines > div.pipeline > div.activity > div.counter {
+    top: 0.3vmax;
+    font-size: 1.0vmax;
+    color: white;
+}
+
+#pipelines > div.pipeline > div.activity > div.counter.success {
+    left: 0.3vmax;
+}
+
+#pipelines > div.pipeline > div.activity > div.counter.running {
+    left: 2.85vmax;
+}
+
+#pipelines > div.pipeline > div.activity > div.counter.failure {
+    left: 5.35vmax;
+}
