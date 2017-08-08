@@ -34,7 +34,7 @@ public class SftpReset {
 
             // get all variables
             String line = value.toString();
-            String[] keyval line.split("=");
+            String[] keyval = line.split("=");
             switch (keyval[0]) {
                 case "offset":
                     offset = Integer.parseInt(keyval[1]);
