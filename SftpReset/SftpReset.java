@@ -65,9 +65,9 @@ public class SftpReset {
             try {
 
                 // connect via SSH
-                session = jsch.getSession(user, host, 22);
+                session = jsch.getSession(username, hostname, 22);
                 session.setConfig("StrictHostKeyChecking", "no");
-                session.setPassword(pass);
+                session.setPassword(password);
                 session.connect();
 
                 // connect via SFTP
@@ -116,13 +116,13 @@ public class SftpReset {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         Job job = new Job(conf);
-        job.setJarByClass(WordCount.class);
+        job.setJarByClass(SftpReset.class);
         job.setJobName("sftpreset");
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
-        job.setMapperClass(WordCount.Map.class);
-        job.setCombinerClass(WordCount.Reduce.class);
-        job.setReducerClass(WordCount.Reduce.class);
+        job.setMapperClass(SftpReset.Map.class);
+        job.setCombinerClass(SftpReset.Reduce.class);
+        job.setReducerClass(SftpReset.Reduce.class);
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
         job.waitForCompletion(true);
