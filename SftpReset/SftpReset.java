@@ -61,6 +61,8 @@ public class SftpReset extends Configured implements Tool {
                     break;
             }
 
+            System.out.println ( "line: " + line );
+
             // determine if there is enough to execute
             Boolean execute = (
                 input != null && !input.isEmpty() && 
@@ -73,7 +75,7 @@ public class SftpReset extends Configured implements Tool {
             // execute if requested
             if (execute) {
 
-                System.out.println ( "offset: " + offset + ", roundTo: " + roundTo );
+                System.out.println ( "used offset: " + offset + ", roundTo: " + roundTo );
 
                 JSch jsch = new JSch();
                 Session session = null;
