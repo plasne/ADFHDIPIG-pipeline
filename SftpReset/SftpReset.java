@@ -59,6 +59,14 @@ public class SftpReset {
                     break;
             }
 
+            System.out.print( offset );
+            System.out.print( roundTo );
+            System.out.print( input );
+            System.out.print( output );
+            System.out.print( hostname );
+            System.out.print( username );
+            System.out.print( password );
+
             // apply the changes
             JSch jsch = new JSch();
             Session session = null;
@@ -97,6 +105,7 @@ public class SftpReset {
 
             } catch (Exception e) {
                 e.printStackTrace();
+                throw e; // rethrow to crash job
             } finally {
                 if (session != null) session.disconnect();
             }
