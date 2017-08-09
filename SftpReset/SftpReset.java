@@ -148,6 +148,7 @@ public class SftpReset {
         String input = "";
         String output = "";
         Boolean roundToWasSet = false;
+        Boolean direct = false;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             switch(arg) {
@@ -169,6 +170,9 @@ public class SftpReset {
                 case "--output":
                     output = args[i + 1];
                     break;
+                case "--direct":
+                    direct = true;
+                    break;
             }
         }
 
@@ -189,7 +193,11 @@ public class SftpReset {
         // create the job
         Job job = new Job(conf);
         job.setJobName("sftpreset");
-        job.setJarByClass(SftpReset.class);  //job.setJar("SftpReset.jar");
+        if (direct) {
+            job.setJar("SftpReset.jar");
+        } else {
+            job.setJarByClass(SftpReset.class);
+        }
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
         job.setMapperClass(SftpReset.Map.class);
