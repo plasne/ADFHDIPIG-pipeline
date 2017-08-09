@@ -30,7 +30,7 @@ public class SftpReset {
         private String username = "";                       // username for SFTP server
         private String password = "";                       // password for SFTP server
 
-        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, JSchException {
+        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
             // get all variables
             String line = value.toString();
@@ -105,7 +105,7 @@ public class SftpReset {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                throw e; // rethrow to crash job
+                throw new IOException(e);
             } finally {
                 if (session != null) session.disconnect();
             }
