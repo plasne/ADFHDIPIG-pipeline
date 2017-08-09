@@ -33,6 +33,7 @@ public class SftpReset {
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
             // get all variables
+            Boolean execute = false;
             String line = value.toString();
             String[] keyval = line.split("=");
             switch (keyval[0]) {
@@ -57,9 +58,14 @@ public class SftpReset {
                 case "password":
                     input = keyval[1];
                     break;
+                case "go":
+                case "run":
+                case "execute":
+                    execute = true;
+                    break;
             }
 
-            System.out.println( line );
+            System.out.println( "line: " + line );
             System.out.println( offset );
             System.out.println( roundTo );
             System.out.println( input );
@@ -68,47 +74,49 @@ public class SftpReset {
             System.out.println( username );
             System.out.println( password );
 
-            // apply the changes
-            JSch jsch = new JSch();
-            Session session = null;
-            try {
+            // execute if requested
+            if (execute) {
+                JSch jsch = new JSch();
+                Session session = null;
+                try {
 
-                // connect via SSH
-                session = jsch.getSession(username, hostname, 22);
-                session.setConfig("StrictHostKeyChecking", "no");
-                session.setPassword(password);
-                session.connect();
+                    // connect via SSH
+                    session = jsch.getSession(username, hostname, 22);
+                    session.setConfig("StrictHostKeyChecking", "no");
+                    session.setPassword(password);
+                    session.connect();
 
-                // connect via SFTP
-                Channel channel = session.openChannel("sftp");
-                channel.connect();
-                ChannelSftp sftpChannel = (ChannelSftp) channel;
+                    // connect via SFTP
+                    Channel channel = session.openChannel("sftp");
+                    channel.connect();
+                    ChannelSftp sftpChannel = (ChannelSftp) channel;
 
-                // offset + round
-                LocalDateTime dt_offset = LocalDateTime.now(Clock.systemUTC()).plusMinutes(offset).withSecond(0).withNano(0);
-                LocalDateTime dt_rounded = dt_offset;
-                if (roundTo != 0) {
-                    dt_rounded = dt_rounded.plusMinutes( (60 + roundTo - dt_offset.getMinute()) % roundTo);
+                    // offset + round
+                    LocalDateTime dt_offset = LocalDateTime.now(Clock.systemUTC()).plusMinutes(offset).withSecond(0).withNano(0);
+                    LocalDateTime dt_rounded = dt_offset;
+                    if (roundTo != 0) {
+                        dt_rounded = dt_rounded.plusMinutes( (60 + roundTo - dt_offset.getMinute()) % roundTo);
+                    }
+                    if (roundTo < 0) {
+                        dt_rounded = dt_rounded.plusMinutes( roundTo );
+                    }
+
+                    // rename folder
+                    String output_ts = dt_rounded.format(DateTimeFormatter.ofPattern(output));
+                    sftpChannel.rename(input, output_ts);
+
+                    // create new folder
+                    sftpChannel.mkdir(input);
+
+                    // logout
+                    sftpChannel.exit();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new IOException(e);
+                } finally {
+                    if (session != null) session.disconnect();
                 }
-                if (roundTo < 0) {
-                    dt_rounded = dt_rounded.plusMinutes( roundTo );
-                }
-
-                // rename folder
-                String output_ts = dt_rounded.format(DateTimeFormatter.ofPattern(output));
-                sftpChannel.rename(input, output_ts);
-
-                // create new folder
-                sftpChannel.mkdir(input);
-
-                // logout
-                sftpChannel.exit();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new IOException(e);
-            } finally {
-                if (session != null) session.disconnect();
             }
 
         }
