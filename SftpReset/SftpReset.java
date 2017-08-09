@@ -59,13 +59,14 @@ public class SftpReset {
                     break;
             }
 
-            System.out.print( offset );
-            System.out.print( roundTo );
-            System.out.print( input );
-            System.out.print( output );
-            System.out.print( hostname );
-            System.out.print( username );
-            System.out.print( password );
+            System.out.println( line );
+            System.out.println( offset );
+            System.out.println( roundTo );
+            System.out.println( input );
+            System.out.println( output );
+            System.out.println( hostname );
+            System.out.println( username );
+            System.out.println( password );
 
             // apply the changes
             JSch jsch = new JSch();
