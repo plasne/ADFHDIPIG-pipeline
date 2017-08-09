@@ -14,7 +14,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import com.jcraft.jsch.*;
-import com.jcraft.jsch.JSchException;
 import java.time.*;
 import java.time.format.*;
 
@@ -31,7 +30,7 @@ public class SftpReset {
         private String username = "";                       // username for SFTP server
         private String password = "";                       // password for SFTP server
 
-        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, JschException {
+        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, JSchException {
 
             // get all variables
             String line = value.toString();
