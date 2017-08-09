@@ -207,7 +207,7 @@ public class SftpReset extends Configured implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
-        int res = Toolrunner.run(new Configuration(), new SftpReset(), args);
+        int res = ToolRunner.run(new Configuration(), new SftpReset(), args);
     }
 
 }
