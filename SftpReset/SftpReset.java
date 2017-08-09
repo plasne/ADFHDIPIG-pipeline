@@ -22,10 +22,10 @@ public class SftpReset {
     public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
 
         // defaults
-        private int offset = 0;                             // don't offset time
-        private int roundTo = 60;                           // round to next hour
-        private String input = "input";                     // input folder
-        private String output = "'input-'YYYYMMdd'T'HH";    // output folder
+        private int offset = -1;                            // offset time
+        private int roundTo = -1;                           // round to next x minutes
+        private String input = "";                          // input folder
+        private String output = "";                         // output folder
         private String hostname = "";                       // hostname for SFTP server
         private String username = "";                       // username for SFTP server
         private String password = "";                       // password for SFTP server
@@ -33,7 +33,6 @@ public class SftpReset {
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
             // get all variables
-            Boolean execute = false;
             String line = value.toString();
             String[] keyval = line.split("=");
             switch (keyval[0]) {
@@ -58,11 +57,6 @@ public class SftpReset {
                 case "password":
                     input = keyval[1];
                     break;
-                case "go":
-                case "run":
-                case "execute":
-                    execute = true;
-                    break;
             }
 
             System.out.println( "line: " + line );
@@ -74,8 +68,19 @@ public class SftpReset {
             System.out.println( username );
             System.out.println( password );
 
+            // determine if there is enough to execute
+            Boolean execute = (
+                offset > -1 && roundTo > -1 && 
+                input != null && !input.isEmpty() && 
+                output != null && !output.isEmpty() && 
+                hostname != null && !hostname.isEmpty() && 
+                username != null && !username.isEmpty() && 
+                password != null && !password.isEmpty()
+            );
+
             // execute if requested
             if (execute) {
+                System.out.println("executing...");
                 JSch jsch = new JSch();
                 Session session = null;
                 try {
