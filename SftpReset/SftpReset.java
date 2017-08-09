@@ -59,15 +59,6 @@ public class SftpReset {
                     break;
             }
 
-            System.out.println( "line: " + line );
-            System.out.println( offset );
-            System.out.println( roundTo );
-            System.out.println( input );
-            System.out.println( output );
-            System.out.println( hostname );
-            System.out.println( username );
-            System.out.println( password );
-
             // determine if there is enough to execute
             Boolean execute = (
                 offset > -1 && roundTo > -1 && 
@@ -80,7 +71,6 @@ public class SftpReset {
 
             // execute if requested
             if (execute) {
-                System.out.println("executing...");
                 JSch jsch = new JSch();
                 Session session = null;
                 try {
