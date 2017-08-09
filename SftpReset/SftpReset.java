@@ -22,17 +22,20 @@ public class SftpReset {
     public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
 
         // defaults
-        int offset = 0;                             // don't offset time
-        int roundTo = 60;                           // round to next hour
-        String input = "input";                     // input folder
-        String output = "'input-'YYYYMMdd'T'HH";    // output folder
-        String hostname = "";                       // hostname for SFTP server
-        String username = "";                       // username for SFTP server
-        String password = "";                       // password for SFTP server
+        /*
+        private int offset = 0;                             // don't offset time
+        private int roundTo = 60;                           // round to next hour
+        private String input = "input";                     // input folder
+        private String output = "'input-'YYYYMMdd'T'HH";    // output folder
+        private String hostname = "";                       // hostname for SFTP server
+        private String username = "";                       // username for SFTP server
+        private String password = "";                       // password for SFTP server
+        */
 
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
             // get all variables
+            /*
             String line = value.toString();
             String[] keyval = line.split("=");
             switch (keyval[0]) {
@@ -100,6 +103,7 @@ public class SftpReset {
             } finally {
                 if (session != null) session.disconnect();
             }
+            */
 
         }
 
