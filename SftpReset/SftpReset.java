@@ -55,7 +55,7 @@ public class SftpReset {
                     username = keyval[1];
                     break;
                 case "password":
-                    input = keyval[1];
+                    password = keyval[1];
                     break;
             }
 
