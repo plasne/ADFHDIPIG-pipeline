@@ -148,8 +148,8 @@ public class SftpReset {
         // create the job
         Configuration conf = new Configuration();
         Job job = new Job(conf);
-        job.setJar("SftpReset.jar");
         job.setJobName("sftpreset");
+        job.setJarByClass(SftpReset.class);  //job.setJar("SftpReset.jar");
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
         job.setMapperClass(SftpReset.Map.class);
