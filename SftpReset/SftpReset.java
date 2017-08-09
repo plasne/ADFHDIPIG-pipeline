@@ -114,6 +114,25 @@ public class SftpReset {
     }
 
     public static void main(String[] args) throws Exception {
+
+        // read the arguments
+        String input;
+        String output;
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            switch(arg) {
+                case "-i":
+                case "--input":
+                    input = arg[i + 1];
+                    break;
+                case "-o":
+                case "--output":
+                    output = arg[i + 1];
+                    break;
+            }
+        }
+
+        // create the job
         Configuration conf = new Configuration();
         Job job = new Job(conf);
         job.setJarByClass(SftpReset.class);
@@ -123,9 +142,10 @@ public class SftpReset {
         job.setMapperClass(SftpReset.Map.class);
         job.setCombinerClass(SftpReset.Reduce.class);
         job.setReducerClass(SftpReset.Reduce.class);
-        FileInputFormat.addInputPath(job, new Path(args[0]));
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        FileInputFormat.addInputPath(job, new Path(input));
+        FileOutputFormat.setOutputPath(job, new Path(output));
         job.waitForCompletion(true);
+
     }
 
 }
