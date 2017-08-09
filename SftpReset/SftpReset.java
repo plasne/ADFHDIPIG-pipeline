@@ -34,6 +34,7 @@ public class SftpReset {
         public void configure(JobConf job) {
             offset = job.getInt("offset", 0);
             roundTo = job.getInt("roundTo", -1);
+            System.out.println ( "read offset: " + offset + ", roundTo: " + roundTo );
         }
 
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
