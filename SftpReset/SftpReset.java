@@ -22,7 +22,6 @@ public class SftpReset {
     public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
 
         // defaults
-        /*
         private int offset = 0;                             // don't offset time
         private int roundTo = 60;                           // round to next hour
         private String input = "input";                     // input folder
@@ -30,12 +29,10 @@ public class SftpReset {
         private String hostname = "";                       // hostname for SFTP server
         private String username = "";                       // username for SFTP server
         private String password = "";                       // password for SFTP server
-        */
 
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
             // get all variables
-            /*
             String line = value.toString();
             String[] keyval = line.split("=");
             switch (keyval[0]) {
@@ -103,7 +100,6 @@ public class SftpReset {
             } finally {
                 if (session != null) session.disconnect();
             }
-            */
 
         }
 
@@ -139,7 +135,8 @@ public class SftpReset {
         // create the job
         Configuration conf = new Configuration();
         Job job = new Job(conf);
-        job.setJarByClass(SftpReset.class);
+        //job.setJarByClass(SftpReset.class);
+        job.setJar("SftpReset.jar");
         job.setJobName("sftpreset");
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
