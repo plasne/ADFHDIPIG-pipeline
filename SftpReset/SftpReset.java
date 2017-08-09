@@ -116,8 +116,8 @@ public class SftpReset {
     public static void main(String[] args) throws Exception {
 
         // read the arguments
-        String input;
-        String output;
+        String input = "";
+        String output = "";
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             switch(arg) {
