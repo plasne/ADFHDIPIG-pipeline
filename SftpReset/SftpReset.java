@@ -22,13 +22,18 @@ public class SftpReset {
     public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
 
         // defaults
-        private int offset = -1;                            // offset time
-        private int roundTo = -1;                           // round to next x minutes
+        private int offset = 0;                             // offset time
+        private int roundTo = 0;                            // round to next x minutes
         private String input = "";                          // input folder
         private String output = "";                         // output folder
         private String hostname = "";                       // hostname for SFTP server
         private String username = "";                       // username for SFTP server
         private String password = "";                       // password for SFTP server
+
+        public void configure(JobConf job) {
+            offset = job.getInt("offset", 0);
+            roundTo = job.getInt("roundTo", -1);
+        }
 
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
@@ -36,12 +41,14 @@ public class SftpReset {
             String line = value.toString();
             String[] keyval = line.split("=");
             switch (keyval[0]) {
+                /*
                 case "offset":
                     offset = Integer.parseInt(keyval[1]);
                     break;
                 case "roundTo":
                     roundTo = Integer.parseInt(keyval[1]);
                     break;
+                */
                 case "input":
                     input = keyval[1];
                     break;
@@ -61,7 +68,6 @@ public class SftpReset {
 
             // determine if there is enough to execute
             Boolean execute = (
-                offset > -1 && roundTo > -1 && 
                 input != null && !input.isEmpty() && 
                 output != null && !output.isEmpty() && 
                 hostname != null && !hostname.isEmpty() && 
@@ -128,12 +134,28 @@ public class SftpReset {
 
     public static void main(String[] args) throws Exception {
 
+        // start new configuration
+        Configuration conf = new Configuration();
+
         // read the arguments
+        int offset = 0;
+        int roundTo = -1;
         String input = "";
         String output = "";
+        Boolean roundToWasSet = false;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             switch(arg) {
+                case "--offset":
+                    int offset = Integer.parseInt( args[i + 1] );
+                    conf.set("offset", offset);
+                    break;
+                case "-r":
+                case "--roundTo"
+                    int roundTo = Integer.parseInt( args[i + 1] );
+                    conf.set("roundTo", offset);
+                    roundToWasSet = true;
+                    break;
                 case "-i":
                 case "--input":
                     input = args[i + 1];
@@ -145,8 +167,21 @@ public class SftpReset {
             }
         }
 
+        // offset + round for output folder
+        if (!roundToWasSet) {
+            throw new Exception("-r or --roundTo must be set.");
+        }
+        LocalDateTime dt_offset = LocalDateTime.now(Clock.systemUTC()).plusMinutes(offset).withSecond(0).withNano(0);
+        LocalDateTime dt_rounded = dt_offset;
+        if (roundTo != 0) {
+            dt_rounded = dt_rounded.plusMinutes( (60 + roundTo - dt_offset.getMinute()) % roundTo);
+        }
+        if (roundTo < 0) {
+            dt_rounded = dt_rounded.plusMinutes( roundTo );
+        }
+        String output_ts = dt_rounded.format(DateTimeFormatter.ofPattern(output));
+
         // create the job
-        Configuration conf = new Configuration();
         Job job = new Job(conf);
         job.setJobName("sftpreset");
         job.setJarByClass(SftpReset.class);  //job.setJar("SftpReset.jar");
@@ -156,7 +191,7 @@ public class SftpReset {
         job.setCombinerClass(SftpReset.Reduce.class);
         job.setReducerClass(SftpReset.Reduce.class);
         FileInputFormat.addInputPath(job, new Path(input));
-        FileOutputFormat.setOutputPath(job, new Path(output));
+        FileOutputFormat.setOutputPath(job, new Path(output_ts));
         job.waitForCompletion(true);
 
     }
