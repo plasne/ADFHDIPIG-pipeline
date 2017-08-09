@@ -30,7 +30,7 @@ public class SftpReset extends Configured implements Tool {
             System.out.println ( "read offset: " + offset + ", roundTo: " + roundTo );
         }
 
-        public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
+        public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> collector, Reporter reporter) throws IOException {
 
             // get all variables
             String line = value.toString();
@@ -130,11 +130,10 @@ public class SftpReset extends Configured implements Tool {
 
     }
 
-    public static void main(String[] args) throws Exception {
+    public int run(String args[]) throws Exception {
 
         // start new configuration
-        //Configuration conf = new Configuration();
-        JobConf job = new JobConf(getConf());
+        JobConf job = new JobConf(getConf(), SftpReset.class);
 
         // read the arguments
         int offset = 0;
@@ -185,14 +184,15 @@ public class SftpReset extends Configured implements Tool {
         }
         String output_ts = dt_rounded.format(DateTimeFormatter.ofPattern(output));
 
-        // create the job
-        //Job job = new Job(conf);
+        // define the job
         job.setJobName("sftpreset");
+        /*
         if (local) {
             job.setJar("SftpReset.jar");
         } else {
             job.setJarByClass(SftpReset.class);
         }
+        */
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
         job.setMapperClass(SftpReset.Map.class);
@@ -201,11 +201,13 @@ public class SftpReset extends Configured implements Tool {
         FileInputFormat.setInputPaths(job, new Path(input));
         FileOutputFormat.setOutputPath(job, new Path(output_ts));
         
+        // start the job
         JobClient.runJob(job);
         return 0;
+    }
 
-        //job.waitForCompletion(true);
-
+    public static void main(String[] args) throws Exception {
+        int res = Toolrunner.run(new Configuration(), new SftpReset(), args);
     }
 
 }
