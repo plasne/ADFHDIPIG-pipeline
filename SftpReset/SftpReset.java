@@ -30,7 +30,7 @@ public class SftpReset {
         private String username = "";                       // username for SFTP server
         private String password = "";                       // password for SFTP server
 
-        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException, JschException {
 
             // get all variables
             String line = value.toString();
