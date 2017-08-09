@@ -78,6 +78,9 @@ public class SftpReset {
 
             // execute if requested
             if (execute) {
+
+                System.out.println ( "offset: " + offset + ", roundTo: " + roundTo );
+
                 JSch jsch = new JSch();
                 Session session = null;
                 try {
