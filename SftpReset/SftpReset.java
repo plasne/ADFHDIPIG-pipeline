@@ -151,7 +151,7 @@ public class SftpReset {
                     conf.set("offset", offset);
                     break;
                 case "-r":
-                case "--roundTo"
+                case "--roundTo":
                     int roundTo = Integer.parseInt( args[i + 1] );
                     conf.set("roundTo", offset);
                     roundToWasSet = true;
