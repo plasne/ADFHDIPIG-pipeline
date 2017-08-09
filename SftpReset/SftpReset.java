@@ -147,13 +147,13 @@ public class SftpReset {
             String arg = args[i];
             switch(arg) {
                 case "--offset":
-                    int offset = Integer.parseInt( args[i + 1] );
-                    conf.set("offset", offset);
+                    offset = Integer.parseInt( args[i + 1] );
+                    conf.setInt("offset", offset);
                     break;
                 case "-r":
                 case "--roundTo":
-                    int roundTo = Integer.parseInt( args[i + 1] );
-                    conf.set("roundTo", offset);
+                    roundTo = Integer.parseInt( args[i + 1] );
+                    conf.setInt("roundTo", roundTo);
                     roundToWasSet = true;
                     break;
                 case "-i":
