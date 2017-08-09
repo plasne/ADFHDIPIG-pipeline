@@ -124,7 +124,7 @@ public class SftpReset extends Configured implements Tool {
 
     public static class Reduce extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
 
-        public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
+        public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> collector, Reporter reporter) throws IOException {
             // nothing to do
         }
 
@@ -133,7 +133,7 @@ public class SftpReset extends Configured implements Tool {
     public int run(String args[]) throws Exception {
 
         // start new configuration
-        JobConf job = new JobConf(getConf(), SftpReset.class);
+        JobConf job = new JobConf(getConf()); //, SftpReset.class);
 
         // read the arguments
         int offset = 0;
@@ -186,13 +186,11 @@ public class SftpReset extends Configured implements Tool {
 
         // define the job
         job.setJobName("sftpreset");
-        /*
         if (local) {
             job.setJar("SftpReset.jar");
         } else {
             job.setJarByClass(SftpReset.class);
         }
-        */
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
         job.setMapperClass(SftpReset.Map.class);
