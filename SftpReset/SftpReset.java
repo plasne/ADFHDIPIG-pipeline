@@ -14,6 +14,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import com.jcraft.jsch.*;
+import com.jcraft.jsch.JSchException;
 import java.time.*;
 import java.time.format.*;
 
@@ -144,7 +145,6 @@ public class SftpReset {
         // create the job
         Configuration conf = new Configuration();
         Job job = new Job(conf);
-        //job.setJarByClass(SftpReset.class);
         job.setJar("SftpReset.jar");
         job.setJobName("sftpreset");
         job.setOutputKeyClass(Text.class);
