@@ -123,11 +123,11 @@ public class SftpReset {
             switch(arg) {
                 case "-i":
                 case "--input":
-                    input = arg[i + 1];
+                    input = args[i + 1];
                     break;
                 case "-o":
                 case "--output":
-                    output = arg[i + 1];
+                    output = args[i + 1];
                     break;
             }
         }
