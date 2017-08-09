@@ -31,6 +31,7 @@ public class SftpReset {
         private String username = "";                       // username for SFTP server
         private String password = "";                       // password for SFTP server
 
+        @Override
         public void configure(JobConf job) {
             offset = job.getInt("offset", 0);
             roundTo = job.getInt("roundTo", -1);
@@ -148,7 +149,7 @@ public class SftpReset {
         String input = "";
         String output = "";
         Boolean roundToWasSet = false;
-        Boolean direct = false;
+        Boolean local = false;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             switch(arg) {
@@ -170,8 +171,9 @@ public class SftpReset {
                 case "--output":
                     output = args[i + 1];
                     break;
-                case "--direct":
-                    direct = true;
+                case "--debug":
+                case "--local":
+                    local = true;
                     break;
             }
         }
@@ -193,7 +195,7 @@ public class SftpReset {
         // create the job
         Job job = new Job(conf);
         job.setJobName("sftpreset");
-        if (direct) {
+        if (local) {
             job.setJar("SftpReset.jar");
         } else {
             job.setJarByClass(SftpReset.class);
