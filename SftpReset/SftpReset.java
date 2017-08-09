@@ -6,21 +6,14 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.util.*;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapred.*;
 import com.jcraft.jsch.*;
 import java.time.*;
 import java.time.format.*;
 
-public class SftpReset {
+public class SftpReset extends Configured implements Tool {
 
-    public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+    public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, IntWritable> {
 
         // defaults
         private int offset = 0;                             // offset time
@@ -31,14 +24,13 @@ public class SftpReset {
         private String username = "";                       // username for SFTP server
         private String password = "";                       // password for SFTP server
 
-        @Override
         public void configure(JobConf job) {
             offset = job.getInt("offset", 0);
             roundTo = job.getInt("roundTo", -1);
             System.out.println ( "read offset: " + offset + ", roundTo: " + roundTo );
         }
 
-        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+        public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
 
             // get all variables
             String line = value.toString();
@@ -130,9 +122,9 @@ public class SftpReset {
 
     }
 
-    public static class Reduce extends Reducer <Text, IntWritable, Text, IntWritable> {
+    public static class Reduce extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
 
-        public void reduce(Text key, Iterator<IntWritable> values, Context context) throws IOException, InterruptedException {
+        public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
             // nothing to do
         }
 
@@ -141,7 +133,8 @@ public class SftpReset {
     public static void main(String[] args) throws Exception {
 
         // start new configuration
-        Configuration conf = new Configuration();
+        //Configuration conf = new Configuration();
+        JobConf job = new JobConf(getConf());
 
         // read the arguments
         int offset = 0;
@@ -155,12 +148,12 @@ public class SftpReset {
             switch(arg) {
                 case "--offset":
                     offset = Integer.parseInt( args[i + 1] );
-                    conf.setInt("offset", offset);
+                    job.setInt("offset", offset);
                     break;
                 case "-r":
                 case "--roundTo":
                     roundTo = Integer.parseInt( args[i + 1] );
-                    conf.setInt("roundTo", roundTo);
+                    job.setInt("roundTo", roundTo);
                     roundToWasSet = true;
                     break;
                 case "-i":
@@ -193,7 +186,7 @@ public class SftpReset {
         String output_ts = dt_rounded.format(DateTimeFormatter.ofPattern(output));
 
         // create the job
-        Job job = new Job(conf);
+        //Job job = new Job(conf);
         job.setJobName("sftpreset");
         if (local) {
             job.setJar("SftpReset.jar");
@@ -205,9 +198,13 @@ public class SftpReset {
         job.setMapperClass(SftpReset.Map.class);
         job.setCombinerClass(SftpReset.Reduce.class);
         job.setReducerClass(SftpReset.Reduce.class);
-        FileInputFormat.addInputPath(job, new Path(input));
+        FileInputFormat.setInputPaths(job, new Path(input));
         FileOutputFormat.setOutputPath(job, new Path(output_ts));
-        job.waitForCompletion(true);
+        
+        JobClient.runJob(job);
+        return 0;
+
+        //job.waitForCompletion(true);
 
     }
 
