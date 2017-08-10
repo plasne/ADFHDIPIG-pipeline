@@ -188,8 +188,8 @@ public class SftpReset extends Configured implements Tool {
         FileOutputFormat.setOutputPath(job, new Path(output_ts));
 
         // ensure 1 map and no reduce
-        job.set("mapreduce.input.fileinputformat.split.minsize", 256 * 1024 * 1024); // 256 MB
-        job.set("mapreduce.input.fileinputformat.split.maxsize", 512 * 1024 * 1024); // 512 MB
+        job.setInt("mapreduce.input.fileinputformat.split.minsize", 256 * 1024 * 1024); // 256 MB
+        job.setInt("mapreduce.input.fileinputformat.split.maxsize", 512 * 1024 * 1024); // 512 MB
         job.setNumReduceTasks(0);
         
         // start the job
