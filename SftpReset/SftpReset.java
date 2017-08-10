@@ -15,6 +15,40 @@ public class SftpReset extends Configured implements Tool {
 
     public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, IntWritable> {
 
+        public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> collector, Reporter reporter) throws IOException {
+
+            // get parameters from the input file
+            String line = value.toString();
+            String[] keyval = line.split("=");
+            switch (keyval[0]) {
+                case "input":
+                    String input = keyval[1];
+                    job.set("com.plasne.SftpReset.input", input);
+                    break;
+                case "output":
+                    String output = keyval[1];
+                    job.set("com.plasne.SftpReset.output", output);
+                    break;
+                case "hostname":
+                    String hostname = keyval[1];
+                    job.set("com.plasne.SftpReset.hostname", hostname);
+                    break;
+                case "username":
+                    String username = keyval[1];
+                    job.set("com.plasne.SftpReset.username", username);
+                    break;
+                case "password":
+                    String password = keyval[1];
+                    job.set("com.plasne.SftpReset.password", password);
+                    break;
+            }
+
+        }
+
+    }
+
+    public static class Reduce extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
+
         // defaults
         private int offset = 0;                             // offset time
         private int roundTo = 0;                            // round to next x minutes
@@ -25,44 +59,17 @@ public class SftpReset extends Configured implements Tool {
         private String password = "";                       // password for SFTP server
 
         public void configure(JobConf job) {
-            offset = job.getInt("offset", 0);
-            roundTo = job.getInt("roundTo", -1);
-            System.out.println ( "read offset: " + offset + ", roundTo: " + roundTo );
+            offset = job.getInt("com.plasne.SftpReset.offset", 0);
+            roundTo = job.getInt("com.plasne.SftpReset.roundTo", -1);
+            input = job.get("com.plasne.SftpReset.input", "");
+            output = job.get("com.plasne.SftpReset.output", "");
+            hostname = job.get("com.plasne.SftpReset.hostname", "");
+            username = job.get("com.plasne.SftpReset.username", "");
+            password = job.get("com.plasne.SftpReset.password", "");
         }
 
-        public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> collector, Reporter reporter) throws IOException {
-
-            // get all variables
-            String line = value.toString();
-            String[] keyval = line.split("=");
-            switch (keyval[0]) {
-                /*
-                case "offset":
-                    offset = Integer.parseInt(keyval[1]);
-                    break;
-                case "roundTo":
-                    roundTo = Integer.parseInt(keyval[1]);
-                    break;
-                */
-                case "input":
-                    input = keyval[1];
-                    break;
-                case "output":
-                    output = keyval[1];
-                    break;
-                case "hostname":
-                    hostname = keyval[1];
-                    break;
-                case "username":
-                    username = keyval[1];
-                    break;
-                case "password":
-                    password = keyval[1];
-                    break;
-            }
-
-            System.out.println ( "line: " + line );
-
+        public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> collector, Reporter reporter) throws IOException {
+            
             // determine if there is enough to execute
             Boolean execute = (
                 input != null && !input.isEmpty() && 
@@ -72,11 +79,10 @@ public class SftpReset extends Configured implements Tool {
                 password != null && !password.isEmpty()
             );
 
-            // execute if requested
+            System.out.println ( "execute? " + execute );
+
+            // execute if there are enough properties
             if (execute) {
-
-                System.out.println ( "used offset: " + offset + ", roundTo: " + roundTo );
-
                 JSch jsch = new JSch();
                 Session session = null;
                 try {
@@ -124,14 +130,6 @@ public class SftpReset extends Configured implements Tool {
 
     }
 
-    public static class Reduce extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
-
-        public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> collector, Reporter reporter) throws IOException {
-            // nothing to do
-        }
-
-    }
-
     public int run(String args[]) throws Exception {
 
         // start new configuration
@@ -149,12 +147,12 @@ public class SftpReset extends Configured implements Tool {
             switch(arg) {
                 case "--offset":
                     offset = Integer.parseInt( args[i + 1] );
-                    job.setInt("offset", offset);
+                    job.setInt("com.plasne.SftpReset.offset", offset);
                     break;
                 case "-r":
                 case "--roundTo":
                     roundTo = Integer.parseInt( args[i + 1] );
-                    job.setInt("roundTo", roundTo);
+                    job.setInt("com.plasne.SftpReset.roundTo", roundTo);
                     roundToWasSet = true;
                     break;
                 case "-i":
