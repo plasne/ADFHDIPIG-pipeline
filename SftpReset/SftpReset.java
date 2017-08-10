@@ -35,6 +35,12 @@ public class SftpReset extends Configured implements Tool {
             String line = value.toString();
             String[] keyval = line.split("=");
             switch (keyval[0]) {
+                case "offset":
+                    input = Integer.parseInt(keyval[1]);
+                    break;
+                case "roundTo":
+                    roundTo = Integer.parseInt(keyval[1]);
+                    break;
                 case "input":
                     input = keyval[1];
                     break;
@@ -130,6 +136,7 @@ public class SftpReset extends Configured implements Tool {
         String output = "";
         Boolean roundToWasSet = false;
         Boolean local = false;
+        Boolean realtime = false;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             switch(arg) {
@@ -151,6 +158,9 @@ public class SftpReset extends Configured implements Tool {
                 case "--output":
                     output = args[i + 1];
                     break;
+                case "--realtime":
+                    realtime = true;
+                    break;
                 case "--debug":
                 case "--local":
                     local = true;
@@ -159,18 +169,23 @@ public class SftpReset extends Configured implements Tool {
         }
 
         // offset + round for output folder
-        if (!roundToWasSet) {
-            throw new Exception("-r or --roundTo must be set.");
+        String output_ts = "";
+        if (realtime) {
+            output_ts = LocalDateTime.now(Clock.systemUTC());
+        } else {
+            if (!roundToWasSet) {
+                throw new Exception("-r or --roundTo must be set.");
+            }
+            LocalDateTime dt_offset = LocalDateTime.now(Clock.systemUTC()).plusMinutes(offset).withSecond(0).withNano(0);
+            LocalDateTime dt_rounded = dt_offset;
+            if (roundTo != 0) {
+                dt_rounded = dt_rounded.plusMinutes( (60 + roundTo - dt_offset.getMinute()) % roundTo);
+            }
+            if (roundTo < 0) {
+                dt_rounded = dt_rounded.plusMinutes( roundTo );
+            }
+            output_ts = dt_rounded.format(DateTimeFormatter.ofPattern(output));
         }
-        LocalDateTime dt_offset = LocalDateTime.now(Clock.systemUTC()).plusMinutes(offset).withSecond(0).withNano(0);
-        LocalDateTime dt_rounded = dt_offset;
-        if (roundTo != 0) {
-            dt_rounded = dt_rounded.plusMinutes( (60 + roundTo - dt_offset.getMinute()) % roundTo);
-        }
-        if (roundTo < 0) {
-            dt_rounded = dt_rounded.plusMinutes( roundTo );
-        }
-        String output_ts = dt_rounded.format(DateTimeFormatter.ofPattern(output));
 
         // define the job
         job.setJobName("sftpreset");
