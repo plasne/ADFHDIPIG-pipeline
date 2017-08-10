@@ -36,7 +36,7 @@ public class SftpReset extends Configured implements Tool {
             String[] keyval = line.split("=");
             switch (keyval[0]) {
                 case "offset":
-                    input = Integer.parseInt(keyval[1]);
+                    offset = Integer.parseInt(keyval[1]);
                     break;
                 case "roundTo":
                     roundTo = Integer.parseInt(keyval[1]);
@@ -171,7 +171,7 @@ public class SftpReset extends Configured implements Tool {
         // offset + round for output folder
         String output_ts = "";
         if (realtime) {
-            output_ts = LocalDateTime.now(Clock.systemUTC());
+            output_ts = LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ofPattern(output));
         } else {
             if (!roundToWasSet) {
                 throw new Exception("-r or --roundTo must be set.");
