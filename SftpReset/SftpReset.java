@@ -36,14 +36,6 @@ public class SftpReset extends Configured implements Tool {
             String line = value.toString();
             String[] keyval = line.split("=");
             switch (keyval[0]) {
-                /*
-                case "offset":
-                    offset = Integer.parseInt(keyval[1]);
-                    break;
-                case "roundTo":
-                    roundTo = Integer.parseInt(keyval[1]);
-                    break;
-                */
                 case "input":
                     input = keyval[1];
                     break;
@@ -200,6 +192,11 @@ public class SftpReset extends Configured implements Tool {
         job.setReducerClass(SftpReset.Reduce.class);
         FileInputFormat.setInputPaths(job, new Path(input));
         FileOutputFormat.setOutputPath(job, new Path(output_ts));
+
+        // ensure 1 map and no reduce
+        job.set("mapreduce.input.fileinputformat.split.minsize", 256 * 1024 * 1024); // 256 MB
+        job.set("mapreduce.input.fileinputformat.split.maxsize", 512 * 1024 * 1024); // 512 MB
+        job.setNumReduceTasks(0);
         
         // start the job
         JobClient.runJob(job);
