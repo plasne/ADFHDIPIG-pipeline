@@ -20,6 +20,35 @@ jar vcf SftpReset.jar com
 
 You will notice that the SftpReset.jar is used in its own compilation. The MapReduce jar needs to have all dependencies self-contained in the JAR. Fortunately the only dependency is Jsch, which I have contained in the "com" folder so it is compiled in the SftpReset.jar each time. You could reference the jsch.jar instead or you could just compile using Jsch in the SftpReset.jar each time.
 
+## Configuration
+
+There is a configuration file (shown below as sftp.txt) that must contain rows like this:
+
+```text
+input=inputfolder
+output='inputfolder-'YYYYMMdd'T'HHmm
+hostname=ftp.server.com
+username=myusername
+password=mypassword
+```
+
+It can optionally also contain rows like this:
+
+```text
+offset=0
+roundTo=60
+```
+
+The data will be used in this way:
+
+* input - This is the path to the folder that will be renamed on the SFTP server. It is the same folder name that will be recreated when the rename is done.
+
+* output - This is the path to what the folder will be renamed to. It must be in a format that the Java DataTimeFormatter can parse. For example, you must use single quotes around any literals.
+
+* hostname - This is the fully qualified host name of the SFTP server.
+
+* username/password  - This is a username and password that can be used to login to the SFTP server and that will have the rights to rename and create folders.
+
 ## Running Local
 
 To test the job, you can run it locally on an HDInsight server by typing the following:
@@ -39,7 +68,7 @@ The parameters are:
   
 * input - This is the file containing the other parameters, most notably the credentials to get to the SFTP site.
 
-* output - This is the folder that will be created for the files output from the MapReduce activity. There won't actually be any data, but you must have this folder specified such that it can be created or the job will fail. Because this folder will need to be created on every run you must have a timeslice in the name so the output must be in a format that can be parsed by the Java DataTimeFromatter. For example, you must use single quotes around any literals.
+* output - This is the folder that will be created for the files output from the MapReduce activity. There won't actually be any data, but you must have this folder specified such that it can be created or the job will fail. Because this folder will need to be created on every run you must have a timeslice in the name so the output must be in a format that can be parsed by the Java DataTimeFormatter. For example, you must use single quotes around any literals.
 
 * local - For some reason I could never determine, the Map and Reduce classes cannot be found by setJarByClass when running local and cannot be found by setJar when running remote (actually this second one is because the file is renamed on import), so flagging it local or not changes the logic on how the JAR is referenced.
 
