@@ -9,8 +9,8 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-String.prototype.formatAsDate = function() {
-    return moment(this, "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ").utc().format("M-D-YY H:mm:ss UTC");
+String.prototype.formatAsDate = function(format = "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ") {
+    return moment(this, format).utc().format("M-D-YY H:mm:ss UTC");
 }
 
 function isProcessing(state) {
@@ -21,10 +21,10 @@ function isProcessing(state) {
     }
 }
 
-function query(table, datasets) {
+function query(table, dataset, start) {
     isProcessing(true);
     $.ajax({
-        url: "/slices?datasets=" + datasets,
+        url: "/slice?dataset=" + dataset + "&start=" + start,
         json: true
     }).done(function(logs, status, xhr) {
         table.clear();
@@ -44,47 +44,34 @@ function field(name, value) {
     return field;
 }
 
+function requestLogs(a, id, start) {
+    $.ajax({
+        url: "/logs?runId=" + id + "&start=" + start,
+        json: true
+    }).done(function(logs, status, xhr) {
+        const parent = $(a).parent();
+        parent.empty();
+        logs.forEach(function(log) {
+            $("<a />").attr("href", log.url).text(log.name).appendTo(parent);
+            parent.append("&nbsp;&nbsp;&nbsp;");
+        });
+    }).fail(function(xhr, status, error) {
+        alert("fail: " + status);
+    });
+}
+
 function detail(data) {
 
     // get the fetching container
     const container = $("<div />");
     const outer = $("<div />").addClass("detail").appendTo(container);
     const inner = $("<div />").addClass("detail-items").appendTo(outer);
-    $("<div />").text("Fetching details, please wait...").appendTo(inner);
 
-    // request the data
-    $.ajax({
-        url: "/slice?dataset=" + data.dataset + "&start=" + moment(data.start).valueOf(),
-        json: true,
-        cache: false
-    }).done(function(slices, status, xhr) {
-        const inner = $("div.detail-items");
-        inner.empty();
-        if (slices.length > 0) {
-            const slice = slices[slices.length - 1];
-            
-            // show detail fields for the last entry
-            field("Type", slice.type).appendTo(inner);
-            field("Status", slice.status).appendTo(inner);
-            field("Processing Start Time", slice.processingStartTime.formatAsDate()).appendTo(inner);
-            field("Processing End Time", slice.processingEndTime.formatAsDate()).appendTo(inner);
-            field("% Complete", slice.percentComplete).appendTo(inner);
-            field("Retry Attempt", slice.retryAttempt).appendTo(inner);
-            if (slice.errorMessage) field("Error Message", slice.errorMessage).appendTo(inner);
-            field("Has Logs?", slice.hasLogs).appendTo(inner);
-            if (slices.length > 1) {
-                field("More", "<a id='detail-items-more'>view all executions</a>").appendTo(inner);
-                $("#detail-items-more").click(function() {
-                    window.open("/slices.html?pipeline=" + slice.pipelineName + "&activity=" + slice.activityName + "&dataset=" + data.dataset + "&start=" + moment(data.start).valueOf());
-                });
-            }
-
-        } else {
-            $("<div />").text("There are no executions.").appendTo(inner);
-        }
-    }).fail(function(error) {
-        alert(error);
-    });
+    // show details
+    if (data.errorMessage) field("Error Message", data.errorMessage).appendTo(inner);
+    if (data.hasLogs) {
+        field("Logs", "<a href='javascript:void(0);' onclick='requestLogs(this, \"" + data.id + "\", " + moment(data.dataSliceStart, "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ").valueOf() + ");'>request logs</a>").appendTo(inner);
+    }
 
     return container.html();
 }
@@ -95,8 +82,8 @@ function build() {
     const table = $("#logs > table").DataTable({
         columns: [
             {
-                title: "Dataset",
-                data: "dataset"
+                title: "Type",
+                data: "type"
             },
             {
                 title: "Status",
@@ -105,61 +92,49 @@ function build() {
                 className: "centered"
             },
             {
-                title: "State",
-                data: "state",
+                title: "Retry Attempt",
+                data: "retryAttempt",
                 width: "60px",
                 className: "centered"
             },
             {
-                title: "Retry Count",
-                data: "retryCount",
-                width: "20px",
+                title: "% Complete",
+                data: "percentComplete",
+                width: "60px",
                 className: "centered"
             },
             {
-                title: "Long Retry Count",
-                data: "longRetryCount",
-                width: "20px",
+                title: "Process Start",
+                data: "processingStartTime",
+                width: "190px",
+                render: function(data, type, row) {
+                    if (type === "display") {
+                        return data.formatAsDate();
+                    } else {
+                        return data;
+                    }
+                }
+            },
+            {
+                title: "Process End",
+                data: "processingEndTime",
+                width: "190px",
+                render: function(data, type, row) {
+                    if (type === "display") {
+                        return data.formatAsDate();
+                    } else {
+                        return data;
+                    }
+                }
+            },
+            {
+                title: "Logs?",
+                data: "hasLogs",
+                width: "60px",
                 className: "centered"
-            },
-            {
-                title: "Updated",
-                data: "statusUpdateTimestamp",
-                width: "190px",
-                render: function(data, type, row) {
-                    if (type === "display") {
-                        return data.formatAsDate();
-                    } else {
-                        return data;
-                    }
-                }
-            },
-            {
-                title: "Window Start",
-                data: "start",
-                width: "190px",
-                render: function(data, type, row) {
-                    if (type === "display") {
-                        return data.formatAsDate();
-                    } else {
-                        return data;
-                    }
-                }
-            },
-            {
-                title: "Window End",
-                data: "end",
-                width: "190px",
-                render: function(data, type, row) {
-                    if (type === "display") {
-                        return data.formatAsDate();
-                    } else {
-                        return data;
-                    }
-                }
             }
         ],
-        "order": [[ 6, "desc" ]],
+        "order": [[ 4, "desc" ]],
         processing: true
     });
 
@@ -199,12 +174,14 @@ $(document).ready(function() {
     // get parameters
     const pipeline = getParameterByName("pipeline");
     const activity = getParameterByName("activity");
-    const datasets = getParameterByName("datasets");
+    const dataset = getParameterByName("dataset");
+    const start = getParameterByName("start");
 
     // headers
     $("#pipeline-name").text( pipeline );
     $("#activity-name").text( activity );
-    $("#datasets-name").text( datasets );
+    $("#dataset-name").text( dataset );
+    $("#start-name").text( start.formatAsDate("x") );
 
     // build the table
     const table = build();
@@ -220,6 +197,6 @@ $(document).ready(function() {
     }
 
     // query
-    query(table, datasets);
+    query(table, dataset, start);
 
 });

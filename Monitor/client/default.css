@@ -11,7 +11,7 @@ html, body {
 }
 
 #pipelines > div.pipeline {
-    margin-bottom: 1vh;
+    margin-bottom: 2vh;
     display: flex;
     flex-direction: row;
     height: 10vh;
@@ -45,7 +45,7 @@ html, body {
 }
 
 #pipelines > div.pipeline > div.activity > div.bubble {
-    top: 0vmax;
+    top: -2vmax;
 }
 
 #pipelines > div.pipeline > div.activity > div.bubble.success {
@@ -61,7 +61,7 @@ html, body {
 }
 
 #pipelines > div.pipeline > div.activity > div.counter {
-    top: 0.3vmax;
+    top: calc(-2.0vmax + 0.3vmax);
     font-size: 1.0vmax;
     color: white;
 }

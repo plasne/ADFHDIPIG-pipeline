@@ -22,6 +22,7 @@ function drawCircle(color) {
 
 function getPipelines() {
     return new Promise(function(resolve, reject) {
+        //req.hasRight("read").then(token => {
 
         // read the list of pipelines
         $.ajax({
@@ -55,6 +56,9 @@ function getPipelines() {
                         case "HDInsightPig":
                             $("<img />").attr({ src: "img/pig.png" }).appendTo(activity_icon_div);
                             break;
+                        case "HDInsightMapReduce":
+                            $("<img />").attr({ src: "img/mapreduce.png" }).appendTo(activity_icon_div);
+                            break;
                     }
                     const activity_name_div = $("<div />").addClass("name").text(activity.name).appendTo(activity_div);
 
@@ -81,6 +85,8 @@ function getPipelines() {
                         const dataset = datasets.find(function(o) { return o.name == output.name; });
                         if (dataset) {
                             dataset.success.push( activity_success_counter_div );
+                            dataset.running.push( activity_running_counter_div );
+                            dataset.failure.push( activity_failure_counter_div );
                         } else {
                             datasets.push({
                                 name: output.name,
@@ -93,7 +99,7 @@ function getPipelines() {
 
                     // make it clickable
                     $(activity_div).click(function() {
-                        const dataset_names = datasets.map(function(dataset) { return dataset.name });
+                        const dataset_names = activity.outputs.map(function(output) { return output.name });
                         window.open("/adf-logs.html?pipeline=" + pipeline.name + "&activity=" + activity.name + "&datasets=" + dataset_names, "_blank");
                     });
 
