@@ -92,33 +92,41 @@ app.get("/", (req, res) => {
 
 // get a list of pipelines
 app.get("/pipelines", (req, res) => {
+    req.hasRight("read").then(() => {
 
-    // authenticate against Azure APIs
-    const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
-    context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
-        if (!err) {
+        // authenticate against Azure APIs
+        const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
+        context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
+            if (!err) {
 
-            const resourceGroup = "pelasne-adf";
-            const dataFactory = "pelasne-adf";
+                const resourceGroup = "pelasne-adf";
+                const dataFactory = "pelasne-adf";
 
-            // get the pipelines
-            request.get({
-                uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/Microsoft.DataFactory/datafactories/${dataFactory}/datapipelines?api-version=${adf_version}`,
-                headers: { Authorization: "Bearer " + tokenResponse.accessToken },
-                json: true
-            }, (err, response, body) => {
-                if (!err && response.statusCode == 200) {
-                    res.send(response.body.value);
-                } else {
-                    if (err) { console.error("err(201): " + err) } else { console.error("err(202) [" + response.statusCode + "]: " + response.statusMessage); console.log(body); };
-                }
-            });
+                // get the pipelines
+                request.get({
+                    uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/Microsoft.DataFactory/datafactories/${dataFactory}/datapipelines?api-version=${adf_version}`,
+                    headers: { Authorization: "Bearer " + tokenResponse.accessToken },
+                    json: true
+                }, (err, response, body) => {
+                    if (!err && response.statusCode == 200) {
+                        res.send(response.body.value);
+                    } else {
+                        if (err) { console.error("err(201): " + err) } else { console.error("err(202) [" + response.statusCode + "]: " + response.statusMessage); console.log(body); };
+                    }
+                });
 
+            } else {
+                res.status(500).send("err(200): Server calls could not authenticate.");
+            }
+        });
+
+    }, reason => {
+        if (reason === "authentication") {
+            res.redirect("/login");
         } else {
-            res.status(500).send("err(200): Server calls could not authenticate.");
+            res.status(401);
         }
     });
-
 });
 
 // get a list of slices
