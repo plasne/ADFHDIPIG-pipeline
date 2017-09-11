@@ -92,19 +92,16 @@ app.get("/", (req, res) => {
 
 // get a list of pipelines
 app.get("/pipelines", (req, res) => {
-    req.hasRight("read").then(() => {
+    req.hasRight("read").then(token => {
 
         // authenticate against Azure APIs
         const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
         context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
             if (!err) {
 
-                const resourceGroup = "pelasne-adf";
-                const dataFactory = "pelasne-adf";
-
                 // get the pipelines
                 request.get({
-                    uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/Microsoft.DataFactory/datafactories/${dataFactory}/datapipelines?api-version=${adf_version}`,
+                    uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${token.resourceGroup}/providers/Microsoft.DataFactory/datafactories/${token.dataFactory}/datapipelines?api-version=${adf_version}`,
                     headers: { Authorization: "Bearer " + tokenResponse.accessToken },
                     json: true
                 }, (err, response, body) => {
@@ -124,7 +121,7 @@ app.get("/pipelines", (req, res) => {
         if (reason === "authentication") {
             res.redirect("/login");
         } else {
-            res.status(401);
+            res.status(401).send("unauthorized");
         }
     });
 });
@@ -439,7 +436,8 @@ app.get("/token", function(req, res) {
                             sub: tokenResponse.userId,
                             scope: membership,
                             rights: rights,
-                            subKey: "subKey"
+                            resourceGroup: "pelasne-adf",
+                            dataFactory: "pelasne-adf"
                         };
 
                         // build the JWT
