@@ -420,6 +420,8 @@ app.get("/token", function(req, res) {
                             }
                         });
 
+                        console.log("space: 1");
+
                         // define rights
                         const rights = [];
                         if (membership.indexOf("admins") > -1) {
@@ -440,6 +442,8 @@ app.get("/token", function(req, res) {
                             dataFactory: "pelasne-adf"
                         };
 
+                        console.log(claims);
+
                         // build the JWT
                         const duration = 4 * 60 * 60 * 1000; // 4 hours
                         const jwt = nJwt.create(claims, jwtKey);
@@ -451,12 +455,7 @@ app.get("/token", function(req, res) {
                         });
 
                         // redirect
-                        if (req.cookies.redirect) {
-                            res.cookie("redirect", "", { expires: new Date() });
-                            res.redirect(req.cookies.redirect);
-                        } else {
-                            res.redirect("/pipelines.html");
-                        }
+                        res.redirect("/pipelines.html");
 
                     } else {
                         res.status(401).send("Unauthorized (membership): " + ((membershipError) ? membershipError : response.statusCode + ", " + body));
