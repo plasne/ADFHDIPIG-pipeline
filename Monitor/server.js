@@ -21,6 +21,19 @@ const clientId = config.get("internal.clientId");
 const clientSecret = config.get("internal.clientSecret");
 const adf_version = config.get("internal.adf_version");
 
+// extensions
+Array.prototype.hasIntersection = function(arr) {
+    if (this.length < 1 || arr.length < 1) return false;
+
+    for (let i = 0; i < this.length; i++) {
+        const src = this[i];
+        const found = arr.filter(dst => { return src == dst }); // so the comparison isn't type-specific
+        if (found.length > 0) return true;
+    }
+
+    return false;
+}
+
 // instantiate express
 const app = express();
 app.use(cookieParser());
@@ -420,8 +433,6 @@ app.get("/token", function(req, res) {
                             }
                         });
 
-                        console.log("space: 1");
-
                         // define rights
                         const rights = [];
                         if (membership.indexOf("admins") > -1) {
@@ -441,8 +452,6 @@ app.get("/token", function(req, res) {
                             resourceGroup: "pelasne-adf",
                             dataFactory: "pelasne-adf"
                         };
-
-                        console.log(claims);
 
                         // build the JWT
                         const duration = 4 * 60 * 60 * 1000; // 4 hours
