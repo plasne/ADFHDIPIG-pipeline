@@ -449,7 +449,7 @@ app.get("/token", function(req, res) {
                             res.cookie("redirect", "", { expires: new Date() });
                             res.redirect(req.cookies.redirect);
                         } else {
-                            res.redirect("/applications.html");
+                            res.redirect("/pipelines.html");
                         }
 
                     } else {

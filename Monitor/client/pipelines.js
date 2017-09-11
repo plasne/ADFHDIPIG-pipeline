@@ -22,7 +22,6 @@ function drawCircle(color) {
 
 function getPipelines() {
     return new Promise(function(resolve, reject) {
-        //req.hasRight("read").then(token => {
 
         // read the list of pipelines
         $.ajax({
