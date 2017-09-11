@@ -323,7 +323,7 @@ app.get("/instance", (req, res) => {
         const service = azure.createTableService(account, key);
 
         // ensure the table exists
-        const table = config.get("storage.table");
+        const table = config.get("storage.table_instance");
         createTableIfNotExists(service, table).then(result => {
 
             // read all instance logs

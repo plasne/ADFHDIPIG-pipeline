@@ -3,7 +3,7 @@
         "account": "<storage_account>",
         "key": "<storage_account_key>",
         "table_instance": "LoadLogs",
-        "table_debug": "Logs"
+        "table_customers": "Customers"
     },
     "internal": {
         "directory": "<directory>.onmicrosoft.com",
@@ -17,7 +17,6 @@
         "clientSecret": "<client_secret>",
         "redirectUri": "<redirect_url>",
         "jwtKey": "<jwt_encryption_key>",
-        "issuer": "<issuer_uri>",
-        "groupPrefix": "<group_prefix>"
+        "issuer": "<issuer_uri>"
     }
 }
