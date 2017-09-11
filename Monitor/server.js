@@ -50,6 +50,8 @@ express.request.hasRights = function(rights) {
     return new Promise((resolve, reject) => {
         const req = this;
         const token = req.accessToken();
+        console.log("+++ hasRights : start");
+        console.log("token: " + token);
         if (token) {
             nJwt.verify(token, jwtKey, function(err, verified) {
                 if (!err) {
@@ -60,9 +62,12 @@ express.request.hasRights = function(rights) {
                             reject("authorization");
                         }
                     } else {
+                        console.log("verified.body.rights: " + verified.body.rights + "; rights: " + rights);
                         if (verified.body.rights.indexOf(rights) > -1) {
+                            console.log("verified...");
                             resolve(verified);
                         } else {
+                            console.log("authorization failure");
                             reject("authorization");
                         }
                     }
@@ -114,7 +119,7 @@ app.get("/pipelines", (req, res) => {
 
                 // get the pipelines
                 request.get({
-                    uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${token.resourceGroup}/providers/Microsoft.DataFactory/datafactories/${token.dataFactory}/datapipelines?api-version=${adf_version}`,
+                    uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${token.body.resourceGroup}/providers/Microsoft.DataFactory/datafactories/${token.body.dataFactory}/datapipelines?api-version=${adf_version}`,
                     headers: { Authorization: "Bearer " + tokenResponse.accessToken },
                     json: true
                 }, (err, response, body) => {
