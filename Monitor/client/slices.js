@@ -45,19 +45,26 @@ function field(name, value) {
 }
 
 function requestLogs(a, id, start) {
+
+    // fetching...
+    const parent = $(a).parent();
+    parent.empty();
+    $("fetching...").appendTo(parent);
+
+    // get the log URLs
     $.ajax({
-        url: "/logs?runId=" + id + "&start=" + start,
+        url: `/logs?runId=${id}&start=${start}`,
         json: true
     }).done(function(logs, status, xhr) {
-        const parent = $(a).parent();
         parent.empty();
         logs.forEach(function(log) {
             $("<a />").attr("href", log.url).text(log.name).appendTo(parent);
             parent.append("&nbsp;&nbsp;&nbsp;");
         });
     }).fail(function(xhr, status, error) {
-        alert("fail: " + status);
+        alert(`fail: ${status}`);
     });
+
 }
 
 function detail(data) {

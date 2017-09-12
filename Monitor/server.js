@@ -272,6 +272,7 @@ app.get("/slice", (req, res) => {
 // get a list of all log files that can be downloaded
 app.get("/logs", (req, res) => {
     req.hasRight("view").then(token => {
+        const dataset = req.query.dataset;
         const runId = req.query.runId;
         const start = parseInt(req.query.start);
         if (runId && !isNaN(start)) {
@@ -304,14 +305,23 @@ app.get("/logs", (req, res) => {
                                         if (parseInt(blob.Properties["Content-Length"]) > 0) {
                                             files.push({
                                                 name: blob.Name,
-                                                url: components.host + "/" + components.container + "/" + blob.Name + "?" + components.token
+                                                url: `${components.host}/${components.container}/${blob.Name}?${components.token}`
                                             });
                                         }
                                     });
+                                    if (dataset) {
+                                        const customerId = "HSKY";
+                                        const slice = new moment(start).utc().format("YYYYMMDDTHHmm");
+                                        const instanceId = `${customerId}-${dataset}-${slice}`;
+                                        files.push({
+                                            name: instanceId,
+                                            url: `/instance?instanceId=${instanceId}`
+                                        });
+                                    }
                                     res.send(files);
 
                                 } else {
-                                    res.status(500).send("err(500): " + response.statusCode + ": " + response.statusMessage);
+                                    res.status(500).send(`err(500): ${response.statusCode}: ${response.statusMessage}`);
                                 }
                             });
 
@@ -400,7 +410,7 @@ app.get("/instance", (req, res) => {
                     file.push(null);
                     res.writeHead(200, {
                         "Content-Type": "application/csv",
-                        "Content-Disposition": "attachment; filename=\"" + instanceId + ".csv\""
+                        "Content-Disposition": `attachment; filename=\"${instanceId}.csv\"`
                     });
                     file.pipe(res);
 

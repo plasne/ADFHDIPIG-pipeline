@@ -6,8 +6,8 @@ There are 2 Azure Active Directory Applications you have to create in order for 
 
 ## TODO
 
-* fix the formatting of pipelines
-* fix formatting of view all executions
+* add the instance logs
+* remove the timestamp
 * finish this documentation
 
 ## Creating the internal application
