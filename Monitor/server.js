@@ -72,6 +72,7 @@ express.request.hasRights = function(rights) {
                         }
                     }
                 } else {
+                    console.error("auth: " + err);
                     reject("authentication", err);
                 }
             });
@@ -135,11 +136,11 @@ app.get("/pipelines", (req, res) => {
             }
         });
 
-    }, reason => {
+    }, (reason, ex) => {
         if (reason === "authentication") {
             res.redirect("/login");
         } else {
-            res.status(401).send("unauthorized");
+            res.status(401).send(ex);
         }
     });
 });
