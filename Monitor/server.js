@@ -162,7 +162,7 @@ app.get("/slices", (req, res) => {
                 if (!err) {
 
                     // determine timestamps
-                    const now = new Date("2017-05-12");
+                    const now = new Date("2017-05-14T00:00:00Z");
                     const startTimestamp = new Date(now - 96 * 60 * 60 * 1000).toISOString(); // 96 hours back
                     const endTimestamp = now.toISOString();
 
