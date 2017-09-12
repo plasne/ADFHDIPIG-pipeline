@@ -120,8 +120,16 @@ app.get("/pipelines", (req, res) => {
                     json: true
                 }, (err, response, body) => {
                     if (!err && response.statusCode == 200) {
-                        console.log(response.body.value);
-                        res.send(response.body.value);
+
+                        // only show pipelines that the customer has access to
+                        const pipelines = [];
+                        for (let pipeline of response.body.value) {
+                            if (token.body.pipelines.indexOf(pipeline.name) > -1) {
+                                pipelines.push(pipeline);
+                            }
+                        }
+                        res.send(pipelines);
+
                     } else {
                         if (err) { console.error("err(201): " + err) } else { console.error("err(202) [" + response.statusCode + "]: " + response.statusMessage); console.log(body); };
                     }
@@ -474,7 +482,8 @@ app.get("/token", function(req, res) {
                             scope: membership,
                             rights: rights,
                             resourceGroup: "pelasne-adf",
-                            dataFactory: "pelasne-adf"
+                            dataFactory: "pelasne-adf",
+                            pipelines: [ "Normalize", "SftpReset-Pipeline" ]
                         };
 
                         // build the JWT
