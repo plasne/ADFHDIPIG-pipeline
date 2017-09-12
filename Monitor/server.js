@@ -15,6 +15,7 @@ const qs = require("querystring");
 const nJwt = require("njwt");
 
 // global variables
+const jwtKey = config.get("external.jwtKey");
 const directory = config.get("internal.directory");
 const subscriptionId = config.get("internal.subscriptionId");
 const clientId = config.get("internal.clientId");
@@ -409,7 +410,6 @@ app.get("/token", function(req, res) {
     const clientId = config.get("external.clientId");
     const clientSecret = config.get("external.clientSecret");
     const redirectUri = config.get("external.redirectUri");
-    const jwtKey = config.get("external.jwtKey");
     const issuer = config.get("external.issuer");
     const groupPrefix = config.get("external.groupPrefix");
 
