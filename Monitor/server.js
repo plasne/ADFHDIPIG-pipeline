@@ -51,36 +51,28 @@ express.request.hasRights = function(rights) {
     return new Promise((resolve, reject) => {
         const req = this;
         const token = req.accessToken();
-        console.log("+++ hasRights : start");
-        console.log("token: " + token);
         if (token) {
             nJwt.verify(token, jwtKey, function(err, verified) {
                 if (!err) {
-                    console.log("OK");
                     if (Array.isArray(rights)) {
-                        console.log("is array");
                         if (verified.body.rights.hasIntersection(rights)) {
                             resolve(verified);
                         } else {
-                            reject("authorization");
+                            reject("authorization", new Error("does not have required rights"));
                         }
                     } else {
-                        console.log("verified.body.rights: " + verified.body.rights + "; rights: " + rights);
                         if (verified.body.rights.indexOf(rights) > -1) {
-                            console.log("verified...");
                             resolve(verified);
                         } else {
-                            console.log("authorization failure");
-                            reject("authorization");
+                            reject("authorization", new Error("does not have required rights"));
                         }
                     }
                 } else {
-                    console.error("auth: " + err);
                     reject("authentication", err);
                 }
             });
         } else {
-            reject("authentication");
+            reject("authentication", new Error("no access token was provided"));
         }
     });
 };
@@ -128,6 +120,7 @@ app.get("/pipelines", (req, res) => {
                     json: true
                 }, (err, response, body) => {
                     if (!err && response.statusCode == 200) {
+                        console.log(response.body.value);
                         res.send(response.body.value);
                     } else {
                         if (err) { console.error("err(201): " + err) } else { console.error("err(202) [" + response.statusCode + "]: " + response.statusMessage); console.log(body); };
@@ -150,223 +143,246 @@ app.get("/pipelines", (req, res) => {
 
 // get a list of slices
 app.get("/slices", (req, res) => {
-    let datasets = req.query.datasets;
-    if (datasets) {
-        datasets = datasets.toArrayOfStrings();
+    req.hasRight("read").then(token => {
+        let datasets = req.query.datasets;
+        if (datasets) {
+            datasets = datasets.toArrayOfStrings();
 
-        // authenticate against Azure APIs
-        const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
-        context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
-            if (!err) {
+            // authenticate against Azure APIs
+            const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
+            context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
+                if (!err) {
 
-                const resourceGroup = "pelasne-adf";
-                const dataFactory = "pelasne-adf";
+                    // determine timestamps
+                    const now = new Date();
+                    const startTimestamp = new Date(now - 96 * 60 * 60 * 1000).toISOString(); // 96 hours back
+                    const endTimestamp = now.toISOString();
 
-                const now = new Date("2017-05-14T00:00:00Z");
-                const startTimestamp = new Date(now - 96 * 60 * 60 * 1000).toISOString(); // 96 hours back
-                const endTimestamp = now.toISOString();
-
-                const slices = [];
-
-                // build a pool of queries to get data on all the specified datasets
-                let index = 0;
-                const pool = new promisePool(() => {
-                    if (index < datasets.length) {
-                        const dataset = datasets[index];
-                        index++;
-                        return new Promise((resolve, reject) => {
-                            request.get({
-                                uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/Microsoft.DataFactory/datafactories/${dataFactory}/datasets/${dataset}/slices?start=${startTimestamp}&end=${endTimestamp}&api-version=${adf_version}`,
-                                headers: { Authorization: "Bearer " + tokenResponse.accessToken },
-                                json: true
-                            }, (err, response, body) => {
-                                if (!err && response.statusCode == 200) {
-                                    response.body.value.forEach(slice => {
-                                        slice.dataset = dataset;
-                                        slices.push(slice);
-                                    });
-                                    resolve();
-                                } else {
-                                    reject( err || new Error(response.body) );
-                                }
+                    // build a pool of queries to get data on all the specified datasets
+                    const slices = [];
+                    let index = 0;
+                    const pool = new promisePool(() => {
+                        if (index < datasets.length) {
+                            const dataset = datasets[index];
+                            index++;
+                            return new Promise((resolve, reject) => {
+                                request.get({
+                                    uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${token.body.resourceGroup}/providers/Microsoft.DataFactory/datafactories/${token.body.dataFactory}/datasets/${dataset}/slices?start=${startTimestamp}&end=${endTimestamp}&api-version=${adf_version}`,
+                                    headers: { Authorization: "Bearer " + tokenResponse.accessToken },
+                                    json: true
+                                }, (err, response, body) => {
+                                    if (!err && response.statusCode == 200) {
+                                        response.body.value.forEach(slice => {
+                                            slice.dataset = dataset;
+                                            slices.push(slice);
+                                        });
+                                        resolve();
+                                    } else {
+                                        reject( err || new Error(response.body) );
+                                    }
+                                });
                             });
-                        });
-                    } else {
-                        return null;
-                    }
-                }, 4);
-                
-                // process the queries 4 at a time and when done send the results
-                pool.start().then(() => {
-                    res.send(slices);
-                }, error => {
-                    res.status(500).send("err(300): " + error.message);
-                });
+                        } else {
+                            return null;
+                        }
+                    }, 4);
+                    
+                    // process the queries 4 at a time and when done send the results
+                    pool.start().then(() => {
+                        res.send(slices);
+                    }, error => {
+                        res.status(500).send("err(300): " + error.message);
+                    });
 
-            } else {
-                res.status(500).send("err(200): Server calls could not authenticate.");
-            }
-        });
+                } else {
+                    res.status(500).send("err(200): Server calls could not authenticate.");
+                }
+            });
 
-    } else {
-        res.status(400).send("err(300): You must supply a dataset parameter.");
-    }
+        } else {
+            res.status(400).send("err(300): You must supply a dataset parameter.");
+        }
+    }, (reason, ex) => {
+        if (reason === "authentication") {
+            res.redirect("/login");
+        } else {
+            res.status(401).send(ex);
+        }
+    });
 });
 
 // get details on a specific slice run
 app.get("/slice", (req, res) => {
-    const dataset = req.query.dataset;
-    const start = parseInt(req.query.start);
-    if (dataset && !isNaN(start)) {
-        const startTimestamp = new moment(start).utc().format("YYYY-MM-DDTHH:mm:ss") + ".0000000";
+    req.hasRight("read").then(token => {
+        const dataset = req.query.dataset;
+        const start = parseInt(req.query.start);
+        if (dataset && !isNaN(start)) {
+            const startTimestamp = new moment(start).utc().format("YYYY-MM-DDTHH:mm:ss") + ".0000000";
 
-        // authenticate against Azure APIs
-        const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
-        context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
-            if (!err) {
+            // authenticate against Azure APIs
+            const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
+            context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
+                if (!err) {
 
-                const resourceGroup = "pelasne-adf";
-                const dataFactory = "pelasne-adf";
+                    // query for slice details
+                    request.get({
+                        uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${token.body.resourceGroup}/providers/Microsoft.DataFactory/datafactories/${token.body.dataFactory}/datasets/${dataset}/sliceruns?startTime=${startTimestamp}&api-version=${adf_version}`,
+                        headers: { "Authorization": "Bearer " + tokenResponse.accessToken },
+                        json: true
+                    }, (err, response, body) => {
+                        if (!err && response.statusCode == 200) {
+                            res.send(response.body.value);
+                        } else {
+                            res.status(500).send("err(400): " + (err || JSON.stringify(response.body)));
+                        }
+                    });
 
-                request.get({
-                    uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/Microsoft.DataFactory/datafactories/${dataFactory}/datasets/${dataset}/sliceruns?startTime=${startTimestamp}&api-version=${adf_version}`,
-                    headers: { "Authorization": "Bearer " + tokenResponse.accessToken },
-                    json: true
-                }, (err, response, body) => {
-                    if (!err && response.statusCode == 200) {
-                        res.send(response.body.value);
-                    } else {
-                        res.status(500).send("err(400): " + (err || JSON.stringify(response.body)));
-                    }
-                });
+                } else {
+                    res.status(500).send("err(200): Server calls could not authenticate.");
+                }
+            });
 
-            } else {
-                res.status(500).send("err(200): Server calls could not authenticate.");
-            }
-        });
-
-    } else {
-        res.status(400).send("err(300): You must supply a dataset and start parameter.");
-    }
+        } else {
+            res.status(400).send("err(300): You must supply a dataset and start parameter.");
+        }
+    }, (reason, ex) => {
+        if (reason === "authentication") {
+            res.redirect("/login");
+        } else {
+            res.status(401).send(ex);
+        }
+    });
 });
 
 // get a list of all log files that can be downloaded
 app.get("/logs", (req, res) => {
-    const runId = req.query.runId;
-    const start = parseInt(req.query.start);
-    if (runId && !isNaN(start)) {
-        const startTimestamp = new moment(start).utc().format("YYYY-MM-DDTHH:mm:ss") + ".0000000";
+    req.hasRight("read").then(token => {
+        const runId = req.query.runId;
+        const start = parseInt(req.query.start);
+        if (runId && !isNaN(start)) {
+            const startTimestamp = new moment(start).utc().format("YYYY-MM-DDTHH:mm:ss") + ".0000000";
 
-        // authenticate against Azure APIs
-        const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
-        context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
-            if (!err) {
+            // authenticate against Azure APIs
+            const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
+            context.acquireTokenWithClientCredentials("https://management.core.windows.net/", clientId, clientSecret, function(err, tokenResponse) {
+                if (!err) {
 
-                const resourceGroup = "pelasne-adf";
-                const dataFactory = "pelasne-adf";
+                    // request access to log files
+                    request.get({
+                        uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${token.body.resourceGroup}/providers/Microsoft.DataFactory/datafactories/${token.body.dataFactory}/runs/${runId}/logInfo?start${startTimestamp}&api-version=${adf_version}`,
+                        headers: { "Authorization": "Bearer " + tokenResponse.accessToken },
+                        json: true
+                    }, (err, response, body) => {
+                        if (!err && response.statusCode == 200) {
 
-                request.get({
-                    uri: `https://management.azure.com/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/Microsoft.DataFactory/datafactories/${dataFactory}/runs/${runId}/logInfo?start${startTimestamp}&api-version=${adf_version}`,
-                    headers: { "Authorization": "Bearer " + tokenResponse.accessToken },
-                    json: true
-                }, (err, response, body) => {
-                    if (!err && response.statusCode == 200) {
+                            // list all log files
+                            const components = WasbSasUrlToComponents(response.body);
+                            const blobsvc = azure.createBlobServiceWithSas(components.host, components.token);
+                            blobsvc.listBlobsSegmented(components.container, null, {
+                                maxResults: 100
+                            }, function(err, result, response) {
+                                if (!err && response.statusCode == 200) {
 
-                        const components = WasbSasUrlToComponents(response.body);
-                        const blobsvc = azure.createBlobServiceWithSas(components.host, components.token);
+                                    // return a list of log files
+                                    const files = [];
+                                    response.body.EnumerationResults.Blobs.Blob.forEach(blob => {
+                                        if (parseInt(blob.Properties["Content-Length"]) > 0) {
+                                            files.push({
+                                                name: blob.Name,
+                                                url: components.host + "/" + components.container + "/" + blob.Name + "?" + components.token
+                                            });
+                                        }
+                                    });
+                                    res.send(files);
 
-                        blobsvc.listBlobsSegmented(components.container, null, {
-                            maxResults: 100
-                        }, function(err, result, response) {
-                            if (!err && response.statusCode == 200) {
+                                } else {
+                                    res.status(500).send("err(500): " + response.statusCode + ": " + response.statusMessage);
+                                }
+                            });
 
-                                // return a list of log files
-                                const files = [];
-                                response.body.EnumerationResults.Blobs.Blob.forEach(blob => {
-                                    if (parseInt(blob.Properties["Content-Length"]) > 0) {
-                                        files.push({
-                                            name: blob.Name,
-                                            url: components.host + "/" + components.container + "/" + blob.Name + "?" + components.token
-                                        });
-                                    }
-                                });
-                                res.send(files);
+                        } else {
+                            res.status(500).send("err(400): " + (err || JSON.stringify(response.body)));
+                        }
+                    });
 
-                            } else {
-                                res.status(500).send("err(500): " + response.statusCode + ": " + response.statusMessage);
-                            }
-                        });
+                } else {
+                    res.status(500).send("err(200): Server calls could not authenticate.");
+                }
+            });
 
-
-                        //res.send(response.body);
-                    } else {
-                        res.status(500).send("err(400): " + (err || JSON.stringify(response.body)));
-                    }
-                });
-
-            } else {
-                res.status(500).send("err(200): Server calls could not authenticate.");
-            }
-        });
-
-    } else {
-        res.status(400).send("err(300): You must supply a runId and start parameter.");
-    }
+        } else {
+            res.status(400).send("err(300): You must supply a runId and start parameter.");
+        }
+    }, (reason, ex) => {
+        if (reason === "authentication") {
+            res.redirect("/login");
+        } else {
+            res.status(401).send(ex);
+        }
+    });
 });
 
 // get instance logs
 //   NOTE: instanceId = <customerId>-<activityName>-<sliceStart>
 //     ex:              HSKY-NormalizeUsingPig-20170324T1300
 app.get("/instance", (req, res) => {
-    const instanceId = req.query.instanceId;
-    if (instanceId) {
+    req.hasRight("read").then(token => {
+        const instanceId = req.query.instanceId;
+        if (instanceId) {
 
-        // instantiate the table service
-        const account = config.get("storage.account");
-        const key = config.get("storage.key");
-        const service = azure.createTableService(account, key);
+            // instantiate the table service
+            const account = config.get("storage.account");
+            const key = config.get("storage.key");
+            const service = azure.createTableService(account, key);
 
-        // ensure the table exists
-        const table = config.get("storage.table_instance");
-        createTableIfNotExists(service, table).then(result => {
+            // ensure the table exists
+            const table = config.get("storage.table_instance");
+            createTableIfNotExists(service, table).then(result => {
 
-            // read all instance logs
-            queryForAllInstances(service, instanceId).then(entries => {
-                const output = entries.map(entry => {
-                    return {
-                        index: entry.RowKey._,
-                        ts: entry.Timestamp._,
-                        level: entry.Level._,
-                        msg: entry.Message._,
-                        apk: entry.AssociatedPK._,
-                        ark: entry.AssociatedRK._
-                    };
+                // read all instance logs
+                queryForAllInstances(service, instanceId).then(entries => {
+                    const output = entries.map(entry => {
+                        return {
+                            index: entry.RowKey._,
+                            ts: entry.Timestamp._,
+                            level: entry.Level._,
+                            msg: entry.Message._,
+                            apk: entry.AssociatedPK._,
+                            ark: entry.AssociatedRK._
+                        };
+                    });
+
+                    const file = new stream.Readable();
+                    file.push("index,timestamp,level,message\n");
+                    output.forEach(line => {
+                        file.push(`${line.index},${line.ts},${line.level},"${line.msg}"\n`);
+                    });
+                    file.push(null);
+                    res.writeHead(200, {
+                        "Content-Type": "application/csv",
+                        "Content-Disposition": "attachment; filename=\"" + instanceId + ".csv\""
+                    });
+                    file.pipe(res);
+
+                }, error => {
+                    console.error(error);
+                    res.status(500).send({ message: "Failed to read logs. Please try again in a bit.", ex: error });
                 });
-
-                const file = new stream.Readable();
-                file.push("index,timestamp,level,message\n");
-                output.forEach(line => {
-                    file.push(`${line.index},${line.ts},${line.level},"${line.msg}"\n`);
-                });
-                file.push(null);
-                res.writeHead(200, {
-                    "Content-Type": "application/csv",
-                    "Content-Disposition": "attachment; filename=\"" + instanceId + ".csv\""
-                });
-                file.pipe(res);
 
             }, error => {
                 console.error(error);
-                res.status(500).send({ message: "Failed to read logs. Please try again in a bit.", ex: error });
             });
 
-        }, error => {
-            console.error(error);
-        });
-
-    } else {
-        res.send([]); // empty array of objects
-    }
+        } else {
+            res.send([]); // empty array of objects
+        }
+    }, (reason, ex) => {
+        if (reason === "authentication") {
+            res.redirect("/login");
+        } else {
+            res.status(401).send(ex);
+        }
+    });
 });
 
 app.get("/logout", function(req, res) {
@@ -490,13 +506,5 @@ app.get("/token", function(req, res) {
 
 // startup the server
 app.listen(80, () => {
-
-/*
-    const long = big(2).power(63).subtract(1);
-    const current = Date.parse("2017-06-19T00:00:00.000Z");
-    const s = long.subtract(current).toString();
-    console.log(s);
-*/
-
     console.log("listening on port 80...");
 });

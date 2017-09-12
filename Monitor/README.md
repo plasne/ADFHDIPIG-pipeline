@@ -6,8 +6,8 @@ There are 2 Azure Active Directory Applications you have to create in order for 
 
 ## TODO
 
-* figure out why auth isn't working
-* add auth header on each endpoint (and read variables from it instead of hardcode)
+* fix the formatting of pipelines
+* fix formatting of view all executions
 * populate variables into claims based on user identity (ie. from a database)
 * add a config app to populate the table
   * user has access level
