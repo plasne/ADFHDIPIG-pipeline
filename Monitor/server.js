@@ -491,8 +491,6 @@ app.get("/token", function(req, res) {
                         // determine user and domain
                         const userId = tokenResponse.userId;
                         const domain = "@" + tokenResponse.userId.split("@")[1];
-                        console.log(`userId: ${userId}`);
-                        console.log(`domain: ${domain}`);
 
                         // instantiate the table service
                         const account = config.get("storage.account");
@@ -513,19 +511,19 @@ app.get("/token", function(req, res) {
                             });
                         }).then(entries => {
 
-                            console.log(`entries: ${entries.length}`);
-
                             // deserialize and pick most relevant
-                            let allowed;
+                            let allowed = null;
                             const rows = entries.map(entry => {
                                 return {
                                     account: entry.RowKey._,
                                     rights: entry.Rights._,
+                                    resourceGroup: entry.ResourceGroup._,
+                                    dataFactory: entry.DataFactory._,
                                     pipelines: entry.Pipelines._
                                 };
                             });
                             for (let row of rows) {
-                                if (allowed == null || allowed.account.length < row.length) allowed = row;
+                                if (allowed == null || allowed.account.length < row.account.length) allowed = row;
                             }
 
                             // is there a relevant security ACL
