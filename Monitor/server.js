@@ -162,7 +162,7 @@ app.get("/slices", (req, res) => {
                 if (!err) {
 
                     // determine timestamps
-                    const now = new Date();
+                    const now = new Date("2017-05-12");
                     const startTimestamp = new Date(now - 96 * 60 * 60 * 1000).toISOString(); // 96 hours back
                     const endTimestamp = now.toISOString();
 
@@ -343,12 +343,37 @@ app.get("/instance", (req, res) => {
             const key = config.get("storage.key");
             const service = azure.createTableService(account, key);
 
-            // ensure the table exists
+            // create the table if it doesn't exist
             const table = config.get("storage.table_instance");
-            createTableIfNotExists(service, table).then(result => {
+            new Promise((resolve, reject) => {
+                service.createTableIfNotExists(table, (error, result, response) => {
+                    if (error) reject(error);
+                    resolve(result);
+                });
+            }).then(result => {
 
                 // read all instance logs
-                queryForAllInstances(service, instanceId).then(entries => {
+                new Promise((resolve_all, reject_all) => {
+                    const entries = [];
+                    const query = new azure.TableQuery().where("PartitionKey eq ?", instanceId);
+                    let execute = (continuationToken) => new Promise((resolve, reject) => {
+                        service.queryEntities(table, query, continuationToken, (error, result, response) => {
+                            if (!error) {
+                                Array.prototype.push.apply(entries, result.entries);
+                                if (result.continuationToken == null) {
+                                    resolve();
+                                } else {
+                                    execute(result.continuationToken).then(() => resolve(), error => reject(error));
+                                }
+                            } else {
+                                reject(error);
+                            }
+                        });
+                    });
+                    execute(null).then(() => resolve_all(entries), error => reject_all(error));
+                }).then(entries => {
+
+                    // create the output array
                     const output = entries.map(entry => {
                         return {
                             index: entry.RowKey._,
@@ -360,6 +385,7 @@ app.get("/instance", (req, res) => {
                         };
                     });
 
+                    // convert into a CSV file
                     const file = new stream.Readable();
                     file.push("index,timestamp,level,message\n");
                     output.forEach(line => {
@@ -393,6 +419,7 @@ app.get("/instance", (req, res) => {
     });
 });
 
+// logout; discard the access token
 app.get("/logout", function(req, res) {
     res.cookie("accessToken", "", { expires: new Date() });
     res.redirect("/default.html");
