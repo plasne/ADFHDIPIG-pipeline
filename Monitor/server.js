@@ -523,16 +523,11 @@ app.get("/token", function(req, res) {
                                 };
                             });
                             for (let row of rows) {
-                                if (allowed == null || allowed.account.length < row.account.length) {
-                                    allowed = row;
-                                    console.log("assigned");
-                                }
+                                if (allowed == null || allowed.account.length < row.account.length) allowed = row;
                             }
 
                             // is there a relevant security ACL
-                            console.log("allowed:");
-                            console.log(allowed);
-                            if (allowed == null) {
+                            if (allowed != null) {
 
                                 // build the claims (no sensitive information)
                                 const claims = {
