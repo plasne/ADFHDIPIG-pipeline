@@ -49,7 +49,7 @@ function requestLogs(a, id, start) {
     // fetching...
     const parent = $(a).parent();
     parent.empty();
-    $("fetching...").appendTo(parent);
+    $("<div>fetching...</div>").appendTo(parent);
 
     // get the log URLs
     $.ajax({
