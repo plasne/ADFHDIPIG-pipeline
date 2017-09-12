@@ -526,13 +526,12 @@ app.get("/token", function(req, res) {
                                 if (allowed == null || allowed.account.length < row.account.length) {
                                     allowed = row;
                                     console.log("assigned");
-                                    console.log(row);
-                                } else {
-                                    console.log("ignored");
                                 }
                             }
 
                             // is there a relevant security ACL
+                            console.log("allowed:");
+                            console.log(allowed);
                             if (allowed == null) {
 
                                 // build the claims (no sensitive information)
