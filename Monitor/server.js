@@ -64,21 +64,22 @@ express.request.hasRights = function(rights) {
                         if (verified.body.rights.hasIntersection(rights)) {
                             resolve(verified);
                         } else {
-                            reject("authorization", new Error("does not have required rights"));
+                            reject("authorization");
                         }
                     } else {
                         if (verified.body.rights.indexOf(rights) > -1) {
                             resolve(verified);
                         } else {
-                            reject("authorization", new Error("does not have required rights"));
+                            reject("authorization");
                         }
                     }
                 } else {
-                    reject("authentication", err);
+                    console.error(`nJwt.verify: ${err}`);
+                    reject("authentication");
                 }
             });
         } else {
-            reject("authentication", new Error("no access token was provided"));
+            reject("authentication");
         }
     });
 };
@@ -112,7 +113,7 @@ app.get("/", (req, res) => {
 
 // get a list of pipelines
 app.get("/pipelines", (req, res) => {
-    req.hasRight("read").then(token => {
+    req.hasRight("view").then(token => {
 
         // authenticate against Azure APIs
         const context = new adal.AuthenticationContext("https://login.microsoftonline.com/" + directory);
@@ -146,20 +147,18 @@ app.get("/pipelines", (req, res) => {
             }
         });
 
-    }, (reason, ex) => {
-        console.error(`reason: ${reason}`);
-        console.error(`ex: ${ex}`);
+    }, reason => {
         if (reason === "authentication") {
             res.redirect("/login");
         } else {
-            res.status(401).send(ex);
+            res.status(401);
         }
     });
 });
 
 // get a list of slices
 app.get("/slices", (req, res) => {
-    req.hasRight("read").then(token => {
+    req.hasRight("view").then(token => {
         let datasets = req.query.datasets;
         if (datasets) {
             datasets = datasets.toArrayOfStrings();
@@ -218,18 +217,18 @@ app.get("/slices", (req, res) => {
         } else {
             res.status(400).send("err(300): You must supply a dataset parameter.");
         }
-    }, (reason, ex) => {
+    }, reason => {
         if (reason === "authentication") {
             res.redirect("/login");
         } else {
-            res.status(401).send(ex);
+            res.status(401);
         }
     });
 });
 
 // get details on a specific slice run
 app.get("/slice", (req, res) => {
-    req.hasRight("read").then(token => {
+    req.hasRight("view").then(token => {
         const dataset = req.query.dataset;
         const start = parseInt(req.query.start);
         if (dataset && !isNaN(start)) {
@@ -261,18 +260,18 @@ app.get("/slice", (req, res) => {
         } else {
             res.status(400).send("err(300): You must supply a dataset and start parameter.");
         }
-    }, (reason, ex) => {
+    }, reason => {
         if (reason === "authentication") {
             res.redirect("/login");
         } else {
-            res.status(401).send(ex);
+            res.status(401);
         }
     });
 });
 
 // get a list of all log files that can be downloaded
 app.get("/logs", (req, res) => {
-    req.hasRight("read").then(token => {
+    req.hasRight("view").then(token => {
         const runId = req.query.runId;
         const start = parseInt(req.query.start);
         if (runId && !isNaN(start)) {
@@ -329,11 +328,11 @@ app.get("/logs", (req, res) => {
         } else {
             res.status(400).send("err(300): You must supply a runId and start parameter.");
         }
-    }, (reason, ex) => {
+    }, reason => {
         if (reason === "authentication") {
             res.redirect("/login");
         } else {
-            res.status(401).send(ex);
+            res.status(401);
         }
     });
 });
@@ -342,7 +341,7 @@ app.get("/logs", (req, res) => {
 //   NOTE: instanceId = <customerId>-<activityName>-<sliceStart>
 //     ex:              HSKY-NormalizeUsingPig-20170324T1300
 app.get("/instance", (req, res) => {
-    req.hasRight("read").then(token => {
+    req.hasRight("view").then(token => {
         const instanceId = req.query.instanceId;
         if (instanceId) {
 
@@ -417,11 +416,11 @@ app.get("/instance", (req, res) => {
         } else {
             res.send([]); // empty array of objects
         }
-    }, (reason, ex) => {
+    }, reason => {
         if (reason === "authentication") {
             res.redirect("/login");
         } else {
-            res.status(401).send(ex);
+            res.status(401);
         }
     });
 });
