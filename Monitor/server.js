@@ -491,6 +491,8 @@ app.get("/token", function(req, res) {
                         // determine user and domain
                         const userId = tokenResponse.userId;
                         const domain = "@" + tokenResponse.userId.split("@")[1];
+                        console.log(`userId: ${userId}`);
+                        console.log(`domain: ${domain}`);
 
                         // instantiate the table service
                         const account = config.get("storage.account");
@@ -511,6 +513,8 @@ app.get("/token", function(req, res) {
                             });
                         }).then(entries => {
 
+                            console.log(`entries: ${entries.length}`);
+
                             // deserialize and pick most relevant
                             let allowed;
                             const rows = entries.map(entry => {
@@ -530,7 +534,7 @@ app.get("/token", function(req, res) {
                                 // build the claims (no sensitive information)
                                 const claims = {
                                     iss: issuer,
-                                    sub: tokenResponse.userId,
+                                    sub: userId,
                                     rights: allowed.rights.toArrayOfStrings(),
                                     resourceGroup: allowed.resourceGroup,
                                     dataFactory: allowed.dataFactory,
