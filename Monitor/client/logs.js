@@ -45,7 +45,7 @@ function field(name, value) {
 }
 
 function viewExec(pipeline, activity, dataset, start) {
-    const ts = moment(data.start).valueOf();
+    const ts = moment(start).valueOf();
     window.open(`/slices.html?pipeline=${pipeline}&activity=${activity}&dataset=${dataset}&start=${ts}`);
 }
 
@@ -76,7 +76,7 @@ function detail(data) {
             field("% Complete", slice.percentComplete).appendTo(inner);
             field("Retry Attempt", slice.retryAttempt).appendTo(inner);
             if (slice.errorMessage) field("Error Message", slice.errorMessage).appendTo(inner);
-            field("Has Logs?", slice.hasLogs).appendTo(inner);
+            field("Has Logs?", ((slice.hasLogs) ? "true" : "false")).appendTo(inner);
             if (slices.length > 1) {
                 field("More", `<a href='javascript:void(0);' onclick='viewExec(\"${slice.pipelineName}\", \"${slice.activityName}\", \"${data.dataset}\", \"${data.start}\");'>view all executions</a>`).appendTo(inner);
             }
