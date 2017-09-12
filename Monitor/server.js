@@ -272,9 +272,9 @@ app.get("/slice", (req, res) => {
 // get a list of all log files that can be downloaded
 app.get("/logs", (req, res) => {
     req.hasRight("view").then(token => {
-        const dataset = req.query.dataset;
         const runId = req.query.runId;
         const start = parseInt(req.query.start);
+        const activity = req.query.activity;
         if (runId && !isNaN(start)) {
             const startTimestamp = new moment(start).utc().format("YYYY-MM-DDTHH:mm:ss") + ".0000000";
 
@@ -309,10 +309,9 @@ app.get("/logs", (req, res) => {
                                             });
                                         }
                                     });
-                                    if (dataset) {
-                                        const customerId = "HSKY";
+                                    if (activity) {
                                         const slice = new moment(start).utc().format("YYYYMMDDTHHmm");
-                                        const instanceId = `${customerId}-${dataset}-${slice}`;
+                                        const instanceId = `${token.body.customerId}-${activity}-${slice}`;
                                         files.push({
                                             name: instanceId,
                                             url: `/instance?instanceId=${instanceId}`
@@ -527,6 +526,7 @@ app.get("/token", function(req, res) {
                             const rows = entries.map(entry => {
                                 return {
                                     account: entry.RowKey._,
+                                    customerId: entry.CustomerId._,
                                     rights: entry.Rights._,
                                     resourceGroup: entry.ResourceGroup._,
                                     dataFactory: entry.DataFactory._,
@@ -544,6 +544,7 @@ app.get("/token", function(req, res) {
                                 const claims = {
                                     iss: issuer,
                                     sub: userId,
+                                    customerId: allowed.customerId,
                                     rights: allowed.rights.toArrayOfStrings(),
                                     resourceGroup: allowed.resourceGroup,
                                     dataFactory: allowed.dataFactory,

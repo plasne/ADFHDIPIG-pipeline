@@ -44,7 +44,7 @@ function field(name, value) {
     return field;
 }
 
-function requestLogs(a, id, start, dataset) {
+function requestLogs(a, id, start, activity) {
 
     // fetching...
     const parent = $(a).parent();
@@ -53,7 +53,7 @@ function requestLogs(a, id, start, dataset) {
 
     // get the log URLs
     $.ajax({
-        url: `/logs?runId=${id}&start=${start}&dataset=${dataset}`,
+        url: `/logs?runId=${id}&start=${start}&dataset=${activity}`,
         json: true
     }).done(function(logs, status, xhr) {
         parent.empty();
@@ -67,7 +67,7 @@ function requestLogs(a, id, start, dataset) {
 
 }
 
-function detail(data) {
+function detail(data, activity) {
 
     // get the fetching container
     const container = $("<div />");
@@ -78,13 +78,13 @@ function detail(data) {
     if (data.errorMessage) field("Error Message", data.errorMessage).appendTo(inner);
     if (data.hasLogs) {
         const start = moment(data.dataSliceStart, "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ").valueOf();
-        field("Logs", `<a href='javascript:void(0);' onclick='requestLogs(this, \"${data.id}\", ${start}, \"${data.dataset}\");'>request logs</a>`).appendTo(inner);
+        field("Logs", `<a href='javascript:void(0);' onclick='requestLogs(this, \"${data.id}\", ${start}, \"${activity}\");'>request logs</a>`).appendTo(inner);
     }
 
     return container.html();
 }
 
-function build() {
+function build(activity) {
 
     // define the table
     const table = $("#logs > table").DataTable({
@@ -165,7 +165,7 @@ function build() {
                 row.child.hide();
             } else {
                 if (row.child.length < 1) {
-                    const details = detail(row.data());
+                    const details = detail(row.data(), activity);
                     row.child(details);
                 }
                 row.child.show();
@@ -192,7 +192,7 @@ $(document).ready(function() {
     $("#start-name").text( start.formatAsDate("x") );
 
     // build the table
-    const table = build();
+    const table = build(activity);
 
     // fix Edge bug where the page options aren't shown
     const pageLengthOptions = $("select[name='DataTables_Table_0_length']");

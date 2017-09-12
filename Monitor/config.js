@@ -18,8 +18,9 @@ const adf_version = config.get("internal.adf_version");
 cmd
     .version("0.1.0")
     .option("--list", "list the current assignments")
-    .option("--assign", "when you specify --account, --rights, --resource-group, --data-factory, and --pipelines, this will create or modify an entry")
+    .option("--assign", "when you specify --account, --customer-id, --rights, --resource-group, --data-factory, and --pipelines, this will create or modify an entry")
     .option("--account <value>", "could be a fully qualified account or simply a domain")
+    .option("--customer-id <value>", "the short code for the customer id")
     .option("--rights <value>", "a comma delimited list of rights that will be given to users of that domain")
     .option("--resource-group <value>", "the resource group containing the data factory")
     .option("--data-factory <value>", "the name of the data factory")
@@ -28,7 +29,7 @@ cmd
 
 // assign (create or modify an entry)
 if (cmd.hasOwnProperty("assign")) {
-    if (cmd.account && cmd.rights && cmd.resourceGroup && cmd.dataFactory && cmd.pipelines) {
+    if (cmd.account && cmd.customerId && cmd.rights && cmd.resourceGroup && cmd.dataFactory && cmd.pipelines) {
 
         // instantiate the table service
         const account = config.get("storage.account");
@@ -63,6 +64,7 @@ if (cmd.hasOwnProperty("assign")) {
                 const entry = {
                     PartitionKey: { "_": "access" },
                     RowKey: { "_": cmd.account },
+                    CustomerId: { "_": cmd.customerId },
                     Rights: { "_": cmd.rights },
                     ResourceGroup: { "_": cmd.resourceGroup },
                     DataFactory: { "_": cmd.dataFactory },
@@ -93,7 +95,7 @@ if (cmd.hasOwnProperty("assign")) {
         });
 
     } else {
-        console.error("You must specify --account, --rights, --resource-group, --data-factory, --pipelines.");
+        console.error("You must specify --account, --customer-id, --rights, --resource-group, --data-factory, --pipelines.");
     }
 }
 
@@ -131,6 +133,7 @@ if (cmd.hasOwnProperty("list")) {
         const rows = entries.map(entry => {
             return {
                 account: entry.RowKey._,
+                customerId: entry.CustomerId._,
                 rights: entry.Rights._,
                 resourceGroup: entry.ResourceGroup._,
                 dataFactory: entry.DataFactory._,
@@ -139,15 +142,16 @@ if (cmd.hasOwnProperty("list")) {
         });
 
         // display
-        console.log("Account                                Rights                       Resource Group     Data Factory       Pipelines");
-        console.log("-------                                ------                       --------------     ------------       ---------");
+        console.log("Account                                CustomerId  Rights                  Resource Group     Data Factory       Pipelines");
+        console.log("-------                                ----------  ------                  --------------     ------------       ---------");
         for (let row of rows) {
             const a = (row.account + "                                        ").substring(0, 39);
-            const b = (row.rights + "                              ").substring(0, 29);
-            const c = (row.resourceGroup + "                    ").substring(0, 19);
-            const d = (row.dataFactory + "                    ").substring(0, 19);
-            const e = (row.pipelines).substring(0, 29);
-            console.log(`${a}${b}${c}${d}${e}`);
+            const b = (row.customerId + "             ").substring(0, 12);
+            const c = (row.rights + "                         ").substring(0, 24);
+            const d = (row.resourceGroup + "                    ").substring(0, 19);
+            const e = (row.dataFactory + "                    ").substring(0, 19);
+            const f = (row.pipelines).substring(0, 29);
+            console.log(`${a}${b}${c}${d}${e}${f}`);
         }
 
     }, error => {
