@@ -55,7 +55,9 @@ express.request.hasRights = function(rights) {
         if (token) {
             nJwt.verify(token, jwtKey, function(err, verified) {
                 if (!err) {
+                    console.log("OK");
                     if (Array.isArray(rights)) {
+                        console.log("is array");
                         if (verified.body.rights.hasIntersection(rights)) {
                             resolve(verified);
                         } else {
