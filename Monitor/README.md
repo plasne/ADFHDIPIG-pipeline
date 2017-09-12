@@ -8,11 +8,6 @@ There are 2 Azure Active Directory Applications you have to create in order for 
 
 * fix the formatting of pipelines
 * fix formatting of view all executions
-* populate variables into claims based on user identity (ie. from a database)
-* add a config app to populate the table
-  * user has access level
-  * user has access to list of pipelines
-* remove groupPrefix
 * finish this documentation
 
 ## Creating the internal application

@@ -11,6 +11,7 @@ html, body {
 }
 
 #pipelines > div.pipeline {
+    margin-top: 2vh;
     margin-bottom: 2vh;
     display: flex;
     flex-direction: row;
