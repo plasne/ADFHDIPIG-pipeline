@@ -44,7 +44,7 @@ function field(name, value) {
     return field;
 }
 
-function requestLogs(a, id, start) {
+function requestLogs(a, id, start, dataset) {
 
     // fetching...
     const parent = $(a).parent();
@@ -53,7 +53,7 @@ function requestLogs(a, id, start) {
 
     // get the log URLs
     $.ajax({
-        url: `/logs?runId=${id}&start=${start}`,
+        url: `/logs?runId=${id}&start=${start}&dataset=${dataset}`,
         json: true
     }).done(function(logs, status, xhr) {
         parent.empty();
@@ -77,7 +77,8 @@ function detail(data) {
     // show details
     if (data.errorMessage) field("Error Message", data.errorMessage).appendTo(inner);
     if (data.hasLogs) {
-        field("Logs", "<a href='javascript:void(0);' onclick='requestLogs(this, \"" + data.id + "\", " + moment(data.dataSliceStart, "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ").valueOf() + ");'>request logs</a>").appendTo(inner);
+        const start = moment(data.dataSliceStart, "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ").valueOf();
+        field("Logs", `<a href='javascript:void(0);' onclick='requestLogs(this, \"${data.id}\", ${start}, \"${data.dataset}\");'>request logs</a>`).appendTo(inner);
     }
 
     return container.html();
