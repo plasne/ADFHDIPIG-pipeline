@@ -44,6 +44,11 @@ function field(name, value) {
     return field;
 }
 
+function viewExec(pipeline, activity, dataset, start) {
+    const ts = moment(data.start).valueOf();
+    window.open(`/slices.html?pipeline=${pipeline}&activity=${activity}&dataset=${dataset}&start=${ts}`);
+}
+
 function detail(data) {
 
     // get the fetching container
@@ -73,10 +78,7 @@ function detail(data) {
             if (slice.errorMessage) field("Error Message", slice.errorMessage).appendTo(inner);
             field("Has Logs?", slice.hasLogs).appendTo(inner);
             if (slices.length > 1) {
-                field("More", "<a id='detail-items-more'>view all executions</a>").appendTo(inner);
-                $("#detail-items-more").click(function() {
-                    window.open("/slices.html?pipeline=" + slice.pipelineName + "&activity=" + slice.activityName + "&dataset=" + data.dataset + "&start=" + moment(data.start).valueOf());
-                });
+                field("More", `<a href='javascript:void(0);' onclick='viewExec(\"${slice.pipelineName}\", \"${slice.activityName}\", \"${data.dataset}\", \"${data.start}\");'>view all executions</a>`).appendTo(inner);
             }
 
         } else {

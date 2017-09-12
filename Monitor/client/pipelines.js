@@ -99,7 +99,7 @@ function getPipelines() {
                     // make it clickable
                     $(activity_div).click(function() {
                         const dataset_names = activity.outputs.map(function(output) { return output.name });
-                        window.open("/adf-logs.html?pipeline=" + pipeline.name + "&activity=" + activity.name + "&datasets=" + dataset_names, "_blank");
+                        window.open("/logs.html?pipeline=" + pipeline.name + "&activity=" + activity.name + "&datasets=" + dataset_names, "_blank");
                     });
 
                     // show the arrow going to the next activity

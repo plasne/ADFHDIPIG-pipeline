@@ -3,6 +3,7 @@ html, body {
     font-family: Verdana, sans-serif;
     padding: 0vmin;
     margin: 0vmin;
+    font-size: 1.2vmax;
 }
 
 #pipelines {
@@ -11,8 +12,8 @@ html, body {
 }
 
 #pipelines > div.pipeline {
-    margin-top: 2vh;
-    margin-bottom: 2vh;
+    margin-top: 2vmax;
+    margin-bottom: 2vmax;
     display: flex;
     flex-direction: row;
     height: 10vh;
