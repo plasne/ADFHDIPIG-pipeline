@@ -35,6 +35,12 @@ Array.prototype.hasIntersection = function(arr) {
     return false;
 }
 
+String.prototype.toArrayOfStrings = function() {
+    return this.split(",").map((code) => {
+        return code.trim();
+    });
+}
+
 // instantiate express
 const app = express();
 app.use(cookieParser());
@@ -347,8 +353,7 @@ app.get("/instance", (req, res) => {
             const table = config.get("storage.table_instance");
             new Promise((resolve, reject) => {
                 service.createTableIfNotExists(table, (error, result, response) => {
-                    if (error) reject(error);
-                    resolve(result);
+                    if (!error) { resolve(); } else { reject(error); }
                 });
             }).then(result => {
 
@@ -462,7 +467,6 @@ app.get("/token", function(req, res) {
     const clientSecret = config.get("external.clientSecret");
     const redirectUri = config.get("external.redirectUri");
     const issuer = config.get("external.issuer");
-    const groupPrefix = config.get("external.groupPrefix");
 
     // ensure this is all part of the same authorization chain
     if (req.cookies.authstate !== req.query.state) {
@@ -484,47 +488,75 @@ app.get("/token", function(req, res) {
                 }, function(membershipError, response, body) {
                     if (!membershipError && response.statusCode == 200) {
 
-                        // build a list of group names
-                        const membership = [];
-                        body.value.forEach(group => {
-                            if (group.displayName.startsWith(groupPrefix)) {
-                                membership.push(group.displayName.replace(groupPrefix, ""));
+                        // determine user and domain
+                        const userId = tokenResponse.userId;
+                        const domain = "@" + tokenResponse.userId.split("@")[1];
+
+                        // instantiate the table service
+                        const account = config.get("storage.account");
+                        const key = config.get("storage.key");
+                        const service = azure.createTableService(account, key);
+
+                        // return all rows
+                        const table = config.get("storage.table_customers");
+                        new Promise((resolve, reject) => {
+                            const entries = [];
+                            const query = new azure.TableQuery().where("PartitionKey eq 'access' and (RowKey eq ? or RowKey eq ?)", userId, domain);
+                            service.queryEntities(table, query, null, (error, result, response) => {
+                                if (!error) {
+                                    resolve(result.entries);
+                                } else {
+                                    reject(error);
+                                }
+                            });
+                        }).then(entries => {
+
+                            // deserialize and pick most relevant
+                            let allowed;
+                            const rows = entries.map(entry => {
+                                return {
+                                    account: entry.RowKey._,
+                                    rights: entry.Rights._,
+                                    pipelines: entry.Pipelines._
+                                };
+                            });
+                            for (let row of rows) {
+                                if (allowed == null || allowed.account.length < row.length) allowed = row;
                             }
+
+                            // is there a relevant security ACL
+                            if (allowed == null) {
+
+                                // build the claims (no sensitive information)
+                                const claims = {
+                                    iss: issuer,
+                                    sub: tokenResponse.userId,
+                                    rights: allowed.rights.toArrayOfStrings(),
+                                    resourceGroup: allowed.resourceGroup,
+                                    dataFactory: allowed.dataFactory,
+                                    pipelines: allowed.pipelines.toArrayOfStrings()
+                                };
+
+                                // build the JWT
+                                const duration = 4 * 60 * 60 * 1000; // 4 hours
+                                const jwt = nJwt.create(claims, jwtKey);
+                                jwt.setExpiration(new Date().getTime() + duration);
+
+                                // set the JWT into a cookie
+                                res.cookie("accessToken", jwt.compact(), {
+                                    maxAge: duration
+                                });
+
+                                // redirect
+                                res.redirect("/pipelines.html");
+
+                            } else {
+                                res.status(401).send("Unauthorized (ACL): no ACL found for the user.");
+                            }
+
+                        }, error => {
+                            res.status(401).send(`Unauthorized (ACL): ${error}`);
                         });
-
-                        // define rights
-                        const rights = [];
-                        if (membership.indexOf("admins") > -1) {
-                            rights.push("admin");
-                            rights.push("write");
-                            rights.push("read");
-                        } else if (membership.indexOf("users") > -1) {
-                            rights.push("read");
-                        }
-
-                        // build the claims (no sensitive information)
-                        const claims = {
-                            iss: issuer,
-                            sub: tokenResponse.userId,
-                            scope: membership,
-                            rights: rights,
-                            resourceGroup: "pelasne-adf",
-                            dataFactory: "pelasne-adf",
-                            pipelines: [ "Normalize", "SftpReset-Pipeline" ]
-                        };
-
-                        // build the JWT
-                        const duration = 4 * 60 * 60 * 1000; // 4 hours
-                        const jwt = nJwt.create(claims, jwtKey);
-                        jwt.setExpiration(new Date().getTime() + duration);
-
-                        // set the JWT into a cookie
-                        res.cookie("accessToken", jwt.compact(), {
-                            maxAge: duration
-                        });
-
-                        // redirect
-                        res.redirect("/pipelines.html");
 
                     } else {
                         res.status(401).send("Unauthorized (membership): " + ((membershipError) ? membershipError : response.statusCode + ", " + body));
@@ -532,7 +564,7 @@ app.get("/token", function(req, res) {
                 });
 
             } else {
-                res.status(401).send("Unauthorized (access code): " + tokenError);
+                res.status(401).send(`Unauthorized (access code): ${tokenError}`);
             }
         });
 
