@@ -147,6 +147,8 @@ app.get("/pipelines", (req, res) => {
         });
 
     }, (reason, ex) => {
+        console.error(`reason: ${reason}`);
+        console.error(`ex: ${ex}`);
         if (reason === "authentication") {
             res.redirect("/login");
         } else {
