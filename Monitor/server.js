@@ -523,7 +523,13 @@ app.get("/token", function(req, res) {
                                 };
                             });
                             for (let row of rows) {
-                                if (allowed == null || allowed.account.length < row.account.length) allowed = row;
+                                if (allowed == null || allowed.account.length < row.account.length) {
+                                    allowed = row;
+                                    console.log("assigned");
+                                    console.log(row);
+                                } else {
+                                    console.log("ignored");
+                                }
                             }
 
                             // is there a relevant security ACL
