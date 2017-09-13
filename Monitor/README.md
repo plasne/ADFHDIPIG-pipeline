@@ -147,12 +147,62 @@ An example configuration looks like this:
 
 To startup the application you can type:
 
-* sudo node server.js
+```bash
+sudo node server.js
+```
 
 To keep the application running, you should install forever:
 
-* npm install -g forever
+```bash
+npm install -g forever
+```
 
 And then you can run the application like this:
 
-* sudo forever start server.js
+```bash
+sudo forever start server.js
+```
+
+## Access Control Lists
+
+Users that log into the portal should not have blanket access to everything. To determine what they should have access to, there is a config.js application that can apply Access Control Lists to a table. This information is then written to the JSON Web Token as a set of claims.
+
+You can use the following to create or overwrite an ACL:
+
+```bash
+node config.js --assign --account <account> --customer-id <customer> --rights <list of rights> --resource-group <resource group> --data-factory <data factory> --pipelines <list of pipelines>
+```
+
+The parameters are:
+
+* --assign - This is the aciont that will be performed; in this case assigning an ACL.
+
+* --account - This should either be the full name of a account (ex. user@peterlasne.onmicrosoft.com) or a domain (ex. @peterlasne.onmicrosoft.com). This is the scope that the ACL will be applied to. A more specific scope takes precident over a less specific one.
+
+* --customer-id - This is the ID of the customer, it is only used for determining the Instance ID for a log.
+
+* --rights - This should be a single right or a comma-delimited list of rights (in double-quotes) that will be granted to the user.
+
+* --resource-group - This should be the name of the Resource Group containing the ADF that contains the pipelines the user has access to.
+
+* --data-factory - This should be the name of the ADF containing the pipelines that the user has access to.
+
+* --pipelines - This should be a single pipeline name or a comma-delimited list of pipeline names (in double-quotes) that the user should have access to.
+
+An example is:
+
+```bash
+node config.js --assign --account @peterlasne.onmicrosoft.com --customer-id HSKY --rights "view, admin" --resource-group pelasne-adf --data-factory pelasne-adf --pipelines "Normalize, Test-Timestamps"
+```
+
+In order to view the ACLs that have been assigned, please run 
+
+```bash
+node config.js --list
+```
+
+## Instance Logs
+
+The LoadFunc creates logs that are referenced by an Instance ID. While the LoadFunc allows you to specify any Instance ID, the monitoring application needs some derivative name. The name convention should be:
+
+* CustomerID-ActivityName-YYYYMMDDTHHmm
