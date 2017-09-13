@@ -53,7 +53,7 @@ function requestLogs(a, id, start, activity) {
 
     // get the log URLs
     $.ajax({
-        url: `/logs?runId=${id}&start=${start}&dataset=${activity}`,
+        url: `/logs?runId=${id}&start=${start}&activity=${activity}`,
         json: true
     }).done(function(logs, status, xhr) {
         parent.empty();
