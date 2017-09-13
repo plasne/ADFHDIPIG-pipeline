@@ -169,7 +169,7 @@ app.get("/slices", (req, res) => {
                 if (!err) {
 
                     // determine timestamps
-                    const now = new Date("2017-05-14T00:00:00Z");
+                    const now = new Date(); //const now = new Date("2017-05-14T00:00:00Z");
                     const startTimestamp = new Date(now - 96 * 60 * 60 * 1000).toISOString(); // 96 hours back
                     const endTimestamp = now.toISOString();
 
@@ -488,93 +488,78 @@ app.get("/token", function(req, res) {
         context.acquireTokenWithAuthorizationCode(req.query.code, redirectUri, "https://graph.microsoft.com/", clientId, clientSecret, function(tokenError, tokenResponse) {
             if (!tokenError) {
 
-                // get the user membership
-                request.get({
-                    uri: "https://graph.microsoft.com/v1.0/me/memberOf?$select=displayName",
-                    headers: {
-                        Authorization: "Bearer " + tokenResponse.accessToken
-                    },
-                    json: true
-                }, function(membershipError, response, body) {
-                    if (!membershipError && response.statusCode == 200) {
+                // determine user and domain
+                const userId = tokenResponse.userId;
+                const domain = "@" + tokenResponse.userId.split("@")[1];
 
-                        // determine user and domain
-                        const userId = tokenResponse.userId;
-                        const domain = "@" + tokenResponse.userId.split("@")[1];
+                // instantiate the table service
+                const account = config.get("storage.account");
+                const key = config.get("storage.key");
+                const service = azure.createTableService(account, key);
 
-                        // instantiate the table service
-                        const account = config.get("storage.account");
-                        const key = config.get("storage.key");
-                        const service = azure.createTableService(account, key);
+                // return all rows
+                const table = config.get("storage.table_customers");
+                new Promise((resolve, reject) => {
+                    const entries = [];
+                    const query = new azure.TableQuery().where("PartitionKey eq 'access' and (RowKey eq ? or RowKey eq ?)", userId, domain);
+                    service.queryEntities(table, query, null, (error, result, response) => {
+                        if (!error) {
+                            resolve(result.entries);
+                        } else {
+                            reject(error);
+                        }
+                    });
+                }).then(entries => {
 
-                        // return all rows
-                        const table = config.get("storage.table_customers");
-                        new Promise((resolve, reject) => {
-                            const entries = [];
-                            const query = new azure.TableQuery().where("PartitionKey eq 'access' and (RowKey eq ? or RowKey eq ?)", userId, domain);
-                            service.queryEntities(table, query, null, (error, result, response) => {
-                                if (!error) {
-                                    resolve(result.entries);
-                                } else {
-                                    reject(error);
-                                }
-                            });
-                        }).then(entries => {
+                    // deserialize and pick most relevant
+                    let allowed = null;
+                    const rows = entries.map(entry => {
+                        return {
+                            account: entry.RowKey._,
+                            customerId: entry.CustomerId._,
+                            rights: entry.Rights._,
+                            resourceGroup: entry.ResourceGroup._,
+                            dataFactory: entry.DataFactory._,
+                            pipelines: entry.Pipelines._
+                        };
+                    });
+                    for (let row of rows) {
+                        if (allowed == null || allowed.account.length < row.account.length) allowed = row;
+                    }
 
-                            // deserialize and pick most relevant
-                            let allowed = null;
-                            const rows = entries.map(entry => {
-                                return {
-                                    account: entry.RowKey._,
-                                    customerId: entry.CustomerId._,
-                                    rights: entry.Rights._,
-                                    resourceGroup: entry.ResourceGroup._,
-                                    dataFactory: entry.DataFactory._,
-                                    pipelines: entry.Pipelines._
-                                };
-                            });
-                            for (let row of rows) {
-                                if (allowed == null || allowed.account.length < row.account.length) allowed = row;
-                            }
+                    // is there a relevant security ACL
+                    if (allowed != null) {
 
-                            // is there a relevant security ACL
-                            if (allowed != null) {
+                        // build the claims (no sensitive information)
+                        const claims = {
+                            iss: issuer,
+                            sub: userId,
+                            customerId: allowed.customerId,
+                            rights: allowed.rights.toArrayOfStrings(),
+                            resourceGroup: allowed.resourceGroup,
+                            dataFactory: allowed.dataFactory,
+                            pipelines: allowed.pipelines.toArrayOfStrings()
+                        };
 
-                                // build the claims (no sensitive information)
-                                const claims = {
-                                    iss: issuer,
-                                    sub: userId,
-                                    customerId: allowed.customerId,
-                                    rights: allowed.rights.toArrayOfStrings(),
-                                    resourceGroup: allowed.resourceGroup,
-                                    dataFactory: allowed.dataFactory,
-                                    pipelines: allowed.pipelines.toArrayOfStrings()
-                                };
+                        // build the JWT
+                        const duration = 4 * 60 * 60 * 1000; // 4 hours
+                        const jwt = nJwt.create(claims, jwtKey);
+                        jwt.setExpiration(new Date().getTime() + duration);
 
-                                // build the JWT
-                                const duration = 4 * 60 * 60 * 1000; // 4 hours
-                                const jwt = nJwt.create(claims, jwtKey);
-                                jwt.setExpiration(new Date().getTime() + duration);
-
-                                // set the JWT into a cookie
-                                res.cookie("accessToken", jwt.compact(), {
-                                    maxAge: duration
-                                });
-
-                                // redirect
-                                res.redirect("/pipelines.html");
-
-                            } else {
-                                res.status(401).send("Unauthorized (ACL): no ACL found for the user.");
-                            }
-
-                        }, error => {
-                            res.status(401).send(`Unauthorized (ACL): ${error}`);
+                        // set the JWT into a cookie
+                        res.cookie("accessToken", jwt.compact(), {
+                            maxAge: duration
                         });
 
+                        // redirect
+                        res.redirect("/pipelines.html");
+
                     } else {
-                        res.status(401).send("Unauthorized (membership): " + ((membershipError) ? membershipError : response.statusCode + ", " + body));
+                        res.status(401).send("Unauthorized (ACL): no ACL found for the user.");
                     }
+
+                }, error => {
+                    res.status(401).send(`Unauthorized (ACL): ${error}`);
                 });
 
             } else {

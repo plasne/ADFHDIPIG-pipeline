@@ -4,12 +4,6 @@ The purpose of this portal is to provide a customer with view access to their pi
 
 There are 2 Azure Active Directory Applications you have to create in order for this application to function. The "internal" application has the authority to read the ADF pipeline status and logs. The "external" application is a multitenant application that customers will consent to that gives them the capability of logging into this portal.
 
-## TODO
-
-* add the instance logs
-* remove the timestamp
-* finish this documentation
-
 ## Creating the internal application
 
 To create the internal application:
@@ -26,7 +20,7 @@ To create the internal application:
 
 ![create-internal-app](docs/create-internal-app.png)
 
-6. Make not of the "Application ID"; this is the "clientId" for the internal application in the configuration file.
+6. Make note of the "Application ID"; this is the "clientId" for the internal application in the configuration file.
 
 ![application-id](docs/application-id.png)
 
@@ -36,9 +30,55 @@ To create the internal application:
 
 ![create-key](docs/create-key.png)
 
-9. 
+9. On each of the Resource Groups that contains an Azure Data Factory resource that you are trying to expose, you need to grant the Application Account access.
+
+In the Resource Group, you will add the permission using the "Access control (IAM)" selection.
+
+![IAM](docs/IAM.png)
+
+10. Give the Application Account the "Data Factory Contributor" permission.
+
+![permissions](docs/permissions.png)
 
 ## Creating the external application
+
+To create the external application:
+
+1. Go to the "Azure Active Directory" blade.
+
+2. Go to "App Registrations".
+
+3. Click on "New application registration".
+
+4. Fill out the details as below. The name doesn't matter as long as it is unique. The sign-on URL technically doesn't matter (as long as it is unique), but if you put in the Reply URL (step #), then you could skip that step as it will automatically be added.
+
+![create-external-app](docs/create-external-app.png)
+
+5. Make note of the "Application ID"; this is the "clientId" for the external application in the configuration file.
+
+6. Click on "Keys".
+
+7. Create a new key and click "Save"; you will then be presented with a key that you must make note of because this will be the "clientSecret" for the external application in the configuration file.
+
+8. Click on "Properties" and change the application to be "Multi-tenanted" and click "Save". This allows administrators of other Azure Active Directories to trust your application so that their users can login.
+
+![multitenant](docs/multitenant.png)
+
+9. Click on "Reply URLs" and make sure the URL is a fully qualified URL that ends with /token and is reachable over the internet. If it isn't accurate, you can delete it and create a new entry.
+
+This should be the URL that is hosting the server.js file included in this package.
+
+![reply](docs/reply.png)
+
+10. Click on "Required permissions", delete any existing permissions, add the following permissions, then "Save":
+
+  * Access directory as the signed in user
+  * Read directory data
+  * Read all groups
+
+These are the permissions that the customer must consent to in order 
+
+![grants](docs/grants.png)
 
 ## Configuration file
 
