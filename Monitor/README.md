@@ -72,11 +72,9 @@ This should be the URL that is hosting the server.js file included in this packa
 
 10. Click on "Required permissions", delete any existing permissions, add the following permissions, then "Save":
 
-  * Access directory as the signed in user
-  * Read directory data
-  * Read all groups
+  * View users' basic profile
 
-These are the permissions that the customer must consent to in order 
+This specific right doesn't not require administrative consent, so each individual user can simply consent to use the application.
 
 ![grants](docs/grants.png)
 
@@ -145,10 +143,16 @@ An example configuration looks like this:
 }
 ```
 
-## Configuring for external users
+## Running the application
 
-* app id
-* generate keys
-* permissions (graph)
-* reply URLs
-* consent
+To startup the application you can type:
+
+* sudo node server.js
+
+To keep the application running, you should install forever:
+
+* npm install -g forever
+
+And then you can run the application like this:
+
+* sudo forever start server.js
