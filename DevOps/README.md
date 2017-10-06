@@ -29,6 +29,8 @@ An example:
 
 [update.js](update.js) is a Node.js application that does the exact same thing as the above PowerShell script. This is provided in case you need to run on a non-Windows system. There is additional setup required for this solution, so if you can use PowerShell, you should.
 
+**NOTE:** This application uses async/await, so you must be running Node.js v7.6+. I would strongly encourage the Current branch (v8.6 at the time of this writing).
+
 The parameters are:
 
 ```
