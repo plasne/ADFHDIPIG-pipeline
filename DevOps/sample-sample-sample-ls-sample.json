@@ -1,0 +1,15 @@
+{
+    "name": "FTP2",
+    "properties": {
+        "type": "FtpServer",
+        "typeProperties": {
+            "authenticationType": "Basic",
+            "host": "some-ftp.eastus.cloudapp.azure.com",
+            "port": 23,
+            "username": "username",
+            "password": "password",
+            "enableSsl": false,
+            "enableServerCertificateValidation": false
+        }
+    }
+}

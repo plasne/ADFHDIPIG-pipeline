@@ -43,6 +43,7 @@ There were quite a few customizations that needed to be implemented to meet the 
 There are quite a few folders and files in this repository, so before I get into the specifics, I will provide an overview of what is contained here:
 
 * DataFactoryApp1 - The Visual Studio sample for an ADF pipeline.
+* DevOps - Various scripts to assist with the deployment and update of ADF assets.
 * Monitor - A Node.js app for viewing the logs (see [Troubleshooting](#troubleshooting) below).
 * Pig
   * lib - JAR files that are needed to compile and run these samples.
